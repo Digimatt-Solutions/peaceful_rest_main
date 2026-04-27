@@ -55,7 +55,7 @@ export const Hero = () => {
               <Button
                 asChild
                 size="lg"
-                className="rounded-full h-13 sm:h-14 px-7 sm:px-8 text-base bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow group"
+                className="rounded-full h-12 sm:h-14 px-7 sm:px-8 text-base bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow group"
               >
                 <Link to="/auth">
                   <Plus className="mr-1 h-4 w-4" />
@@ -66,7 +66,7 @@ export const Hero = () => {
                 asChild
                 size="lg"
                 variant="outline"
-                className="rounded-full h-13 sm:h-14 px-7 sm:px-8 text-base bg-brand-white/5 backdrop-blur-md border-brand-white/30 text-brand-white hover:bg-brand-white hover:text-brand-black"
+                className="rounded-full h-12 sm:h-14 px-7 sm:px-8 text-base bg-brand-white/5 backdrop-blur-md border-brand-white/30 text-brand-white hover:bg-brand-white hover:text-brand-black"
               >
                 <a href="#memorials">
                   <Sparkles className="mr-2 h-4 w-4" />
