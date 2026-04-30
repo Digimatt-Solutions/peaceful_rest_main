@@ -105,7 +105,7 @@ const MemorialDetail = () => {
         <div className="container-luxe py-32 text-center">
           <h1 className="font-serif text-4xl">Memorial not found</h1>
           <p className="text-muted-foreground mt-3">This memorial may be private or no longer available.</p>
-          <Button asChild className="mt-6 rounded-full bg-brand-orange text-brand-white"><Link to="/">Return home</Link></Button>
+          <Button asChild className="mt-6 rounded-full bg-brand-orange text-brand-black"><Link to="/">Return home</Link></Button>
         </div>
         <Footer />
       </main>
@@ -121,57 +121,101 @@ const MemorialDetail = () => {
 
       {/* Hero */}
       <section className="relative pt-20">
-        <div className="absolute inset-0 -z-10 h-[70vh] overflow-hidden">
-          {cover ? (
-            <img src={cover} alt={memorial.full_name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-foreground to-foreground/80" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-black/70 via-brand-black/50 to-background" />
-        </div>
+  
+  {/* BACKGROUND (always stays behind) */}
+  <div className="absolute inset-0 z-0 h-[70vh] overflow-hidden">
+    {cover ? (
+      <img
+        src={cover}
+        alt={memorial.full_name}
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      <div className="w-full h-full bg-gradient-to-br from-foreground to-foreground/80" />
+    )}
 
-        <div className="container-luxe pt-24 pb-12 text-brand-white">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-white/20 bg-brand-white/5 backdrop-blur-md text-xs uppercase tracking-[0.2em]">
-            <Flame className="h-3.5 w-3.5 text-brand-orange candle-flicker" /> In Loving Memory
-          </div>
-          <h1 className="mt-6 font-serif text-5xl sm:text-6xl lg:text-7xl font-medium leading-[1.05]">{memorial.full_name}</h1>
-          <p className="mt-4 text-lg text-brand-white/80 font-light tracking-wide">
-            {fmt(memorial.date_of_birth)} <span className="mx-2 text-brand-orange">—</span> {fmt(memorial.date_of_death)}
-          </p>
-          {memorial.location && (
-            <p className="mt-2 inline-flex items-center gap-2 text-brand-white/70 text-sm">
-              <MapPin className="h-4 w-4 text-brand-orange" /> {memorial.location}
-            </p>
-          )}
-          {memorial.short_tribute && (
-            <p className="mt-6 max-w-2xl italic text-brand-white/85 text-lg leading-relaxed font-serif">
-              "{memorial.short_tribute}"
-            </p>
-          )}
+    {/* overlay (kept subtle so image is visible) */}
+    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60" />
+  </div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button
-              onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
-              className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow h-12 px-6"
-            >
-              <Flame className={`h-4 w-4 mr-2 ${candleLit ? "candle-flicker" : ""}`} fill={candleLit ? "currentColor" : "none"} />
-              {candleLit ? "Candle lit" : "Light a candle"}
-            </Button>
-            <Button onClick={share} variant="outline" className="rounded-full h-12 px-6 bg-brand-white/5 backdrop-blur border-brand-white/30 text-brand-white hover:bg-brand-white hover:text-brand-black">
-              <Share2 className="h-4 w-4 mr-2" /> Share memorial
-            </Button>
-            <a href="#condolence" className="inline-flex items-center gap-2 rounded-full h-12 px-6 bg-brand-white/5 backdrop-blur border border-brand-white/30 text-brand-white hover:bg-brand-white hover:text-brand-black transition-colors text-sm font-medium">
-              <Heart className="h-4 w-4" /> Send condolences
-            </a>
-          </div>
+  {/* CONTENT (always above background) */}
+  <div className="relative z-10 container-luxe pt-24 pb-12 text-white">
+    
+    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-xs uppercase tracking-[0.2em]">
+      <Flame className="h-3.5 w-3.5 text-orange-400" /> 
+      In Loving Memory
+    </div>
 
-          <div className="mt-10 flex items-center gap-8 text-xs text-brand-white/60">
-            <span><strong className="text-brand-white text-base font-serif">{(memorial.visitor_count || 0).toLocaleString()}</strong> visits</span>
-            <span><strong className="text-brand-white text-base font-serif">{condolences.length}</strong> condolences</span>
-            <span><strong className="text-brand-white text-base font-serif">{memories.length}</strong> memories</span>
-          </div>
-        </div>
-      </section>
+    <h1 className="mt-6 font-serif text-5xl sm:text-6xl lg:text-7xl font-medium leading-[1.05]">
+      {memorial.full_name}
+    </h1>
+
+    <p className="mt-4 text-lg text-white/80 font-light tracking-wide">
+      {fmt(memorial.date_of_birth)} 
+      <span className="mx-2 text-orange-400">—</span> 
+      {fmt(memorial.date_of_death)}
+    </p>
+
+    {memorial.location && (
+      <p className="mt-2 inline-flex items-center gap-2 text-white/70 text-sm">
+        <MapPin className="h-4 w-4 text-orange-400" /> 
+        {memorial.location}
+      </p>
+    )}
+
+    {memorial.short_tribute && (
+      <p className="mt-6 max-w-2xl italic text-white/85 text-lg leading-relaxed font-serif">
+        "{memorial.short_tribute}"
+      </p>
+    )}
+
+    <div className="mt-8 flex flex-wrap gap-3">
+      <Button
+        onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
+        className="rounded-full bg-orange-400 text-black hover:bg-orange-500 h-12 px-6"
+      >
+        <Flame className="h-4 w-4 mr-2" />
+        {candleLit ? "Candle lit" : "Light a candle"}
+      </Button>
+
+      <Button
+        onClick={share}
+        variant="outline"
+        className="rounded-full h-12 px-6 border-white/30 text-black hover:bg-white hover:text-black"
+      >
+        <Share2 className="h-4 w-4 mr-2" />
+        Share memorial
+      </Button>
+
+      <a
+        href="#condolence"
+        className="inline-flex items-center gap-2 rounded-full h-12 px-6 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium"
+      >
+        <Heart className="h-4 w-4" />
+        Send condolences
+      </a>
+    </div>
+
+    <div className="mt-10 flex items-center gap-8 text-xs text-white/70">
+      <span>
+        <strong className="text-white text-base font-serif">
+          {(memorial.visitor_count || 0).toLocaleString()}
+        </strong> visits
+      </span>
+      <span>
+        <strong className="text-white text-base font-serif">
+          {condolences.length}
+        </strong> condolences
+      </span>
+      <span>
+        <strong className="text-white text-base font-serif">
+          {memories.length}
+        </strong> memories
+      </span>
+    </div>
+
+  </div>
+</section>
 
       <div className="container-luxe py-16 lg:py-24 grid lg:grid-cols-[1fr_320px] gap-12">
         {/* Main column */}
@@ -274,7 +318,7 @@ const MemorialDetail = () => {
                 <div className="space-y-2"><Label htmlFor="c-rel">Relationship <span className="text-muted-foreground font-normal">(optional)</span></Label><Input id="c-rel" name="relationship" placeholder="Friend, colleague, neighbor…" className="rounded-xl" /></div>
               </div>
               <div className="space-y-2"><Label htmlFor="c-msg">Your message</Label><Textarea id="c-msg" name="message" rows={4} required className="rounded-xl" placeholder="Share a memory or word of comfort…" /></div>
-              <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 h-12 px-7">
+              <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
               </Button>
             </form>
@@ -326,7 +370,7 @@ const MemorialDetail = () => {
           <div className="rounded-2xl border border-brand-orange/30 bg-gradient-to-b from-brand-orange/5 to-transparent p-6 text-center">
             <Flame className="h-6 w-6 mx-auto text-brand-orange candle-flicker" />
             <p className="mt-3 font-serif text-lg leading-tight">May their memory be a blessing.</p>
-            <Button onClick={share} className="mt-4 w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+            <Button onClick={share} className="mt-4 w-full rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
               <Share2 className="h-4 w-4 mr-2" /> Share this memorial
             </Button>
           </div>

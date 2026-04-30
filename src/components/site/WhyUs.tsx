@@ -1,5 +1,9 @@
 import { ShieldCheck, Globe2, Users, Sparkles } from "lucide-react";
-import community from "@/assets/community.jpg";
+
+const COMMUNITY_IMG =
+  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=85";
+const SECONDARY_IMG =
+  "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=900&q=85";
 
 const features = [
   { icon: ShieldCheck, title: "Private & secure", desc: "Bank-grade security with full control over who sees each memorial." },
@@ -11,32 +15,46 @@ const features = [
 export const WhyUs = () => {
   return (
     <section id="about" className="py-24 lg:py-32 bg-cream">
-      <div className="container-luxe grid lg:grid-cols-2 gap-16 items-center">
-        <div className="relative">
-          <img
-            src={community}
-            alt="Hands held together in support"
-            loading="lazy"
-            className="rounded-3xl shadow-elegant aspect-[4/5] object-cover w-full"
-          />
-          <div className="absolute -bottom-8 -right-4 lg:-right-8 bg-brand-white p-6 rounded-2xl shadow-elegant max-w-xs">
-            <div className="font-serif text-3xl text-brand-orange">98%</div>
-            <p className="text-sm text-muted-foreground mt-1">of families say Peaceful Rest helped them feel less alone.</p>
+      <div className="container-luxe grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+        <div className="lg:col-span-6 relative">
+          <div className="grid grid-cols-5 gap-4">
+            <div className="col-span-3">
+              <img
+                src={COMMUNITY_IMG}
+                alt="Hands held together in support"
+                loading="lazy"
+                className="rounded-3xl shadow-elegant aspect-[4/5] object-cover w-full"
+              />
+            </div>
+            <div className="col-span-2 flex flex-col gap-4 pt-12">
+              <img
+                src={SECONDARY_IMG}
+                alt="A peaceful candle moment"
+                loading="lazy"
+                className="rounded-3xl shadow-soft aspect-[3/4] object-cover w-full"
+              />
+              <div className="rounded-3xl bg-brand-black text-brand-white p-5 lg:p-6 shadow-elegant">
+                <div className="font-serif text-3xl lg:text-4xl text-brand-orange leading-none">98%</div>
+                <p className="mt-2 text-xs lg:text-sm text-brand-white/75 leading-relaxed">
+                  of families say Peaceful Rest helped them feel less alone.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div>
-          <span className="text-xs uppercase tracking-[0.25em] text-brand-orange font-semibold">Why Peaceful Rest</span>
-          <h2 className="mt-3 font-serif text-4xl lg:text-5xl font-medium leading-tight">
+        <div className="lg:col-span-6">
+          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Why Peaceful Rest</span>
+          <h2 className="mt-4 font-serif text-4xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
             A thoughtful home for the stories that matter most.
           </h2>
-          <p className="mt-5 text-muted-foreground text-lg leading-relaxed">
+          <p className="mt-6 text-muted-foreground text-lg leading-relaxed">
             We built Peaceful Rest with bereavement counselors, funeral directors, and grieving
-            families. Every feature has a purpose: to make remembering easier, and grief a little
-            less lonely.
+            families. Every feature has a purpose: to make remembering easier, and grief a
+            little less lonely.
           </p>
 
-          <div className="mt-10 grid sm:grid-cols-2 gap-6">
+          <div className="mt-10 grid sm:grid-cols-2 gap-7">
             {features.map((f) => {
               const Icon = f.icon;
               return (
