@@ -52,50 +52,6 @@ export type Database = {
           },
         ]
       }
-      announcement_participations: {
-        Row: {
-          action_type: string
-          amount: number | null
-          announcement_id: string
-          avatar_url: string | null
-          created_at: string
-          display_name: string
-          id: string
-          message: string | null
-          user_id: string
-        }
-        Insert: {
-          action_type: string
-          amount?: number | null
-          announcement_id: string
-          avatar_url?: string | null
-          created_at?: string
-          display_name: string
-          id?: string
-          message?: string | null
-          user_id: string
-        }
-        Update: {
-          action_type?: string
-          amount?: number | null
-          announcement_id?: string
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string
-          id?: string
-          message?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "announcement_participations_announcement_id_fkey"
-            columns: ["announcement_id"]
-            isOneToOne: false
-            referencedRelation: "announcements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       announcements: {
         Row: {
           body: string
