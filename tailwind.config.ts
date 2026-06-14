@@ -71,7 +71,7 @@ export default {
       },
       fontFamily: {
         serif: ["'Cormorant Garamond'", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Quicksand", "system-ui", "sans-serif"],
       },
       backgroundImage: {
         "gradient-warm": "var(--gradient-warm)",
