@@ -28,7 +28,7 @@ const ObituaryManagement = () => {
   const [uploading, setUploading] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Obituary Management · Peaceful Rest";
+    document.title = "Obituary Management · Makiwa";
     if (id) {
       supabase.from("memorials").select("*").eq("id", id).maybeSingle().then(({ data }) => {
         if (data) setForm({ ...data, date_of_birth: data.date_of_birth || "", date_of_death: data.date_of_death || "" });
@@ -133,7 +133,7 @@ const ObituaryManagement = () => {
         <section className="rounded-2xl border border-border bg-card p-7 flex items-center justify-between">
           <div>
             <h3 className="font-serif text-xl">Public visibility</h3>
-            <p className="text-sm text-muted-foreground">When on, this memorial appears publicly on Peaceful Rest.</p>
+            <p className="text-sm text-muted-foreground">When on, this memorial appears publicly on Makiwa.</p>
           </div>
           <Switch checked={form.is_public} onCheckedChange={(v) => setForm((f: any) => ({ ...f, is_public: v }))} />
         </section>

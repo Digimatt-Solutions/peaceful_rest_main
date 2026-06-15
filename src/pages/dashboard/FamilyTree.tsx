@@ -22,7 +22,7 @@ const FamilyTree = () => {
   const deceased = memorials.find(m => m.id === memorialId);
 
   useEffect(() => {
-    document.title = "Family Tree · Peaceful Rest";
+    document.title = "Family Tree · Makiwa";
     if (!user) return;
     supabase.from("memorials").select("id,full_name,profile_photo_url").eq("created_by", user.id).then(({ data }) => {
       setMemorials(data || []);

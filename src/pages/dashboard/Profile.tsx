@@ -17,7 +17,7 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    document.title = "Profile · Peaceful Rest";
+    document.title = "Profile · Makiwa";
     if (!user) return;
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
       if (data) setForm(data);
@@ -48,7 +48,7 @@ const Profile = () => {
 
   return (
     <>
-      <PageHeader title="Profile" subtitle="How others see you on Peaceful Rest." />
+      <PageHeader title="Profile" subtitle="How others see you on Makiwa." />
       <div className="max-w-2xl space-y-6">
         <div className="rounded-2xl border border-border bg-card p-7">
           <div className="flex items-center gap-5">

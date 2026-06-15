@@ -23,7 +23,7 @@ const Overview = () => {
   const [stats, setStats] = useState({ memorials: 0, condolences: 0, donations: 0, visitors: 0 });
 
   useEffect(() => {
-    document.title = "Dashboard · Peaceful Rest";
+    document.title = "Dashboard · Makiwa";
     if (!user) return;
     const load = async () => {
       const { data: mems } = await supabase.from("memorials").select("id,visitor_count").eq("created_by", user.id);

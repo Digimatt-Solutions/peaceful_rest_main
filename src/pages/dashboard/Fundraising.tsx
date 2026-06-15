@@ -26,7 +26,7 @@ const Fundraising = () => {
   const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
 
   useEffect(() => {
-    document.title = "Fundraising · Peaceful Rest";
+    document.title = "Fundraising · Makiwa";
     if (!user) return;
     supabase.from("memorials").select("id,full_name").eq("created_by", user.id).then(({ data }) => {
       setMemorials(data || []); if (data?.[0]) setMemorialId(data[0].id);

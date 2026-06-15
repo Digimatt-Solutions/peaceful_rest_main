@@ -59,7 +59,7 @@ export const Footer = () => {
       </div>
 
       <div className="container-luxe mt-16 pt-8 border-t border-brand-white/10 flex flex-wrap justify-between items-center gap-4 text-xs text-brand-white/50">
-        <p>© {new Date().getFullYear()} Peaceful Rest. Made with care for grieving families.</p>
+        <p>© {new Date().getFullYear()} Makiwa. Made with care for grieving families.</p>
         <p>Honoring every life, every story.</p>
       </div>
     </footer>

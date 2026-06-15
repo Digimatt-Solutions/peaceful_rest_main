@@ -19,7 +19,7 @@ const Anniversary = () => {
   const [form, setForm] = useState({ title: "", description: "", remembrance_date: "" });
 
   useEffect(() => {
-    document.title = "Anniversary · Peaceful Rest";
+    document.title = "Anniversary · Makiwa";
     if (!user) return;
     supabase.from("memorials").select("id,full_name").eq("created_by", user.id).then(({ data }) => {
       setMemorials(data || []); if (data?.[0]) setMemorialId(data[0].id);

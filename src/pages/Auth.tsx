@@ -48,7 +48,7 @@ const Auth = () => {
   const [showSuPw, setShowSuPw] = useState(false);
 
   useEffect(() => {
-    document.title = "Sign In · Peaceful Rest";
+    document.title = "Sign In · Makiwa";
     if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);
 
@@ -78,7 +78,7 @@ const Auth = () => {
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Welcome to Peaceful Rest");
+    toast.success("Welcome to Makiwa");
     navigate("/dashboard");
   };
 
@@ -125,7 +125,7 @@ const Auth = () => {
             </div>
           </div>
 
-          <p className="text-xs text-brand-white/40">© Peaceful Rest. Held with care.</p>
+          <p className="text-xs text-brand-white/40">© Makiwa. Held with care.</p>
         </div>
       </div>
 

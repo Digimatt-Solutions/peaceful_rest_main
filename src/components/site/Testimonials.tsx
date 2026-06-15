@@ -3,7 +3,7 @@ import { Quote, Star } from "lucide-react";
 const testimonials = [
   {
     quote:
-      "Peaceful Rest gave my mother's life the tribute it deserved. Family from three continents lit candles together — it felt like we were all in the same room.",
+      "Makiwa gave my mother's life the tribute it deserved. Family from three continents lit candles together — it felt like we were all in the same room.",
     name: "Amara Johnson",
     role: "Daughter",
     avatar:
@@ -11,7 +11,7 @@ const testimonials = [
   },
   {
     quote:
-      "As a funeral director, I recommend Peaceful Rest to every family. It's the most respectful and well-built platform I've ever used.",
+      "As a funeral director, I recommend Makiwa to every family. It's the most respectful and well-built platform I've ever used.",
     name: "Rev. James Carter",
     role: "Funeral Director",
     avatar:
