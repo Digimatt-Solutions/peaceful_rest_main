@@ -1,7 +1,6 @@
 import { Building2, Flower2, Camera, Car, Tent, Printer, HeartPulse, Shield, UtensilsCrossed, ArrowUpRight } from "lucide-react";
+import FEATURE_IMG from "@/assets/hero-memorial.jpg";
 
-const FEATURE_IMG =
-  "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1600&q=80";
 
 const services = [
   { icon: Building2, name: "Funeral Homes", desc: "Vetted partners offering dignified ceremonies." },

@@ -50,8 +50,8 @@ export const Navbar = () => {
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" className="rounded-full text-brand-white hover:bg-brand-white/10 hover:text-brand-white">
-                <Link to="/auth">Login</Link>
+              <Button asChild variant="ghost" className="rounded-full text-brand-white border-2 hover:bg-brand-white/10 hover:text-brand-white">
+                <Link to="/auth">Sign In</Link>
               </Button>
               <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow">
                 <Link to="/auth">Sign Up</Link>
