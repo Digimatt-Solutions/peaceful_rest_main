@@ -7,15 +7,15 @@ const testimonials = [
     name: "Amara Johnson",
     role: "Daughter",
     avatar:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80",
+      "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=200&q=80",
   },
   {
     quote:
-      "As a funeral director, I recommend Makiwa to every family. It's the most respectful and well-built platform I've ever used.",
-    name: "Rev. James Carter",
+      "As a funeral director in Nairobi, I recommend Makiwa to every family. It's the most respectful and well-built platform I've ever used.",
+    name: "Rev. James Otieno",
     role: "Funeral Director",
     avatar:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80",
+      "https://images.unsplash.com/photo-1539701938214-0d9736e1c16b?auto=format&fit=crop&w=200&q=80",
   },
   {
     quote:
@@ -23,7 +23,7 @@ const testimonials = [
     name: "Lerato Khumalo",
     role: "Family Coordinator",
     avatar:
-      "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=200&q=80",
+      "https://images.unsplash.com/photo-1581382575275-97901c2635b7?auto=format&fit=crop&w=200&q=80",
   },
 ];
 
