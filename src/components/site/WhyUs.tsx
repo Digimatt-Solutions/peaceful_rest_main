@@ -36,7 +36,7 @@ export const WhyUs = () => {
               <div className="rounded-3xl bg-brand-black text-brand-white p-5 lg:p-6 shadow-elegant">
                 <div className="font-serif text-3xl lg:text-4xl text-brand-orange leading-none">98%</div>
                 <p className="mt-2 text-xs lg:text-sm text-brand-white/75 leading-relaxed">
-                  of families say Peaceful Rest helped them feel less alone.
+                  of families say Makiwa helped them feel less alone.
                 </p>
               </div>
             </div>
@@ -44,12 +44,12 @@ export const WhyUs = () => {
         </div>
 
         <div className="lg:col-span-6">
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Why Peaceful Rest</span>
+          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Why Makiwa</span>
           <h2 className="mt-4 font-serif text-4xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
             A thoughtful home for the stories that matter most.
           </h2>
           <p className="mt-6 text-muted-foreground text-lg leading-relaxed">
-            We built Peaceful Rest with bereavement counselors, funeral directors, and grieving
+            We built Makiwa with bereavement counselors, funeral directors, and grieving
             families. Every feature has a purpose: to make remembering easier, and grief a
             little less lonely.
           </p>

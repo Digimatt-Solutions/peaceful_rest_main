@@ -13,7 +13,7 @@ const MyMemorials = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = "My Memorials · Peaceful Rest";
+    document.title = "My Memorials · Makiwa";
     if (!user) return;
     supabase.from("memorials").select("*").eq("created_by", user.id).order("created_at", { ascending: false })
       .then(({ data }) => { setMemorials(data || []); setLoading(false); });

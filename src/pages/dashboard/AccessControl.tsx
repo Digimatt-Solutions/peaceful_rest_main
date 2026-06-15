@@ -17,7 +17,7 @@ const AccessControl = () => {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    document.title = "User Access · Peaceful Rest";
+    document.title = "User Access · Makiwa";
     if (!user) return;
     supabase.from("memorials").select("id,full_name").eq("created_by", user.id).then(({ data }) => {
       setMemorials(data || []); if (data?.[0]) setMemorialId(data[0].id);

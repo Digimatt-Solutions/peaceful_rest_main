@@ -24,7 +24,7 @@ const Community = () => {
   const [form, setForm] = useState({ title: "", body: "", category: "support" });
 
   useEffect(() => {
-    document.title = "Community · Peaceful Rest";
+    document.title = "Community · Makiwa";
     supabase.from("community_posts").select("*").order("created_at", { ascending: false }).limit(50)
       .then(({ data }) => setItems(data || []));
   }, []);

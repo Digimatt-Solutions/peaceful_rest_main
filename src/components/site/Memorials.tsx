@@ -78,7 +78,7 @@ export const Memorials = () => {
             </div>
             <h3 className="font-serif text-2xl sm:text-3xl">A space ready to be filled with memory</h3>
             <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-              Be among the first to create a memorial on Peaceful Rest. Honor a life, gather loved ones, and keep their story alive.
+              Be among the first to create a memorial on Makiwa. Honor a life, gather loved ones, and keep their story alive.
             </p>
             <Button asChild className="mt-7 rounded-full h-12 px-7 bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow">
               <Link to="/auth">Create the first memorial</Link>

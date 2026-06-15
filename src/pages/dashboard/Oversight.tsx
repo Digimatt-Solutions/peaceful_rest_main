@@ -15,7 +15,7 @@ const Oversight = () => {
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    document.title = "Memorial Oversight · Peaceful Rest";
+    document.title = "Memorial Oversight · Makiwa";
   }, []);
 
   useEffect(() => {

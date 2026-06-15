@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HandHeart,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
-  UserCircle, Settings, Flame, LogOut, Menu, ChevronLeft, Sun, Moon, Bell, Search, Globe
+  UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import makiwaLogo from "@/assets/makiwa-logo.png.asset.json";
 
 type NavItem = { to: string; label: string; icon: any; end?: boolean; roles?: string[] };
 
@@ -77,21 +78,14 @@ export const DashboardLayout = () => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className={cn(
-        "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-brand-black text-brand-white flex flex-col transition-all duration-300 h-screen",
+        "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-slate-700 text-slate-50 flex flex-col transition-all duration-300 h-screen border-r border-slate-600",
         collapsed ? "lg:w-20" : "lg:w-72",
         "w-72",
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className={cn("h-16 px-5 border-b border-brand-white/10 flex items-center", collapsed ? "lg:justify-center lg:px-2" : "")}>
-          <Link to="/" className="flex items-center gap-2.5 min-w-0">
-            <span className="h-9 w-9 shrink-0 rounded-full bg-brand-white/5 border border-brand-white/10 flex items-center justify-center">
-              <Flame className="h-4 w-4 text-brand-orange candle-flicker" />
-            </span>
-            {!collapsed && (
-              <span className="font-serif text-xl font-semibold whitespace-nowrap">
-                Peaceful<span className="text-brand-orange">Rest</span>
-              </span>
-            )}
+        <div className={cn("h-16 px-4 border-b border-slate-600/70 flex items-center bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>
+          <Link to="/" className="flex items-center gap-2 min-w-0 bg-white/95 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-center">
+            <img src={makiwaLogo.url} alt="Makiwa" className={cn("object-contain", collapsed ? "h-7 w-7" : "h-9 w-auto")} />
           </Link>
         </div>
 
@@ -110,8 +104,8 @@ export const DashboardLayout = () => {
                   collapsed ? "lg:justify-center lg:px-0 px-3" : "px-3",
                   "py-2.5",
                   isActive
-                    ? "bg-brand-orange text-brand-white font-medium"
-                    : "text-brand-white/70 hover:text-brand-white hover:bg-brand-white/5"
+                    ? "bg-brand-orange text-white font-medium shadow-sm"
+                    : "text-slate-200/85 hover:text-white hover:bg-white/10"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -123,37 +117,41 @@ export const DashboardLayout = () => {
 
         {/* role badge */}
         {!collapsed && role && (
-          <div className="mx-4 mb-3 rounded-lg border border-brand-white/10 bg-brand-white/5 px-3 py-2.5">
-            <p className="text-[10px] uppercase tracking-wider text-brand-white/50">Signed in as</p>
+          <div className="mx-4 mb-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+            <p className="text-[10px] uppercase tracking-wider text-slate-300/70">Signed in as</p>
             <p className="text-sm font-medium mt-0.5">{roleLabel[role] ?? role}</p>
           </div>
         )}
 
-        {/* collapse toggle (desktop) */}
-        <div className="hidden lg:flex p-3 border-t border-brand-white/10">
+        {/* logout button */}
+        <div className="p-3 border-t border-slate-600/70">
           <button
-            onClick={() => setCollapsed(c => !c)}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-brand-white/60 hover:text-brand-white hover:bg-brand-white/5 transition-colors text-xs"
+            onClick={handleSignOut}
+            title="Sign out"
+            className={cn(
+              "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors border",
+              "bg-red-500/15 border-red-400/40 text-red-200 hover:bg-red-500/30 hover:text-white hover:border-red-400"
+            )}
           >
-            <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
-            {!collapsed && <span>Collapse</span>}
+            <LogOut className="h-4 w-4" />
+            {!collapsed && <span>Sign out</span>}
           </button>
         </div>
       </aside>
 
       {/* Mobile overlay */}
-      {mobileOpen && <div onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 bg-brand-black/60 z-30" />}
+      {mobileOpen && <div onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 bg-slate-900/60 z-30" />}
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top navbar */}
-        <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border h-16 flex items-center gap-3 px-4 sm:px-6">
+        <header className="sticky top-0 z-20 bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-xl border-b border-slate-300/70 dark:border-slate-700 h-16 flex items-center gap-3 px-4 sm:px-6">
           <button
             onClick={() => {
               if (window.innerWidth < 1024) setMobileOpen(o => !o);
               else setCollapsed(c => !c);
             }}
-            className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors"
+            className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 bg-white/60 dark:bg-slate-700/60 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             aria-label="Toggle sidebar"
           >
             <Menu className="h-4 w-4" />
@@ -165,13 +163,13 @@ export const DashboardLayout = () => {
               <input
                 type="search"
                 placeholder="Search memorials, people…"
-                className="w-full h-9 pl-9 pr-3 text-sm rounded-lg bg-muted border border-transparent focus:border-border focus:bg-background focus:outline-none transition-colors"
+                className="w-full h-9 pl-9 pr-3 text-sm rounded-lg bg-white/70 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 focus:border-brand-orange/60 focus:bg-white dark:focus:bg-slate-700 focus:outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div className="flex-1 md:hidden font-serif text-lg font-semibold">
-            Peaceful<span className="text-brand-orange">Rest</span>
+          <div className="flex-1 md:hidden font-serif text-lg font-semibold flex items-center">
+            <img src={makiwaLogo.url} alt="Makiwa" className="h-7 w-auto object-contain" />
           </div>
 
           <div className="flex items-center gap-1.5 ml-auto">

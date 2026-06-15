@@ -50,7 +50,7 @@ const MemorialDetail = () => {
       setAnnouncements(a.data || []);
       setLoading(false);
       if (m.data) {
-        document.title = `${m.data.full_name} · Peaceful Rest`;
+        document.title = `${m.data.full_name} · Makiwa`;
         // Increment visitor count (best-effort)
         supabase.from("memorials").update({ visitor_count: (m.data.visitor_count || 0) + 1 }).eq("id", id).then(() => {});
       }

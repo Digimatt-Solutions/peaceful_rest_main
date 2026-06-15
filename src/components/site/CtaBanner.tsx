@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Flame, ArrowRight, ShieldCheck } from "lucide-react";
 
 const CTA_BG =
-  "https://images.unsplash.com/photo-1509909756405-be0199881695?auto=format&fit=crop&w=2400&q=85";
+  "https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&w=2400&q=85";
 
 export const CtaBanner = () => {
   return (

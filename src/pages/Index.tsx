@@ -12,7 +12,7 @@ import { Footer } from "@/components/site/Footer";
 const Index = () => {
   useEffect(() => {
     document.title = "Makiwa - Honoring Lives, Preserving Memories";
-    const desc = "Create beautiful online memorials, share tributes, plan services, and support grieving families with Peaceful Rest.";
+    const desc = "Create beautiful online memorials, share tributes, plan services, and support grieving families with Makiwa.";
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement("meta");

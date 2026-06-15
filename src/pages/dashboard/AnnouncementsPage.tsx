@@ -24,7 +24,7 @@ const AnnouncementsPage = ({ category, title, subtitle }: Props) => {
   const [editing, setEditing] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
 
-  useEffect(() => { document.title = `${title} · Peaceful Rest`; }, [title]);
+  useEffect(() => { document.title = `${title} · Makiwa`; }, [title]);
 
   useEffect(() => {
     if (!user) return;

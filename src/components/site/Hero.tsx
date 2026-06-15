@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Plus, Sparkles, Flame, Quote, Star, ShieldCheck, ArrowRight } from "lucide-react";
-import heroCandles from "@/assets/hero-candles.jpg";
-import PORTRAIT_IMG from "@/assets/flowerr.png";
+import { Plus, Sparkles, Flame, Quote, Star, ArrowRight } from "lucide-react";
 
+const HERO_BG =
+  "https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&w=2400&q=85";
+const PORTRAIT_IMG =
+  "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=1200&q=85";
 
 const AVATARS = [
-  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=80",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1581382575275-97901c2635b7?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1539701938214-0d9736e1c16b?auto=format&fit=crop&w=120&q=80",
 ];
 
 export const Hero = () => {
@@ -21,11 +23,11 @@ export const Hero = () => {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img
-          src={heroCandles}
-          alt="Candlelight memorial"
+          src={HERO_BG}
+          alt="African candlelight memorial"
           className="w-full h-full object-cover animate-slow-zoom"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-black/25 via-brand-black/30 to-brand-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-black/55 via-brand-black/55 to-brand-black/65" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,hsl(19_95%_62%/0.12),transparent_60%)]" />
       </div>
 
