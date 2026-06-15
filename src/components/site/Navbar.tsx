@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Flame } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import makiwaLogo from "@/assets/makiwa-logo.png.asset.json";
 
 const links = [
   { label: "Home", href: "#home" },
