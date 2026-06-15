@@ -23,12 +23,7 @@ export const Navbar = () => {
     <header className="fixed top-0 inset-x-0 z-50 bg-brand-black/55 backdrop-blur-xl border-b border-brand-white/10">
       <nav className="container-luxe flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-brand-white/10 ring-1 ring-brand-white/15">
-            <Flame className="h-4 w-4 text-brand-orange candle-flicker" />
-          </span>
-          <span className="font-serif text-2xl font-semibold tracking-tight text-brand-white">
-            Peaceful<span className="text-brand-orange">Rest</span>
-          </span>
+          <img src={makiwaLogo.url} alt="Makiwa" className="h-10 w-auto object-contain" />
         </Link>
 
         <ul className="hidden lg:flex items-center gap-8">
@@ -46,16 +41,16 @@ export const Navbar = () => {
 
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
-            <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow">
-              <Link to="/dashboard">Dashboard</Link>
+            <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
+              <Link to="/dashboard"><LayoutDashboard className="mr-1.5 h-4 w-4" />Dashboard</Link>
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" className="rounded-full text-brand-white border-2 hover:bg-brand-white/10 hover:text-brand-white">
-                <Link to="/auth">Sign In</Link>
+              <Button asChild variant="ghost" className="rounded-full text-brand-white border border-brand-white/30 hover:bg-brand-white/10 hover:text-brand-white">
+                <Link to="/auth"><LogIn className="mr-1.5 h-4 w-4" />Sign In</Link>
               </Button>
-              <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow">
-                <Link to="/auth">Sign Up</Link>
+              <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
+                <Link to="/auth"><UserPlus className="mr-1.5 h-4 w-4" />Sign Up</Link>
               </Button>
             </>
           )}

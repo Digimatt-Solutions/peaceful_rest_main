@@ -1,18 +1,12 @@
-import { Flame, Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import makiwaLogo from "@/assets/makiwa-logo.png.asset.json";
 
 export const Footer = () => {
   return (
     <footer id="contact" className="bg-brand-black text-brand-white/80 pt-20 pb-10">
       <div className="container-luxe grid md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="h-9 w-9 rounded-full bg-brand-white/5 border border-brand-white/10 flex items-center justify-center">
-              <Flame className="h-4 w-4 text-brand-orange candle-flicker" />
-            </span>
-            <span className="font-serif text-2xl font-semibold text-brand-white">
-              Peaceful<span className="text-brand-orange">Rest</span>
-            </span>
-          </div>
+          <img src={makiwaLogo.url} alt="Makiwa" className="h-12 w-auto object-contain" />
           <p className="mt-5 text-sm leading-relaxed">
             A sanctuary to honor lives, preserve memories, and support families through grief.
           </p>
@@ -60,7 +54,17 @@ export const Footer = () => {
 
       <div className="container-luxe mt-16 pt-8 border-t border-brand-white/10 flex flex-wrap justify-between items-center gap-4 text-xs text-brand-white/50">
         <p>© {new Date().getFullYear()} Makiwa. Made with care for grieving families.</p>
-        <p>Honoring every life, every story.</p>
+        <p>
+          Powered by{" "}
+          <a
+            href="https://digimatt.co.ke/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-orange hover:underline font-medium"
+          >
+            Digimatt Solutions
+          </a>
+        </p>
       </div>
     </footer>
   );
