@@ -1,12 +1,12 @@
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
-import makiwaLogo from "@/assets/makiwa-logo.png.asset.json";
+import logo from "@/assets/makiwa-logo.png";
 
 export const Footer = () => {
   return (
     <footer id="contact" className="bg-brand-black text-brand-white/80 pt-20 pb-10">
       <div className="container-luxe grid md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div>
-          <img src={makiwaLogo.url} alt="Makiwa" className="h-12 w-auto object-contain" />
+          <img src={logo} alt="Makiwa" className="h-12 w-auto object-contain" />
           <p className="mt-5 text-sm leading-relaxed">
             A sanctuary to honor lives, preserve memories, and support families through grief.
           </p>
