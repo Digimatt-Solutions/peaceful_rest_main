@@ -27,7 +27,7 @@ export const Hero = () => {
           alt="African candlelight memorial"
           className="w-full h-full object-cover animate-slow-zoom"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-black/10 via-brand-black/25 to-brand-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-black/5 via-brand-black/20 to-brand-black/15" />
       </div>
 
       {/* Soft orange glow blob */}
@@ -74,30 +74,6 @@ export const Hero = () => {
                   Browse Memorials
                 </a>
               </Button>
-            </div>
-
-            {/* Trust strip */}
-            <div className="mt-12 flex flex-wrap items-center gap-6 animate-fade-up-delay-2">
-              <div className="flex -space-x-3">
-                {AVATARS.map((src, i) => (
-                  <img
-                    key={i}
-                    src={src}
-                    alt=""
-                    loading="lazy"
-                    className="h-10 w-10 rounded-full object-cover ring-2 ring-brand-black"
-                  />
-                ))}
-              </div>
-              <div className="text-sm">
-                <div className="flex items-center gap-1 text-brand-orange">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5" fill="currentColor" strokeWidth={0} />
-                  ))}
-                  <span className="ml-2 text-brand-white font-semibold">4.9/5</span>
-                </div>
-                <p className="text-brand-white/60 text-xs mt-0.5">from 10+ families worldwide</p>
-              </div>
             </div>
 
             <div className="mt-10 pt-8 border-t border-brand-white/10 grid grid-cols-3 gap-6 max-w-xl animate-fade-up-delay-3">
