@@ -45,9 +45,9 @@ export const Footer = () => {
         <div>
           <h4 className="font-serif text-lg text-brand-white">Get in touch</h4>
           <ul className="mt-5 space-y-4 text-sm">
-            <li className="flex gap-3"><Mail className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> hello@peacefulrest.com</li>
-            <li className="flex gap-3"><Phone className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> +1 (800) 555-0199</li>
-            <li className="flex gap-3"><MapPin className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> Available worldwide, 24/7</li>
+            <li className="flex gap-3"><Mail className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> info@makiwa.com</li>
+            <li className="flex gap-3"><Phone className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> +254 700 000 000</li>
+            <li className="flex gap-3"><MapPin className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> Mon - Fri, 8:00 AM - 6:00 PM</li>
           </ul>
         </div>
       </div>

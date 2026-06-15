@@ -15,18 +15,15 @@ export const CtaBanner = () => {
         className="absolute inset-0 w-full h-full object-cover opacity-30"
       />
       {/* Layered overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-black via-brand-black/80 to-brand-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,hsl(19_95%_62%/0.30),transparent_55%)]" />
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[26rem] w-[26rem] rounded-full bg-brand-orange/20 blur-[120px]" />
 
       <div className="container-luxe relative">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-orange/30 bg-brand-orange/10 backdrop-blur-md text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-8">
             <Flame className="h-3.5 w-3.5 candle-flicker" fill="currentColor" />
-            Begin Today — Free Forever Plan
+            Begin Today - Free Forever Plan
           </div>
 
-          <h2 className="font-serif text-4xl sm:text-5xl lg:text-7xl font-medium leading-[1.02] tracking-tight text-balance">
+          <h2 className="font-serif text-3xl sm:text-5xl lg:text-5xl font-medium leading-[1.02] tracking-tight text-balance">
             Light a candle. Tell their story.
             <br />
             <span className="italic text-brand-orange">Keep them close.</span>

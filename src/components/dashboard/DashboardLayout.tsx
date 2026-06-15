@@ -78,13 +78,13 @@ export const DashboardLayout = () => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className={cn(
-        "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-slate-700 text-slate-50 flex flex-col transition-all duration-300 h-screen border-r border-slate-600",
+        "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-brand-black text-slate-50 flex flex-col transition-all duration-300 h-screen border-r border-slate-600",
         collapsed ? "lg:w-20" : "lg:w-72",
         "w-72",
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className={cn("h-16 px-4 border-b border-slate-600/70 flex items-center bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>
-          <Link to="/" className="flex items-center gap-2 min-w-0 bg-white/95 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-center">
+          <Link to="/" className="flex items-left gap-2 min-w-0 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-left">
             <img src={logo} alt="Makiwa" className={cn("object-contain", collapsed ? "h-7 w-7" : "h-9 w-auto")} />
           </Link>
         </div>
@@ -114,14 +114,6 @@ export const DashboardLayout = () => {
             );
           })}
         </nav>
-
-        {/* role badge */}
-        {!collapsed && role && (
-          <div className="mx-4 mb-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
-            <p className="text-[10px] uppercase tracking-wider text-slate-300/70">Signed in as</p>
-            <p className="text-sm font-medium mt-0.5">{roleLabel[role] ?? role}</p>
-          </div>
-        )}
 
         {/* logout button */}
         <div className="p-3 border-t border-slate-600/70">

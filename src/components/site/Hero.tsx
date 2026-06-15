@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Plus, Sparkles, Flame, Quote, Star, ArrowRight } from "lucide-react";
+import PORTRAIT_IMG from "@/assets/flowerr.png";
+import HERO_BG from "@/assets/hero-memorial.jpg";
 
-const HERO_BG =
-  "https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&w=2400&q=85";
-const PORTRAIT_IMG =
-  "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=1200&q=85";
+// const HERO_BG =
+//   "https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&w=2400&q=85";
 
 const AVATARS = [
   "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&q=80",
@@ -27,12 +27,11 @@ export const Hero = () => {
           alt="African candlelight memorial"
           className="w-full h-full object-cover animate-slow-zoom"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-black/55 via-brand-black/55 to-brand-black/65" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,hsl(19_95%_62%/0.12),transparent_60%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-black/10 via-brand-black/25 to-brand-black/35" />
       </div>
 
       {/* Soft orange glow blob */}
-      <div className="pointer-events-none absolute -top-32 -right-32 h-[28rem] w-[28rem] rounded-full bg-brand-orange/20 blur-[120px] z-0" />
+      <div className="pointer-events-none absolute -top-32 -right-32 h-[28rem] w-[28rem] rounded-full bg-brand-orange/5 blur-[120px] z-0" />
 
       {/* Content */}
       <div className="container-luxe relative z-10 py-20 lg:py-28 w-full">
@@ -97,21 +96,21 @@ export const Hero = () => {
                   ))}
                   <span className="ml-2 text-brand-white font-semibold">4.9/5</span>
                 </div>
-                <p className="text-brand-white/60 text-xs mt-0.5">from 12,400+ families worldwide</p>
+                <p className="text-brand-white/60 text-xs mt-0.5">from 10+ families worldwide</p>
               </div>
             </div>
 
             <div className="mt-10 pt-8 border-t border-brand-white/10 grid grid-cols-3 gap-6 max-w-xl animate-fade-up-delay-3">
               <div>
-                <div className="font-serif text-3xl text-brand-white">12.4k+</div>
+                <div className="font-serif text-3xl text-brand-white">5+</div>
                 <div className="text-[11px] uppercase tracking-[0.18em] text-brand-white/55 mt-1">Lives Honored</div>
               </div>
               <div>
-                <div className="font-serif text-3xl text-brand-white">86k</div>
+                <div className="font-serif text-3xl text-brand-white">300+</div>
                 <div className="text-[11px] uppercase tracking-[0.18em] text-brand-white/55 mt-1">Tributes Shared</div>
               </div>
               <div>
-                <div className="font-serif text-3xl text-brand-white">120+</div>
+                <div className="font-serif text-3xl text-brand-white">10+</div>
                 <div className="text-[11px] uppercase tracking-[0.18em] text-brand-white/55 mt-1">Communities</div>
               </div>
             </div>
@@ -119,33 +118,14 @@ export const Hero = () => {
 
           {/* RIGHT */}
           <div className="lg:col-span-5 relative animate-fade-up-delay-1">
-            {/* Portrait card */}
-            <div className="relative rounded-[2rem] overflow-hidden aspect-[4/5] shadow-elegant ">
-              <img
-                src={PORTRAIT_IMG}
-                alt="A loved one remembered"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-black/5 via-brand-black/20 to-transparent" />
-            </div>
+
 
             {/* Floating quote card */}
-            <div className="absolute -bottom-6 -left-6 lg:-left-10 max-w-[18rem] rounded-2xl bg-brand-black/85 backdrop-blur-xl p-5 border border-brand-orange/20 shadow-glow hidden sm:block">
+            <div className="absolute -bottom-6 -left-6 lg:-left-10 max-w-[18rem] rounded-2xl bg-brand-black/5 backdrop-blur-xl p-5 border border-brand-orange/20 shadow-glow hidden sm:block">
               <Quote className="h-5 w-5 text-brand-orange" />
               <blockquote className="mt-2 font-serif text-base leading-snug text-brand-white italic">
                 "Those we love don't go away - they walk beside us every day."
               </blockquote>
-            </div>
-
-            {/* Floating candle stat */}
-            <div className="absolute -top-4 -right-4 lg:-right-6 rounded-2xl bg-brand-white/95 backdrop-blur p-4 shadow-elegant hidden sm:flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-brand-orange/15 flex items-center justify-center">
-                <Flame className="h-5 w-5 text-brand-orange candle-flicker" fill="currentColor" />
-              </div>
-              <div>
-                <div className="text-xs text-foreground/60 font-medium">Today</div>
-                <div className="text-sm font-semibold text-foreground">candles lit</div>
-              </div>
             </div>
           </div>
         </div>

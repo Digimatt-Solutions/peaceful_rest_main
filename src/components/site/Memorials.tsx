@@ -127,7 +127,7 @@ export const Memorials = () => {
                     </p>
                     <Link
                       to={`/memorial/${m.id}`}
-                      className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-orange hover:gap-3 transition-all"
+                      className="mt-5 inline-flex items-center border-2 border-brand-white rounded-lg p-2 gap-2 text-sm font-semibold text-white bg-brand-orange hover:gap-3 transition-all"
                     >
                       View Memorial
                       <ArrowUpRight className="h-4 w-4" />

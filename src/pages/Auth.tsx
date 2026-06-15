@@ -101,7 +101,7 @@ const Auth = () => {
       {/* Visual side */}
       <div className="relative hidden lg:block overflow-hidden">
         <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-black via-brand-black/85 to-brand-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-black/90 via-brand-black/40 to-brand-black/10" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(19_90%_54%/0.25),transparent_55%)]" />
 
         <div className="relative z-10 h-full flex flex-col justify-between p-12 xl:p-16 text-brand-white">
@@ -123,7 +123,9 @@ const Auth = () => {
             </div>
           </div>
 
-          <p className="text-xs text-brand-white/40">© Makiwa. Held with care.</p>
+          <p className="text-xs text-brand-white/40">© Makiwa. Powered by <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
+              Digimatt Solutions
+            </a>.</p>
         </div>
       </div>
 
@@ -133,7 +135,7 @@ const Auth = () => {
           <ArrowLeft className="h-4 w-4" /> Back home
         </Link>
 
-        <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/40 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
+        <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/80 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
           <Link to="/" className="flex justify-center mb-6">
             <img src={logo} alt="Makiwa" className="h-16 w-auto object-contain" />
           </Link>
@@ -141,24 +143,24 @@ const Auth = () => {
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
           <Tabs defaultValue="login" className="mt-8">
-            <TabsList className="grid grid-cols-2 w-full h-12 p-1 bg-muted rounded-full">
-              <TabsTrigger value="login" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
+            <TabsList className="grid grid-cols-2 w-full h-12 p-1 bg-muted rounded-10">
+              <TabsTrigger value="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login" className="mt-8">
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="li-email">Email address</Label>
-                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-2 border-brand-orange/50 focus-visible:ring-brand-orange/40" required />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="li-pw">Password</Label>
-                    <button type="button" className="text-xs text-brand-orange hover:underline">Forgot?</button>
+                    <button type="button" className="text-xs text-brand-orange hover:underline">Forgot Password?</button>
                   </div>
                   <div className="relative">
-                    <Input id="li-pw" name="password" type={showPw ? "text" : "password"} className="h-12 rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                    <Input id="li-pw" name="password" type={showPw ? "text" : "password"} className="h-12 rounded-xl pr-11 border-2 border-brand-orange/50 focus-visible:ring-brand-orange/40" required />
                     <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
