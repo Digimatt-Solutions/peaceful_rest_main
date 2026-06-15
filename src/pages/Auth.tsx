@@ -11,7 +11,7 @@ import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus } 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/hero-memorial.jpg";
-import makiwaLogo from "@/assets/makiwa-logo.png.asset.json";
+import logo from "@/assets/makiwa-logo.png";
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
@@ -106,7 +106,7 @@ const Auth = () => {
 
         <div className="relative z-10 h-full flex flex-col justify-between p-12 xl:p-16 text-brand-white">
           <Link to="/" className="flex items-center gap-3 group w-fit bg-brand-white/95 rounded-2xl px-4 py-2 border border-brand-orange/30">
-            <img src={makiwaLogo.url} alt="Makiwa" className="h-10 w-auto object-contain" />
+            <img src={logo} alt="Makiwa" className="h-10 w-auto object-contain" />
           </Link>
 
           <div className="space-y-6 max-w-lg">
@@ -135,7 +135,7 @@ const Auth = () => {
 
         <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/40 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
           <Link to="/" className="flex justify-center mb-6">
-            <img src={makiwaLogo.url} alt="Makiwa" className="h-16 w-auto object-contain" />
+            <img src={logo} alt="Makiwa" className="h-16 w-auto object-contain" />
           </Link>
 
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>

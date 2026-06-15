@@ -16,7 +16,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import makiwaLogo from "@/assets/makiwa-logo.png.asset.json";
+import logo from "@/assets/makiwa-logo.png";
 
 type NavItem = { to: string; label: string; icon: any; end?: boolean; roles?: string[] };
 
@@ -85,7 +85,7 @@ export const DashboardLayout = () => {
       )}>
         <div className={cn("h-16 px-4 border-b border-slate-600/70 flex items-center bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>
           <Link to="/" className="flex items-center gap-2 min-w-0 bg-white/95 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-center">
-            <img src={makiwaLogo.url} alt="Makiwa" className={cn("object-contain", collapsed ? "h-7 w-7" : "h-9 w-auto")} />
+            <img src={logo} alt="Makiwa" className={cn("object-contain", collapsed ? "h-7 w-7" : "h-9 w-auto")} />
           </Link>
         </div>
 
@@ -169,7 +169,7 @@ export const DashboardLayout = () => {
           </div>
 
           <div className="flex-1 md:hidden font-serif text-lg font-semibold flex items-center">
-            <img src={makiwaLogo.url} alt="Makiwa" className="h-7 w-auto object-contain" />
+            <img src={logo} alt="Makiwa" className="h-7 w-auto object-contain" />
           </div>
 
           <div className="flex items-center gap-1.5 ml-auto">
