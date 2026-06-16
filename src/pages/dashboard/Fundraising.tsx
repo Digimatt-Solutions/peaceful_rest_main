@@ -86,8 +86,8 @@ const Fundraising = () => {
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{f.description}</p>
                     <div className="mt-5">
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="font-semibold">${Number(f.raised_amount).toLocaleString()}</span>
-                        <span className="text-muted-foreground">of ${Number(f.goal_amount).toLocaleString()}</span>
+                        <span className="font-semibold">KSh {Number(f.raised_amount).toLocaleString()}</span>
+                        <span className="text-muted-foreground">of KSh {Number(f.goal_amount).toLocaleString()}</span>
                       </div>
                       <Progress value={pct} className="h-2" />
                     </div>
