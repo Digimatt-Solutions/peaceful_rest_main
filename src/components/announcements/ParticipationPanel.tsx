@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Flame, Heart, HandHeart, Calendar, Loader2 } from "lucide-react";
+import { Flame, Heart, HeartHandshake, Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,7 +23,7 @@ interface Participation {
 const actionMeta: Record<ActionType, { icon: any; label: string; verb: string; color: string }> = {
   candle: { icon: Flame, label: "Light a candle", verb: "lit a candle", color: "text-brand-orange" },
   condolence: { icon: Heart, label: "Send condolence", verb: "sent condolences", color: "text-rose-500" },
-  donation: { icon: HandHeart, label: "Pledge support", verb: "pledged support", color: "text-emerald-500" },
+  donation: { icon: HeartHandshake, label: "Pledge support", verb: "pledged support", color: "text-emerald-500" },
   rsvp: { icon: Calendar, label: "RSVP", verb: "is attending", color: "text-sky-500" },
 };
 
@@ -171,7 +171,7 @@ export const ParticipationPanel = ({ announcementId, actions = ["candle", "condo
                     <div className="text-foreground/90">
                       <span className="font-medium">{p.display_name}</span>
                       <span className="text-muted-foreground"> {Meta.verb}</span>
-                      {p.amount && <span className="text-emerald-600 font-semibold"> · ${p.amount.toFixed(0)}</span>}
+                      {p.amount && <span className="text-emerald-600 font-semibold"> · KSh {p.amount.toFixed(0)}</span>}
                       <span className="text-muted-foreground"> · {formatDistanceToNow(new Date(p.created_at), { addSuffix: true })}</span>
                     </div>
                     {p.message && <div className="text-xs text-muted-foreground italic mt-0.5 line-clamp-2">"{p.message}"</div>}

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
-import { BookHeart, MessageCircle, HandHeart, Eye, CalendarHeart, Plus } from "lucide-react";
+import { BookHeart, MessageCircle, HeartHandshake, Eye, CalendarHeart, Plus } from "lucide-react";
 
 const Stat = ({ label, value, icon: Icon }: { label: string; value: string | number; icon: any }) => (
   <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-elegant transition-shadow">
@@ -20,13 +21,16 @@ const Stat = ({ label, value, icon: Icon }: { label: string; value: string | num
 
 const Overview = () => {
   const { user } = useAuth();
+  const { isSuperAdmin } = useUserRole();
   const [stats, setStats] = useState({ memorials: 0, condolences: 0, donations: 0, visitors: 0 });
 
   useEffect(() => {
     document.title = "Dashboard · Makiwa";
     if (!user) return;
     const load = async () => {
-      const { data: mems } = await supabase.from("memorials").select("id,visitor_count").eq("created_by", user.id);
+      let q = supabase.from("memorials").select("id,visitor_count");
+      if (!isSuperAdmin) q = q.eq("created_by", user.id);
+      const { data: mems } = await q;
       const memIds = (mems || []).map(m => m.id);
       const visitors = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
 
@@ -40,7 +44,8 @@ const Overview = () => {
       setStats({ memorials: mems?.length || 0, condolences: condCount, donations: donTotal, visitors });
     };
     load();
-  }, [user]);
+  }, [user, isSuperAdmin]);
+
 
   return (
     <>
@@ -57,7 +62,7 @@ const Overview = () => {
         <Stat label="Memorials" value={stats.memorials} icon={BookHeart} />
         <Stat label="Visitors" value={stats.visitors.toLocaleString()} icon={Eye} />
         <Stat label="Condolences" value={stats.condolences} icon={MessageCircle} />
-        <Stat label="Donations" value={`$${stats.donations.toLocaleString()}`} icon={HandHeart} />
+        <Stat label="Donations" value={`KSh ${stats.donations.toLocaleString()}`} icon={HeartHandshake} />
       </div>
 
       <div className="mt-10 grid lg:grid-cols-2 gap-5">

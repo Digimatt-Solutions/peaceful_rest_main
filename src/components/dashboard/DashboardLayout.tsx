@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HandHeart,
+  LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HeartHandshake,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
   UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe
 } from "lucide-react";
@@ -26,7 +26,7 @@ const allNav: NavItem[] = [
   { to: "/dashboard/obituary", label: "Obituary Management", icon: FileText, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/family", label: "Family Tree", icon: Users, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/condolences", label: "Condolences", icon: MessageCircle },
-  { to: "/dashboard/fundraising", label: "Fundraising", icon: HandHeart, roles: ["super_admin", "memorial_admin"] },
+  { to: "/dashboard/fundraising", label: "Fundraising", icon: HeartHandshake, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/moments", label: "Life Moments", icon: Camera },
   { to: "/dashboard/anniversary", label: "Anniversary", icon: CalendarHeart, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
@@ -78,13 +78,13 @@ export const DashboardLayout = () => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className={cn(
-        "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-brand-black text-slate-50 flex flex-col transition-all duration-300 h-screen border-r border-slate-600",
+        "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 flex flex-col transition-all duration-300 h-screen border-r border-slate-200 dark:border-slate-700",
         collapsed ? "lg:w-20" : "lg:w-72",
         "w-72",
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className={cn("h-16 px-4 border-b border-slate-600/70 flex items-center bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>
-          <Link to="/" className="flex items-left gap-2 min-w-0 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-left">
+        <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-white/60 dark:bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>
+          <Link to="/" className="flex items-left gap-2 min-w-0 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-left bg-white/50 dark:bg-slate-800/50">
             <img src={logo} alt="Makiwa" className={cn("object-contain", collapsed ? "h-7 w-7" : "h-9 w-auto")} />
           </Link>
         </div>
@@ -105,7 +105,7 @@ export const DashboardLayout = () => {
                   "py-2.5",
                   isActive
                     ? "bg-brand-orange text-white font-medium shadow-sm"
-                    : "text-slate-200/85 hover:text-white hover:bg-white/10"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -116,13 +116,13 @@ export const DashboardLayout = () => {
         </nav>
 
         {/* logout button */}
-        <div className="p-3 border-t border-slate-600/70">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-700">
           <button
             onClick={handleSignOut}
             title="Sign out"
             className={cn(
               "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors border",
-              "bg-red-500/15 border-red-400/40 text-red-200 hover:bg-red-500/30 hover:text-white hover:border-red-400"
+              "bg-red-500/10 border-red-400/40 text-red-600 dark:text-red-300 hover:bg-red-500/20 hover:border-red-500"
             )}
           >
             <LogOut className="h-4 w-4" />

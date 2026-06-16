@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FamilyTreeView } from "@/components/family/FamilyTreeView";
 import { MasonryGallery } from "@/components/gallery/MasonryGallery";
-import { Flame, MapPin, Calendar, Users, MessageCircle, Camera, Megaphone, Loader2, Heart, Share2 } from "lucide-react";
+import { Flame, MapPin, Calendar, Users, MessageCircle, Camera, Megaphone, Loader2, Heart, Share2, HeartHandshake } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { z } from "zod";
@@ -29,6 +30,10 @@ const MemorialDetail = () => {
   const [memories, setMemories] = useState<any[]>([]);
   const [condolences, setCondolences] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [fundraisers, setFundraisers] = useState<any[]>([]);
+  const [donateOpen, setDonateOpen] = useState<string | null>(null);
+  const [donateForm, setDonateForm] = useState({ donor_name: "", amount: "", message: "", is_anonymous: false });
+  const [donating, setDonating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
@@ -42,16 +47,17 @@ const MemorialDetail = () => {
       supabase.from("memories").select("*").eq("memorial_id", id).order("memory_date", { ascending: false }),
       supabase.from("condolences").select("*").eq("memorial_id", id).in("status", ["approved", "pinned"]).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("announcements").select("*").eq("memorial_id", id).order("created_at", { ascending: false }),
-    ]).then(([m, f, mm, c, a]) => {
+      supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).order("created_at", { ascending: false }),
+    ]).then(([m, f, mm, c, a, fr]) => {
       setMemorial(m.data);
       setFamily(f.data || []);
       setMemories(mm.data || []);
       setCondolences(c.data || []);
       setAnnouncements(a.data || []);
+      setFundraisers(fr.data || []);
       setLoading(false);
       if (m.data) {
         document.title = `${m.data.full_name} · Makiwa`;
-        // Increment visitor count (best-effort)
         supabase.from("memorials").update({ visitor_count: (m.data.visitor_count || 0) + 1 }).eq("id", id).then(() => {});
       }
     });
@@ -79,6 +85,29 @@ const MemorialDetail = () => {
     setCondolences([data, ...condolences]);
     (e.target as HTMLFormElement).reset();
     toast.success("Your message was shared. Thank you.");
+  };
+
+  const donate = async (fundraiserId: string) => {
+    const amt = Number(donateForm.amount);
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    setDonating(true);
+    const { error } = await supabase.from("donations").insert({
+      fundraiser_id: fundraiserId,
+      donor_name: donateForm.is_anonymous ? null : (donateForm.donor_name || null),
+      amount: amt,
+      message: donateForm.message || null,
+      is_anonymous: donateForm.is_anonymous,
+    });
+    if (!error) {
+      const fr = fundraisers.find(f => f.id === fundraiserId);
+      const newRaised = Number(fr.raised_amount) + amt;
+      await supabase.from("fundraisers").update({ raised_amount: newRaised }).eq("id", fundraiserId);
+      setFundraisers(fs => fs.map(f => f.id === fundraiserId ? { ...f, raised_amount: newRaised } : f));
+      setDonateForm({ donor_name: "", amount: "", message: "", is_anonymous: false });
+      setDonateOpen(null);
+      toast.success("Thank you for your contribution");
+    } else toast.error(error.message);
+    setDonating(false);
   };
 
   const share = async () => {
@@ -306,6 +335,58 @@ const MemorialDetail = () => {
               </div>
             </section>
           )}
+
+          {/* Fundraising */}
+          {fundraisers.length > 0 && (
+            <section id="contribute">
+              <SectionTitle icon={HeartHandshake} eyebrow="Contribute" title="Support the family" />
+              <div className="mt-8 grid gap-5">
+                {fundraisers.map(f => {
+                  const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;
+                  const open = donateOpen === f.id;
+                  return (
+                    <div key={f.id} className="rounded-2xl border border-border bg-card p-6">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs uppercase tracking-widest text-brand-orange font-semibold">{f.category?.replace(/_/g, " ")}</span>
+                          <h4 className="mt-1 font-serif text-2xl">{f.title}</h4>
+                          {f.description && <p className="mt-2 text-foreground/80 leading-relaxed">{f.description}</p>}
+                        </div>
+                        <Button onClick={() => setDonateOpen(open ? null : f.id)} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-11 px-5">
+                          <HeartHandshake className="h-4 w-4 mr-2" /> Contribute
+                        </Button>
+                      </div>
+                      <div className="mt-5">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="font-semibold">KSh {Number(f.raised_amount).toLocaleString()} raised</span>
+                          <span className="text-muted-foreground">of KSh {Number(f.goal_amount).toLocaleString()}</span>
+                        </div>
+                        <Progress value={pct} className="h-2" />
+                      </div>
+                      {open && (
+                        <div className="mt-6 grid sm:grid-cols-2 gap-3 pt-5 border-t border-border">
+                          <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} className="rounded-xl" /></div>
+                          <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
+                          <div className="space-y-2 sm:col-span-2"><Label>Message <span className="text-muted-foreground font-normal">(optional)</span></Label><Textarea rows={2} value={donateForm.message} onChange={(e) => setDonateForm({ ...donateForm, message: e.target.value })} className="rounded-xl" /></div>
+                          <label className="sm:col-span-2 inline-flex items-center gap-2 text-sm">
+                            <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
+                            Contribute anonymously
+                          </label>
+                          <div className="sm:col-span-2 flex gap-2">
+                            <Button onClick={() => donate(f.id)} disabled={donating} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
+                              {donating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit contribution"}
+                            </Button>
+                            <Button variant="outline" onClick={() => setDonateOpen(null)} className="rounded-full">Cancel</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
 
           {/* Condolences */}
           <section id="condolence">
