@@ -87,6 +87,29 @@ const MemorialDetail = () => {
     toast.success("Your message was shared. Thank you.");
   };
 
+  const donate = async (fundraiserId: string) => {
+    const amt = Number(donateForm.amount);
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    setDonating(true);
+    const { error } = await supabase.from("donations").insert({
+      fundraiser_id: fundraiserId,
+      donor_name: donateForm.is_anonymous ? null : (donateForm.donor_name || null),
+      amount: amt,
+      message: donateForm.message || null,
+      is_anonymous: donateForm.is_anonymous,
+    });
+    if (!error) {
+      const fr = fundraisers.find(f => f.id === fundraiserId);
+      const newRaised = Number(fr.raised_amount) + amt;
+      await supabase.from("fundraisers").update({ raised_amount: newRaised }).eq("id", fundraiserId);
+      setFundraisers(fs => fs.map(f => f.id === fundraiserId ? { ...f, raised_amount: newRaised } : f));
+      setDonateForm({ donor_name: "", amount: "", message: "", is_anonymous: false });
+      setDonateOpen(null);
+      toast.success("Thank you for your contribution");
+    } else toast.error(error.message);
+    setDonating(false);
+  };
+
   const share = async () => {
     const url = window.location.href;
     if (navigator.share) {
