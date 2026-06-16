@@ -8,10 +8,10 @@ import logo from "@/assets/makiwa-logo.png";
 
 const links = [
   { label: "Home", href: "#home" },
+  { label: "About", href: "#about" },
   { label: "Memorials", href: "#memorials" },
   { label: "Services", href: "#services" },
   { label: "Community", href: "#community" },
-  { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
 
