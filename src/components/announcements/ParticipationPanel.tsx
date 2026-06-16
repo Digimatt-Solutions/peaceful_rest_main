@@ -171,7 +171,7 @@ export const ParticipationPanel = ({ announcementId, actions = ["candle", "condo
                     <div className="text-foreground/90">
                       <span className="font-medium">{p.display_name}</span>
                       <span className="text-muted-foreground"> {Meta.verb}</span>
-                      {p.amount && <span className="text-emerald-600 font-semibold"> · ${p.amount.toFixed(0)}</span>}
+                      {p.amount && <span className="text-emerald-600 font-semibold"> · KSh {p.amount.toFixed(0)}</span>}
                       <span className="text-muted-foreground"> · {formatDistanceToNow(new Date(p.created_at), { addSuffix: true })}</span>
                     </div>
                     {p.message && <div className="text-xs text-muted-foreground italic mt-0.5 line-clamp-2">"{p.message}"</div>}
