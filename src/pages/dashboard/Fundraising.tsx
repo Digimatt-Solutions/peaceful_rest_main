@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { HandHeart, Plus } from "lucide-react";
+import { HeartHandshake, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -50,7 +50,7 @@ const Fundraising = () => {
   return (
     <>
       <PageHeader title="Fundraising" subtitle="Receive contributions toward funeral expenses, family support, or education." />
-      {memorials.length === 0 ? <EmptyState icon={HandHeart} title="Create a memorial first" /> : (
+      {memorials.length === 0 ? <EmptyState icon={HeartHandshake} title="Create a memorial first" /> : (
         <>
           <div className="mb-6 max-w-sm">
             <Select value={memorialId} onValueChange={setMemorialId}>
@@ -70,12 +70,12 @@ const Fundraising = () => {
                   <SelectContent>{CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2"><Label>Goal amount ($)</Label><Input type="number" value={form.goal_amount} onChange={(e) => setForm({...form, goal_amount: Number(e.target.value)})} /></div>
+              <div className="space-y-2"><Label>Goal amount (KSh)</Label><Input type="number" value={form.goal_amount} onChange={(e) => setForm({...form, goal_amount: Number(e.target.value)})} /></div>
             </div>
             <Button onClick={create} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Plus className="h-4 w-4 mr-1" /> Create fundraiser</Button>
           </div>
 
-          {funds.length === 0 ? <EmptyState icon={HandHeart} title="No fundraisers yet" /> : (
+          {funds.length === 0 ? <EmptyState icon={HeartHandshake} title="No fundraisers yet" /> : (
             <div className="grid md:grid-cols-2 gap-4">
               {funds.map(f => {
                 const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;

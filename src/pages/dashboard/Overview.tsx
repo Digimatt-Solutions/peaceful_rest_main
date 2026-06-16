@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
-import { BookHeart, MessageCircle, HandHeart, Eye, CalendarHeart, Plus } from "lucide-react";
+import { BookHeart, MessageCircle, HeartHandshake, Eye, CalendarHeart, Plus } from "lucide-react";
 
 const Stat = ({ label, value, icon: Icon }: { label: string; value: string | number; icon: any }) => (
   <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-elegant transition-shadow">
@@ -57,7 +57,7 @@ const Overview = () => {
         <Stat label="Memorials" value={stats.memorials} icon={BookHeart} />
         <Stat label="Visitors" value={stats.visitors.toLocaleString()} icon={Eye} />
         <Stat label="Condolences" value={stats.condolences} icon={MessageCircle} />
-        <Stat label="Donations" value={`$${stats.donations.toLocaleString()}`} icon={HandHeart} />
+        <Stat label="Donations" value={`KSh ${stats.donations.toLocaleString()}`} icon={HeartHandshake} />
       </div>
 
       <div className="mt-10 grid lg:grid-cols-2 gap-5">

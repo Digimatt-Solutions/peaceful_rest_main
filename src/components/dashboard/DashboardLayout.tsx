@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HandHeart,
+  LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HeartHandshake,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
   UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe
 } from "lucide-react";
@@ -26,7 +26,7 @@ const allNav: NavItem[] = [
   { to: "/dashboard/obituary", label: "Obituary Management", icon: FileText, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/family", label: "Family Tree", icon: Users, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/condolences", label: "Condolences", icon: MessageCircle },
-  { to: "/dashboard/fundraising", label: "Fundraising", icon: HandHeart, roles: ["super_admin", "memorial_admin"] },
+  { to: "/dashboard/fundraising", label: "Fundraising", icon: HeartHandshake, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/moments", label: "Life Moments", icon: Camera },
   { to: "/dashboard/anniversary", label: "Anniversary", icon: CalendarHeart, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
