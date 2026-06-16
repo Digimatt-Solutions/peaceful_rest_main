@@ -21,13 +21,16 @@ const Stat = ({ label, value, icon: Icon }: { label: string; value: string | num
 
 const Overview = () => {
   const { user } = useAuth();
+  const { isSuperAdmin } = useUserRole();
   const [stats, setStats] = useState({ memorials: 0, condolences: 0, donations: 0, visitors: 0 });
 
   useEffect(() => {
     document.title = "Dashboard · Makiwa";
     if (!user) return;
     const load = async () => {
-      const { data: mems } = await supabase.from("memorials").select("id,visitor_count").eq("created_by", user.id);
+      let q = supabase.from("memorials").select("id,visitor_count");
+      if (!isSuperAdmin) q = q.eq("created_by", user.id);
+      const { data: mems } = await q;
       const memIds = (mems || []).map(m => m.id);
       const visitors = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
 
@@ -41,7 +44,8 @@ const Overview = () => {
       setStats({ memorials: mems?.length || 0, condolences: condCount, donations: donTotal, visitors });
     };
     load();
-  }, [user]);
+  }, [user, isSuperAdmin]);
+
 
   return (
     <>
