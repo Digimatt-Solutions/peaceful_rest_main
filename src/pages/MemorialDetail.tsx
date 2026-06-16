@@ -47,16 +47,17 @@ const MemorialDetail = () => {
       supabase.from("memories").select("*").eq("memorial_id", id).order("memory_date", { ascending: false }),
       supabase.from("condolences").select("*").eq("memorial_id", id).in("status", ["approved", "pinned"]).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("announcements").select("*").eq("memorial_id", id).order("created_at", { ascending: false }),
-    ]).then(([m, f, mm, c, a]) => {
+      supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).order("created_at", { ascending: false }),
+    ]).then(([m, f, mm, c, a, fr]) => {
       setMemorial(m.data);
       setFamily(f.data || []);
       setMemories(mm.data || []);
       setCondolences(c.data || []);
       setAnnouncements(a.data || []);
+      setFundraisers(fr.data || []);
       setLoading(false);
       if (m.data) {
         document.title = `${m.data.full_name} · Makiwa`;
-        // Increment visitor count (best-effort)
         supabase.from("memorials").update({ visitor_count: (m.data.visitor_count || 0) + 1 }).eq("id", id).then(() => {});
       }
     });
