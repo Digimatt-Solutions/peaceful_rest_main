@@ -140,13 +140,75 @@ export type Database = {
           },
         ]
       }
+      community_post_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           body: string
           category: string
           created_at: string
           id: string
-          title: string
+          image_url: string | null
+          title: string | null
           user_id: string
         }
         Insert: {
@@ -154,7 +216,8 @@ export type Database = {
           category?: string
           created_at?: string
           id?: string
-          title: string
+          image_url?: string | null
+          title?: string | null
           user_id: string
         }
         Update: {
@@ -162,7 +225,8 @@ export type Database = {
           category?: string
           created_at?: string
           id?: string
-          title?: string
+          image_url?: string | null
+          title?: string | null
           user_id?: string
         }
         Relationships: []
@@ -452,6 +516,7 @@ export type Database = {
           memorial_id: string
           memory_date: string | null
           photo_url: string | null
+          photos: string[]
           title: string | null
           user_id: string | null
         }
@@ -462,6 +527,7 @@ export type Database = {
           memorial_id: string
           memory_date?: string | null
           photo_url?: string | null
+          photos?: string[]
           title?: string | null
           user_id?: string | null
         }
@@ -472,6 +538,7 @@ export type Database = {
           memorial_id?: string
           memory_date?: string | null
           photo_url?: string | null
+          photos?: string[]
           title?: string | null
           user_id?: string | null
         }
