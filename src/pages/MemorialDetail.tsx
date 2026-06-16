@@ -336,6 +336,58 @@ const MemorialDetail = () => {
             </section>
           )}
 
+          {/* Fundraising */}
+          {fundraisers.length > 0 && (
+            <section id="contribute">
+              <SectionTitle icon={HeartHandshake} eyebrow="Contribute" title="Support the family" />
+              <div className="mt-8 grid gap-5">
+                {fundraisers.map(f => {
+                  const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;
+                  const open = donateOpen === f.id;
+                  return (
+                    <div key={f.id} className="rounded-2xl border border-border bg-card p-6">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs uppercase tracking-widest text-brand-orange font-semibold">{f.category?.replace(/_/g, " ")}</span>
+                          <h4 className="mt-1 font-serif text-2xl">{f.title}</h4>
+                          {f.description && <p className="mt-2 text-foreground/80 leading-relaxed">{f.description}</p>}
+                        </div>
+                        <Button onClick={() => setDonateOpen(open ? null : f.id)} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-11 px-5">
+                          <HeartHandshake className="h-4 w-4 mr-2" /> Contribute
+                        </Button>
+                      </div>
+                      <div className="mt-5">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="font-semibold">KSh {Number(f.raised_amount).toLocaleString()} raised</span>
+                          <span className="text-muted-foreground">of KSh {Number(f.goal_amount).toLocaleString()}</span>
+                        </div>
+                        <Progress value={pct} className="h-2" />
+                      </div>
+                      {open && (
+                        <div className="mt-6 grid sm:grid-cols-2 gap-3 pt-5 border-t border-border">
+                          <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} className="rounded-xl" /></div>
+                          <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
+                          <div className="space-y-2 sm:col-span-2"><Label>Message <span className="text-muted-foreground font-normal">(optional)</span></Label><Textarea rows={2} value={donateForm.message} onChange={(e) => setDonateForm({ ...donateForm, message: e.target.value })} className="rounded-xl" /></div>
+                          <label className="sm:col-span-2 inline-flex items-center gap-2 text-sm">
+                            <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
+                            Contribute anonymously
+                          </label>
+                          <div className="sm:col-span-2 flex gap-2">
+                            <Button onClick={() => donate(f.id)} disabled={donating} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
+                              {donating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit contribution"}
+                            </Button>
+                            <Button variant="outline" onClick={() => setDonateOpen(null)} className="rounded-full">Cancel</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+
           {/* Condolences */}
           <section id="condolence">
             <SectionTitle icon={MessageCircle} eyebrow="Condolences" title="Messages from those who loved them" />
