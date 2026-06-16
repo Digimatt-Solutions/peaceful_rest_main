@@ -105,7 +105,7 @@ export const DashboardLayout = () => {
                   "py-2.5",
                   isActive
                     ? "bg-brand-orange text-white font-medium shadow-sm"
-                    : "text-slate-200/85 hover:text-white hover:bg-white/10"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -116,13 +116,13 @@ export const DashboardLayout = () => {
         </nav>
 
         {/* logout button */}
-        <div className="p-3 border-t border-slate-600/70">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-700">
           <button
             onClick={handleSignOut}
             title="Sign out"
             className={cn(
               "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors border",
-              "bg-red-500/15 border-red-400/40 text-red-200 hover:bg-red-500/30 hover:text-white hover:border-red-400"
+              "bg-red-500/10 border-red-400/40 text-red-600 dark:text-red-300 hover:bg-red-500/20 hover:border-red-500"
             )}
           >
             <LogOut className="h-4 w-4" />
