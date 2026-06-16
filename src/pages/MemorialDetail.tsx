@@ -30,6 +30,10 @@ const MemorialDetail = () => {
   const [memories, setMemories] = useState<any[]>([]);
   const [condolences, setCondolences] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [fundraisers, setFundraisers] = useState<any[]>([]);
+  const [donateOpen, setDonateOpen] = useState<string | null>(null);
+  const [donateForm, setDonateForm] = useState({ donor_name: "", amount: "", message: "", is_anonymous: false });
+  const [donating, setDonating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
