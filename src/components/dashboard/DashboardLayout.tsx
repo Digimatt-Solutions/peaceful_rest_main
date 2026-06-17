@@ -33,7 +33,7 @@ const allNav: NavItem[] = [
   { to: "/dashboard/events", label: "Events", icon: CalendarDays },
   { to: "/dashboard/community", label: "Community", icon: MessagesSquare },
   { to: "/dashboard/oversight", label: "Memorial Oversight", icon: Globe, roles: ["super_admin"] },
-  { to: "/dashboard/access", label: "User Access Control", icon: ShieldCheck, roles: ["super_admin"] },
+  { to: "/dashboard/access", label: "User Management", icon: ShieldCheck, roles: ["super_admin"] },
   { to: "/dashboard/profile", label: "Profile", icon: UserCircle },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

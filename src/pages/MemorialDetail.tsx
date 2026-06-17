@@ -142,6 +142,7 @@ const MemorialDetail = () => {
   }
 
   const cover = memorial.cover_photo_url || memorial.profile_photo_url;
+  // Hero uses cover image; listings/family tree use profile_photo_url
   const upcomingEvents = announcements.filter(a => a.event_date && new Date(a.event_date) >= new Date());
 
   return (
