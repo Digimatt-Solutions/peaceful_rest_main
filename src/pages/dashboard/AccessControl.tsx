@@ -85,18 +85,21 @@ const AccessControl = () => {
     toast.success("Role updated");
   };
 
-  const deleteUserRoles = async (userId: string) => {
-    if (!confirm("Remove all roles for this user? They will become a basic mourner.")) return;
-    await supabase.from("user_roles").delete().eq("user_id", userId);
-    await supabase.from("user_roles").insert({ user_id: userId, role: "mourner" as any });
-    setUserRoles(r => ({ ...r, [userId]: "mourner" }));
-    toast.success("Reset to Mourner");
+  const deleteUser = async (userId: string) => {
+    if (userRoles[userId] === "super_admin") {
+      return toast.error("Super admin accounts cannot be deleted");
+    }
+    if (!confirm("Permanently delete this user and all their data? This cannot be undone.")) return;
+    const { data, error } = await supabase.functions.invoke("delete-user", { body: { userId } });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || error?.message || "Failed to delete");
+    setAllUsers(us => us.filter(u => u.id !== userId));
+    toast.success("User permanently deleted");
   };
 
   if (!isSuperAdmin) {
     return (
       <>
-        <PageHeader title="User Access Control" subtitle="Promote trusted users to additional admins for a memorial." />
+        <PageHeader title="User Management" subtitle="Promote trusted users to additional admins for a memorial." />
         {memorials.length === 0 ? <EmptyState icon={ShieldCheck} title="Create a memorial first" /> : (
           <MemorialAdmins {...{ memorialId, setMemorialId, memorials, admins, email, setEmail, promote, revoke }} />
         )}
@@ -106,7 +109,7 @@ const AccessControl = () => {
 
   return (
     <>
-      <PageHeader title="User Access Control" subtitle="Manage user roles and memorial-level admins across the platform." />
+      <PageHeader title="User Management" subtitle="Manage every user account, change roles, and permanently remove users." />
       <Tabs defaultValue="users">
         <TabsList className="mb-6">
           <TabsTrigger value="users"><Users className="h-4 w-4 mr-1.5" /> All Users</TabsTrigger>
@@ -119,27 +122,30 @@ const AccessControl = () => {
               {allUsers.length} registered user{allUsers.length !== 1 ? "s" : ""}
             </div>
             <div className="divide-y divide-border">
-              {allUsers.map(u => (
+              {allUsers.map(u => {
+                const r = userRoles[u.id] || "mourner";
+                const isSuper = r === "super_admin";
+                return (
                 <div key={u.id} className="p-4 flex items-center gap-4">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={u.avatar_url} />
                     <AvatarFallback className="bg-brand-orange text-white">{(u.full_name || u.email || "?").charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{u.full_name || "Unnamed"}</p>
+                    <p className="font-medium truncate">{u.full_name || "Unnamed"} {isSuper && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-brand-orange/15 text-brand-orange uppercase tracking-wider">Super Admin</span>}</p>
                     <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                   </div>
-                  <Select value={userRoles[u.id] || "mourner"} onValueChange={(v) => changeRole(u.id, v)}>
+                  <Select value={r} onValueChange={(v) => changeRole(u.id, v)} disabled={isSuper}>
                     <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {ROLE_OPTIONS.map(r => <SelectItem key={r.v} value={r.v}>{r.l}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  <Button size="sm" variant="ghost" onClick={() => deleteUserRoles(u.id)} title="Reset roles">
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                  <Button size="sm" variant="ghost" onClick={() => deleteUser(u.id)} disabled={isSuper} title={isSuper ? "Super admin cannot be deleted" : "Delete permanently"}>
+                    <Trash2 className={`h-4 w-4 ${isSuper ? "text-muted-foreground/40" : "text-destructive"}`} />
                   </Button>
                 </div>
-              ))}
+              );})}
               {allUsers.length === 0 && <div className="p-12 text-center text-muted-foreground text-sm">No users yet.</div>}
             </div>
           </div>
