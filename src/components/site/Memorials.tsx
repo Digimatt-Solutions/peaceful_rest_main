@@ -87,7 +87,7 @@ export const Memorials = () => {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
             {memorials.map((m, i) => {
-              const photo = m.cover_photo_url || m.profile_photo_url;
+              const photo = m.profile_photo_url || m.cover_photo_url;
               return (
                 <article
                   key={m.id}
