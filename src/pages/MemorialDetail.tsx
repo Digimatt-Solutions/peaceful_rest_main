@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FamilyTreeView } from "@/components/family/FamilyTreeView";
 import { MasonryGallery } from "@/components/gallery/MasonryGallery";
+import { HorizontalScrollGallery } from "@/components/gallery/HorizontalScrollGallery";
 import { Flame, MapPin, Calendar, Users, MessageCircle, Camera, Megaphone, Loader2, Heart, Share2, HeartHandshake } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -278,16 +279,38 @@ const MemorialDetail = () => {
           {memories.length > 0 && (
             <section>
               <SectionTitle icon={Camera} eyebrow="Life Moments" title="A gallery of cherished memories" />
-              <div className="mt-8">
-                <MasonryGallery
-                  items={memories.filter(m => m.photo_url).map(m => ({
-                    id: m.id,
-                    src: m.photo_url,
-                    title: m.title,
-                    description: m.description,
-                    date: m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined,
-                  }))}
-                />
+              <div className="mt-8 space-y-10">
+                {memories.map((m) => {
+                  const photos: string[] = [
+                    ...(Array.isArray(m.photos) ? m.photos.filter(Boolean) : []),
+                    ...(m.photo_url && !(Array.isArray(m.photos) && m.photos.includes(m.photo_url)) ? [m.photo_url] : []),
+                  ];
+                  if (photos.length === 0) return null;
+                  const dateStr = m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined;
+                  return (
+                    <div key={m.id}>
+                      <div className="mb-4 flex items-baseline justify-between gap-4 flex-wrap">
+                        <div>
+                          {m.title && <h4 className="font-serif text-2xl">{m.title}</h4>}
+                          {dateStr && <p className="text-xs uppercase tracking-widest text-brand-orange mt-1">{dateStr}</p>}
+                        </div>
+                        {photos.length > 1 && (
+                          <span className="text-xs text-muted-foreground">{photos.length} photos</span>
+                        )}
+                      </div>
+                      {m.description && <p className="text-foreground/80 mb-5 leading-relaxed max-w-3xl">{m.description}</p>}
+                      <HorizontalScrollGallery
+                        items={photos.map((src, i) => ({
+                          id: `${m.id}-${i}`,
+                          src,
+                          title: m.title,
+                          description: m.description,
+                          date: dateStr,
+                        }))}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
