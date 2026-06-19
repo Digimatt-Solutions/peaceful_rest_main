@@ -92,7 +92,15 @@ export const DashboardLayout = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1">
-          {visibleNav.map((item) => {
+          {!role ? (
+            // skeleton while role resolves - prevents flash of wrong nav
+            Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg")}>
+                <div className="h-4 w-4 rounded bg-slate-300/60 dark:bg-slate-700/60 animate-pulse" />
+                {!collapsed && <div className="h-3 flex-1 rounded bg-slate-300/60 dark:bg-slate-700/60 animate-pulse" />}
+              </div>
+            ))
+          ) : visibleNav.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
