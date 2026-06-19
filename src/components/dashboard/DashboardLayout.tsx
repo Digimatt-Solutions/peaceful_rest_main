@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HeartHandshake,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
-  UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe
+  UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe, Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ const allNav: NavItem[] = [
   { to: "/dashboard/community", label: "Community", icon: MessagesSquare },
   { to: "/dashboard/oversight", label: "Memorial Oversight", icon: Globe, roles: ["super_admin"] },
   { to: "/dashboard/access", label: "User Management", icon: ShieldCheck, roles: ["super_admin"] },
+  { to: "/dashboard/activity", label: "Activity Logs", icon: Activity, roles: ["super_admin"] },
   { to: "/dashboard/profile", label: "Profile", icon: UserCircle },
   { to: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -49,7 +50,7 @@ const roleLabel: Record<string, string> = {
 export const DashboardLayout = () => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { role } = useUserRole();
+  const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string; email?: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -72,7 +73,8 @@ export const DashboardLayout = () => {
   const initials = (profile?.full_name || user?.email || "U").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "User";
 
-  const visibleNav = allNav.filter(item => !item.roles || (role && item.roles.includes(role)));
+  // Only filter once role is known — prevents the flash of wrong-role nav items.
+  const visibleNav = role ? allNav.filter(item => !item.roles || item.roles.includes(role)) : [];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -90,7 +92,15 @@ export const DashboardLayout = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1">
-          {visibleNav.map((item) => {
+          {!role ? (
+            // skeleton while role resolves - prevents flash of wrong nav
+            Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg")}>
+                <div className="h-4 w-4 rounded bg-slate-300/60 dark:bg-slate-700/60 animate-pulse" />
+                {!collapsed && <div className="h-3 flex-1 rounded bg-slate-300/60 dark:bg-slate-700/60 animate-pulse" />}
+              </div>
+            ))
+          ) : visibleNav.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink

@@ -24,6 +24,7 @@ import AnnouncementsPage from "./pages/dashboard/AnnouncementsPage";
 import Community from "./pages/dashboard/Community";
 import AccessControl from "./pages/dashboard/AccessControl";
 import Oversight from "./pages/dashboard/Oversight";
+import ActivityLogs from "./pages/dashboard/ActivityLogs";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="community" element={<Community />} />
               <Route path="access" element={<AccessControl />} />
               <Route path="oversight" element={<Oversight />} />
+              <Route path="activity" element={<ActivityLogs />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
             </Route>
