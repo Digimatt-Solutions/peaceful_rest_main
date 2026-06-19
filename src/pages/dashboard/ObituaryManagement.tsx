@@ -67,6 +67,10 @@ const ObituaryManagement = () => {
       : await supabase.from("memorials").insert(payload).select().maybeSingle();
     setLoading(false);
     if (error) { toast.error(error.message); return; }
+    logActivity(id ? "memorial_update" : "memorial_create", {
+      entity_type: "memorial", entity_id: (data?.id || id) as string,
+      description: `${id ? "Updated" : "Created"} memorial for ${form.full_name}`,
+    });
     toast.success(id ? "Memorial updated" : "Memorial created");
     if (!id && data) navigate(`/dashboard/obituary?id=${data.id}`);
   };
@@ -75,6 +79,7 @@ const ObituaryManagement = () => {
     if (!id || !confirm("Delete this memorial permanently?")) return;
     const { error } = await supabase.from("memorials").delete().eq("id", id);
     if (error) return toast.error(error.message);
+    logActivity("delete", { entity_type: "memorial", entity_id: id, description: `Deleted memorial ${form.full_name}` });
     toast.success("Memorial deleted");
     navigate("/dashboard/memorials");
   };
