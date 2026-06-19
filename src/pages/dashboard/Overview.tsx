@@ -81,7 +81,7 @@ const Overview = () => {
       const visitors = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
 
       // condolences
-      let condQ = supabase.from("condolences").select("id,memorial_id,created_at,message,author_name");
+      let condQ = supabase.from("condolences").select("id,memorial_id,created_at,message,name");
       if (memIds.length && !isMourner) condQ = condQ.in("memorial_id", memIds);
       if (isMourner) condQ = condQ.eq("user_id", user.id);
       const { data: conds } = await condQ;
@@ -166,7 +166,7 @@ const Overview = () => {
 
       // recent condolences
       if (memIds.length || isMourner) {
-        let rq = supabase.from("condolences").select("id,message,author_name,created_at,memorial_id").order("created_at", { ascending: false }).limit(5);
+        let rq = supabase.from("condolences").select("id,message,name,created_at,memorial_id").order("created_at", { ascending: false }).limit(5);
         if (!isMourner && memIds.length) rq = rq.in("memorial_id", memIds);
         if (isMourner) rq = rq.eq("user_id", user.id);
         const { data: r } = await rq;
@@ -317,7 +317,7 @@ const Overview = () => {
                 <div key={r.id} className="rounded-xl border border-border p-4 bg-background/50">
                   <p className="text-sm line-clamp-3">"{r.message}"</p>
                   <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>— {r.author_name || "Anonymous"}</span>
+                    <span>— {r.name || "Anonymous"}</span>
                     <span>{format(new Date(r.created_at), "MMM d")}</span>
                   </div>
                 </div>
