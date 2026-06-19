@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activity";
 
 const empty = {
   full_name: "", gender: "", date_of_birth: "", date_of_death: "",
