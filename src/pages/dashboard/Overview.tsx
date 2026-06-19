@@ -81,17 +81,23 @@ const Overview = () => {
       const visitors = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
 
       // condolences
-      let condQ = supabase.from("condolences").select("id,memorial_id,created_at");
+      let condQ = supabase.from("condolences").select("id,memorial_id,created_at,message,author_name");
       if (memIds.length && !isMourner) condQ = condQ.in("memorial_id", memIds);
       if (isMourner) condQ = condQ.eq("user_id", user.id);
       const { data: conds } = await condQ;
 
-      // donations
-      let donQ = supabase.from("donations").select("amount,fundraiser_id,created_at,memorial_id");
-      if (memIds.length && !isMourner) donQ = donQ.in("memorial_id", memIds);
-      if (isMourner) donQ = donQ.eq("donor_user_id", user.id);
+      // donations (joined via fundraisers -> memorial_id)
+      let fundIdsForScope: string[] = [];
+      if (memIds.length) {
+        const { data: fs } = await supabase.from("fundraisers").select("id").in("memorial_id", memIds);
+        fundIdsForScope = (fs || []).map(f => f.id);
+      }
+      let donQ = supabase.from("donations").select("amount,fundraiser_id,created_at,user_id");
+      if (!isMourner && fundIdsForScope.length) donQ = donQ.in("fundraiser_id", fundIdsForScope);
+      if (!isMourner && !fundIdsForScope.length) donQ = donQ.eq("fundraiser_id", "00000000-0000-0000-0000-000000000000");
+      if (isMourner) donQ = donQ.eq("user_id", user.id);
       const { data: dons } = await donQ;
-      const donTotal = (dons || []).reduce((s, d) => s + Number(d.amount || 0), 0);
+      const donTotal = (dons || []).reduce((s: number, d: any) => s + Number(d.amount || 0), 0);
 
       // role-extra fetches
       let users = 0;
@@ -137,9 +143,9 @@ const Overview = () => {
         const c = (conds || []).filter(x => {
           const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
         }).length;
-        const dn = (dons || []).filter(x => {
+        const dn = (dons || []).filter((x: any) => {
           const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
-        }).reduce((s, x) => s + Number(x.amount || 0), 0);
+        }).reduce((s: number, x: any) => s + Number(x.amount || 0), 0);
         const v = (mems || []).filter(x => {
           const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
         }).length;
