@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShieldCheck, UserPlus, X, Users, Trash2 } from "lucide-react";
+import { logActivity } from "@/lib/activity";
 import { toast } from "sonner";
 
 const ROLE_OPTIONS = [
@@ -77,11 +78,17 @@ const AccessControl = () => {
   };
 
   const changeRole = async (userId: string, newRole: string) => {
-    // Delete existing roles then insert
+    const prev = userRoles[userId] || "mourner";
     await supabase.from("user_roles").delete().eq("user_id", userId);
     const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole as any });
     if (error) return toast.error(error.message);
     setUserRoles(r => ({ ...r, [userId]: newRole }));
+    const target = allUsers.find(u => u.id === userId);
+    logActivity("role_change", {
+      entity_type: "user", entity_id: userId,
+      description: `Changed role of ${target?.email || userId} from ${prev} to ${newRole}`,
+      metadata: { previous: prev, next: newRole },
+    });
     toast.success("Role updated");
   };
 
@@ -90,9 +97,14 @@ const AccessControl = () => {
       return toast.error("Super admin accounts cannot be deleted");
     }
     if (!confirm("Permanently delete this user and all their data? This cannot be undone.")) return;
+    const target = allUsers.find(u => u.id === userId);
     const { data, error } = await supabase.functions.invoke("delete-user", { body: { userId } });
     if (error || (data as any)?.error) return toast.error((data as any)?.error || error?.message || "Failed to delete");
     setAllUsers(us => us.filter(u => u.id !== userId));
+    logActivity("user_delete", {
+      entity_type: "user", entity_id: userId,
+      description: `Permanently deleted user ${target?.email || userId}`,
+    });
     toast.success("User permanently deleted");
   };
 
