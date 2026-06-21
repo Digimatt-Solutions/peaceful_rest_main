@@ -116,6 +116,20 @@
   75% { opacity: 0.95; transform: scale(1.01) rotate(0.3deg); filter: drop-shadow(0 0 16px hsl(19 95% 62% / 0.8)); }
 }
 
+/* Quicksand-everywhere mode: applied to <body> on non-landing/detail routes. */
+body.font-quicksand-all .font-serif,
+body.font-quicksand-all h1,
+body.font-quicksand-all h2,
+body.font-quicksand-all h3,
+body.font-quicksand-all h4,
+body.font-quicksand-all h5,
+body.font-quicksand-all h6 {
+  font-family: 'Quicksand', system-ui, sans-serif !important;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
