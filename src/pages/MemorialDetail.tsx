@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
@@ -26,6 +27,7 @@ const condolenceSchema = z.object({
 
 const MemorialDetail = () => {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [memorial, setMemorial] = useState<any>(null);
   const [family, setFamily] = useState<any[]>([]);
   const [memories, setMemories] = useState<any[]>([]);
@@ -33,11 +35,12 @@ const MemorialDetail = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [fundraisers, setFundraisers] = useState<any[]>([]);
   const [donateOpen, setDonateOpen] = useState<string | null>(null);
-  const [donateForm, setDonateForm] = useState({ donor_name: "", amount: "", message: "", is_anonymous: false });
+  const [donateForm, setDonateForm] = useState({ donor_name: "", donor_email: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
+
 
   useEffect(() => {
     if (!id) return;
@@ -88,28 +91,58 @@ const MemorialDetail = () => {
     toast.success("Your message was shared. Thank you.");
   };
 
+  // Verify Stripe checkout return
+  useEffect(() => {
+    const status = searchParams.get("donation");
+    const sessionId = searchParams.get("session_id");
+    if (status === "success" && sessionId) {
+      (async () => {
+        const { data, error } = await supabase.functions.invoke("verify-donation", { body: { session_id: sessionId } });
+        if (!error && data?.status === "paid") {
+          toast.success(`Thank you for your contribution of KSh ${Number(data.amount).toLocaleString()}!`);
+        } else if (!error) {
+          toast.info("Payment is processing. It will appear shortly.");
+        }
+        // refresh fundraisers
+        if (id) {
+          const { data: fr } = await supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).order("created_at", { ascending: false });
+          setFundraisers(fr || []);
+        }
+        searchParams.delete("donation"); searchParams.delete("session_id");
+        setSearchParams(searchParams, { replace: true });
+      })();
+    } else if (status === "cancelled") {
+      toast.info("Contribution cancelled.");
+      searchParams.delete("donation");
+      setSearchParams(searchParams, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const donate = async (fundraiserId: string) => {
     const amt = Number(donateForm.amount);
     if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!donateForm.is_anonymous && !donateForm.donor_name.trim()) return toast.error("Please enter your name");
     setDonating(true);
-    const { error } = await supabase.from("donations").insert({
-      fundraiser_id: fundraiserId,
-      donor_name: donateForm.is_anonymous ? null : (donateForm.donor_name || null),
-      amount: amt,
-      message: donateForm.message || null,
-      is_anonymous: donateForm.is_anonymous,
+    const { data, error } = await supabase.functions.invoke("create-donation-checkout", {
+      body: {
+        fundraiser_id: fundraiserId,
+        amount: amt,
+        donor_name: donateForm.donor_name,
+        donor_email: donateForm.donor_email,
+        message: donateForm.message,
+        is_anonymous: donateForm.is_anonymous,
+      },
     });
-    if (!error) {
-      const fr = fundraisers.find(f => f.id === fundraiserId);
-      const newRaised = Number(fr.raised_amount) + amt;
-      await supabase.from("fundraisers").update({ raised_amount: newRaised }).eq("id", fundraiserId);
-      setFundraisers(fs => fs.map(f => f.id === fundraiserId ? { ...f, raised_amount: newRaised } : f));
-      setDonateForm({ donor_name: "", amount: "", message: "", is_anonymous: false });
-      setDonateOpen(null);
-      toast.success("Thank you for your contribution");
-    } else toast.error(error.message);
     setDonating(false);
+    if (error || !data?.url) {
+      toast.error(error?.message || "Could not start checkout. Please try again.");
+      return;
+    }
+    // Redirect to Stripe Checkout
+    window.location.href = data.url;
   };
+
 
   const share = async () => {
     const url = window.location.href;
