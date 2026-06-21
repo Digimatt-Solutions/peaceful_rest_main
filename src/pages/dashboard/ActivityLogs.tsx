@@ -28,11 +28,16 @@ const actionColor = (a: string) => {
   return "bg-slate-500/15 text-slate-600 border-slate-500/30";
 };
 
+const PAGE_SIZE = 25;
+
 const ActivityLogs = () => {
   const { isSuperAdmin } = useUserRole();
   const [logs, setLogs] = useState<Log[]>([]);
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => { setPage(1); }, [q]);
 
   useEffect(() => {
     document.title = "Activity Logs · Makiwa";
@@ -42,14 +47,14 @@ const ActivityLogs = () => {
         .from("activity_logs")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(500);
+        .limit(1000);
       if (!cancelled) { setLogs((data as Log[]) || []); setLoading(false); }
     };
     load();
     const channel = supabase
       .channel("activity_logs_realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_logs" }, (payload) => {
-        setLogs(prev => [payload.new as Log, ...prev].slice(0, 500));
+        setLogs(prev => [payload.new as Log, ...prev].slice(0, 1000));
       })
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(channel); };
@@ -66,6 +71,10 @@ const ActivityLogs = () => {
       (l.entity_type || "").toLowerCase().includes(t)
     );
   }, [logs, q]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   if (!isSuperAdmin) {
     return (
@@ -95,7 +104,7 @@ const ActivityLogs = () => {
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         <div className="px-5 py-3 border-b border-border bg-muted/30 text-sm font-medium text-muted-foreground flex items-center justify-between">
-          <span>{filtered.length} of {logs.length} entries</span>
+          <span>Showing {paginated.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}–{(currentPage - 1) * PAGE_SIZE + paginated.length} of {filtered.length}</span>
           <span className="inline-flex items-center gap-1.5 text-xs"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> live</span>
         </div>
         {loading ? (
@@ -103,8 +112,8 @@ const ActivityLogs = () => {
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center"><Activity className="h-8 w-8 mx-auto mb-3 text-muted-foreground" /><p className="text-sm text-muted-foreground">No activity recorded yet.</p></div>
         ) : (
-          <div className="divide-y divide-border max-h-[70vh] overflow-y-auto">
-            {filtered.map(l => (
+          <div className="divide-y divide-border">
+            {paginated.map(l => (
               <div key={l.id} className="px-5 py-3.5 flex items-start gap-4 hover:bg-muted/30 transition-colors">
                 <div className="h-9 w-9 rounded-full bg-brand-orange/15 text-brand-orange flex items-center justify-center shrink-0">
                   <UserIcon className="h-4 w-4" />
@@ -126,9 +135,38 @@ const ActivityLogs = () => {
             ))}
           </div>
         )}
+
+        {filtered.length > PAGE_SIZE && (
+          <div className="px-5 py-3 border-t border-border bg-muted/20 flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage(1)}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1.5 text-xs rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+              >First</button>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 text-xs rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+              >Previous</button>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 text-xs rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+              >Next</button>
+              <button
+                onClick={() => setPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1.5 text-xs rounded-md border border-border hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+              >Last</button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
 };
+
 
 export default ActivityLogs;
