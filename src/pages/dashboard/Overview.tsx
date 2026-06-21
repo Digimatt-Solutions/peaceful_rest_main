@@ -52,7 +52,7 @@ const Card = ({ title, icon: Icon, children, className = "" }: any) => (
   </div>
 );
 
-const COLORS = ["hsl(var(--primary))", "#10b981", "#3b82f6", "#a855f7", "#f43f5e", "#f59e0b"];
+const COLORS = ["#f97316", "#fb923c", "#fdba74", "#fed7aa", "#c2410c", "#9a3412", "#ea580c", "#7c2d12"];
 
 const Overview = () => {
   const { user } = useAuth();
@@ -232,21 +232,22 @@ const Overview = () => {
             <AreaChart data={series} margin={{ left: -10, right: 10, top: 5 }}>
               <defs>
                 <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#f97316" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#fdba74" stopOpacity={0.55} />
+                  <stop offset="100%" stopColor="#fdba74" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
-              <Area type="monotone" dataKey="condolences" stroke="hsl(var(--primary))" fill="url(#g1)" strokeWidth={2} />
-              <Area type="monotone" dataKey="visitors" stroke="#10b981" fill="url(#g2)" strokeWidth={2} />
+              <Area type="monotone" dataKey="condolences" stroke="#f97316" fill="url(#g1)" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="visitors" stroke="#c2410c" fill="url(#g2)" strokeWidth={2.5} />
             </AreaChart>
+
           </ResponsiveContainer>
         </Card>
 
@@ -289,8 +290,9 @@ const Overview = () => {
                   <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
-                  <Bar dataKey="visitors" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} />
-                  <Bar dataKey="condolences" fill="#10b981" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="visitors" fill="#f97316" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="condolences" fill="#fdba74" radius={[0, 6, 6, 0]} />
+
                 </BarChart>
               </ResponsiveContainer>
             ) : <p className="text-sm text-muted-foreground">No memorial data yet.</p>}

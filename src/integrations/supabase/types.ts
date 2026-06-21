@@ -321,31 +321,40 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          donor_email: string | null
           donor_name: string | null
           fundraiser_id: string
           id: string
           is_anonymous: boolean
           message: string | null
+          status: string
+          stripe_session_id: string | null
           user_id: string | null
         }
         Insert: {
           amount: number
           created_at?: string
+          donor_email?: string | null
           donor_name?: string | null
           fundraiser_id: string
           id?: string
           is_anonymous?: boolean
           message?: string | null
+          status?: string
+          stripe_session_id?: string | null
           user_id?: string | null
         }
         Update: {
           amount?: number
           created_at?: string
+          donor_email?: string | null
           donor_name?: string | null
           fundraiser_id?: string
           id?: string
           is_anonymous?: boolean
           message?: string | null
+          status?: string
+          stripe_session_id?: string | null
           user_id?: string | null
         }
         Relationships: [

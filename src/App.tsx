@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +31,16 @@ import Settings from "./pages/dashboard/Settings";
 
 const queryClient = new QueryClient();
 
+// Toggle Quicksand-everywhere mode on body for all routes except landing + memorial detail.
+const FontModeManager = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const preserveSerif = pathname === "/" || pathname.startsWith("/memorial/");
+    document.body.classList.toggle("font-quicksand-all", !preserveSerif);
+  }, [pathname]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -38,6 +49,7 @@ const App = () => (
       <BrowserRouter>
         <ThemeProvider>
           <AuthProvider>
+            <FontModeManager />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />

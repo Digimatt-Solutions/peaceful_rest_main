@@ -1,23 +1,26 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
 import { BookHeart, Plus, ArrowUpRight, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
+import { NewMemorialDialog } from "@/components/dashboard/NewMemorialDialog";
 
 const MyMemorials = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [memorials, setMemorials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    document.title = "My Memorials · Makiwa";
+  const load = () => {
     if (!user) return;
+    setLoading(true);
     supabase.from("memorials").select("*").eq("created_by", user.id).order("created_at", { ascending: false })
       .then(({ data }) => { setMemorials(data || []); setLoading(false); });
-  }, [user]);
+  };
+  useEffect(() => { document.title = "My Memorials · Makiwa"; load(); }, [user]);
 
   return (
     <>
@@ -25,9 +28,9 @@ const MyMemorials = () => {
         title="My Memorials"
         subtitle="Memorials you've created and care for."
         action={
-          <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
-            <Link to="/dashboard/obituary"><Plus className="h-4 w-4 mr-1" /> New Memorial</Link>
-          </Button>
+          <NewMemorialDialog
+            onCreated={(m) => { load(); if (m?.id) navigate(`/dashboard/obituary?id=${m.id}`); }}
+          />
         }
       />
       {loading ? <p className="text-muted-foreground">Loading…</p>
@@ -36,7 +39,7 @@ const MyMemorials = () => {
             icon={BookHeart}
             title="No memorials yet"
             description="Create a beautiful, lasting tribute for someone you love."
-            action={<Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/dashboard/obituary">Create memorial</Link></Button>}
+            action={<NewMemorialDialog onCreated={(m) => { load(); if (m?.id) navigate(`/dashboard/obituary?id=${m.id}`); }} trigger={<Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Plus className="h-4 w-4 mr-1" /> Create memorial</Button>} />}
           />
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">

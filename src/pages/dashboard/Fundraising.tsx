@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { HeartHandshake, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import {
+  Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart,
+  ResponsiveContainer, Tooltip, XAxis, YAxis, Area, AreaChart,
+} from "recharts";
 
 const CATEGORIES = [
   { value: "funeral_expenses", label: "Funeral Expenses" },
@@ -18,88 +26,315 @@ const CATEGORIES = [
   { value: "other", label: "Other" },
 ];
 
+// Orange palette variants
+const ORANGE = ["#f97316", "#fb923c", "#fdba74", "#fed7aa", "#c2410c", "#9a3412", "#ea580c", "#7c2d12"];
+
 const Fundraising = () => {
   const { user } = useAuth();
+  const { isSuperAdmin } = useUserRole();
   const [memorials, setMemorials] = useState<any[]>([]);
   const [memorialId, setMemorialId] = useState("");
   const [funds, setFunds] = useState<any[]>([]);
+  const [donations, setDonations] = useState<any[]>([]);
   const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+  const [openCreate, setOpenCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Fundraising · Makiwa";
     if (!user) return;
-    supabase.from("memorials").select("id,full_name").eq("created_by", user.id).then(({ data }) => {
-      setMemorials(data || []); if (data?.[0]) setMemorialId(data[0].id);
+    let q = supabase.from("memorials").select("id,full_name,profile_photo_url");
+    if (!isSuperAdmin) q = q.eq("created_by", user.id);
+    q.then(({ data }) => {
+      setMemorials(data || []);
+      if (data?.[0]) setMemorialId(data[0].id);
+      setLoading(false);
     });
-  }, [user]);
+  }, [user, isSuperAdmin]);
 
   useEffect(() => {
-    if (!memorialId) return;
-    supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false })
-      .then(({ data }) => setFunds(data || []));
+    if (!memorialId) { setFunds([]); setDonations([]); return; }
+    (async () => {
+      const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
+      setFunds(fs || []);
+      const ids = (fs || []).map(f => f.id);
+      if (ids.length) {
+        const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+        setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+      } else setDonations([]);
+    })();
   }, [memorialId]);
 
   const create = async () => {
     if (!form.title || !memorialId) return;
     const { data, error } = await supabase.from("fundraisers").insert({ ...form, memorial_id: memorialId, goal_amount: Number(form.goal_amount) }).select().maybeSingle();
     if (error) return toast.error(error.message);
-    setFunds([data, ...funds]); setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+    setFunds([data, ...funds]);
+    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+    setOpenCreate(false);
     toast.success("Fundraiser created");
   };
 
+  const selectedMemorial = memorials.find(m => m.id === memorialId);
+
+  // Aggregates
+  const totals = useMemo(() => {
+    const raised = donations.reduce((s, d) => s + Number(d.amount || 0), 0);
+    const goal = funds.reduce((s, f) => s + Number(f.goal_amount || 0), 0);
+    const uniqueDonors = new Set(donations.map(d => d.is_anonymous ? `anon-${d.id}` : (d.donor_email || d.donor_name || `id-${d.id}`))).size;
+    const avg = donations.length ? raised / donations.length : 0;
+    return { raised, goal, uniqueDonors, avg, count: donations.length };
+  }, [donations, funds]);
+
+  const perFundraiser = useMemo(() => funds.map(f => ({
+    name: f.title.length > 18 ? f.title.slice(0, 16) + "…" : f.title,
+    raised: Number(f.raised_amount || 0),
+    goal: Number(f.goal_amount || 0),
+  })), [funds]);
+
+  const trend = useMemo(() => {
+    const days: Record<string, number> = {};
+    const today = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today); d.setDate(d.getDate() - i);
+      days[format(d, "MMM d")] = 0;
+    }
+    donations.forEach(d => {
+      const k = format(new Date(d.created_at), "MMM d");
+      if (k in days) days[k] += Number(d.amount || 0);
+    });
+    return Object.entries(days).map(([date, amount]) => ({ date, amount }));
+  }, [donations]);
+
+  const topDonors = useMemo(() => {
+    const map: Record<string, { name: string; total: number; count: number }> = {};
+    donations.forEach(d => {
+      const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_email || d.donor_name || "Anonymous");
+      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+      if (!map[key]) map[key] = { name: display, total: 0, count: 0 };
+      map[key].total += Number(d.amount || 0);
+      map[key].count += 1;
+    });
+    return Object.values(map).sort((a, b) => b.total - a.total).slice(0, 5);
+  }, [donations]);
+
   return (
     <>
-      <PageHeader title="Fundraising" subtitle="Receive contributions toward funeral expenses, family support, or education." />
-      {memorials.length === 0 ? <EmptyState icon={HeartHandshake} title="Create a memorial first" /> : (
+      <PageHeader
+        title="Fundraising"
+        subtitle="Track contributions, donors, and goals across every memorial."
+        action={memorials.length > 0 && (
+          <Dialog open={openCreate} onOpenChange={setOpenCreate}>
+            <DialogTrigger asChild>
+              <Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+                <Plus className="h-4 w-4 mr-1.5" /> New fundraiser
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader><DialogTitle className="font-serif text-2xl">New fundraiser</DialogTitle></DialogHeader>
+              <div className="space-y-4 mt-2">
+                <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Category</Label>
+                    <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2"><Label>Goal (KSh)</Label><Input type="number" value={form.goal_amount} onChange={(e) => setForm({ ...form, goal_amount: Number(e.target.value) })} /></div>
+                </div>
+                <Button onClick={create} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">Create fundraiser</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      />
+
+      {loading ? <p className="text-muted-foreground">Loading…</p>
+        : memorials.length === 0 ? <EmptyState icon={HeartHandshake} title="Create a memorial first" description="Fundraisers belong to a memorial. Create one to get started." />
+        : (
         <>
-          <div className="mb-6 max-w-sm">
+          {/* Memorial selector */}
+          <div className="mb-6 flex items-center gap-3 flex-wrap">
+            <span className="text-sm text-muted-foreground">Viewing memorial:</span>
             <Select value={memorialId} onValueChange={setMemorialId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
               <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
             </Select>
+            {selectedMemorial?.profile_photo_url && (
+              <img src={selectedMemorial.profile_photo_url} alt="" className="h-9 w-9 rounded-full object-cover border border-border" />
+            )}
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 mb-8 space-y-4">
-            <h3 className="font-serif text-xl">New fundraiser</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2 sm:col-span-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} /></div>
-              <div className="space-y-2 sm:col-span-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Category</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({...form, category: v})}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
-                </Select>
+          {/* Summary cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <StatCard icon={Wallet} label="Total raised" value={`KSh ${totals.raised.toLocaleString()}`} tint={ORANGE[0]} />
+            <StatCard icon={Target} label="Combined goal" value={`KSh ${totals.goal.toLocaleString()}`} tint={ORANGE[1]} />
+            <StatCard icon={Users} label="Unique donors" value={totals.uniqueDonors} tint={ORANGE[4]} />
+            <StatCard icon={TrendingUp} label="Avg donation" value={`KSh ${Math.round(totals.avg).toLocaleString()}`} tint={ORANGE[6]} />
+          </div>
+
+          {funds.length === 0 ? <EmptyState icon={HeartHandshake} title="No fundraisers yet" description="Click New fundraiser to start collecting contributions." />
+            : (
+            <>
+              {/* Charts grid */}
+              <div className="grid lg:grid-cols-3 gap-5 mb-6">
+                <Card title="14-day donation trend" icon={TrendingUp} className="lg:col-span-2">
+                  <ResponsiveContainer width="100%" height={240}>
+                    <AreaChart data={trend} margin={{ left: -10, right: 10, top: 5 }}>
+                      <defs>
+                        <linearGradient id="orangeGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={ORANGE[0]} stopOpacity={0.6} />
+                          <stop offset="100%" stopColor={ORANGE[0]} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} formatter={(v: any) => `KSh ${Number(v).toLocaleString()}`} />
+                      <Area type="monotone" dataKey="amount" stroke={ORANGE[0]} fill="url(#orangeGrad)" strokeWidth={2.5} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </Card>
+
+                <Card title="Top donors" icon={Crown}>
+                  {topDonors.length ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <PieChart>
+                        <Pie data={topDonors} dataKey="total" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={85} paddingAngle={3}>
+                          {topDonors.map((_, i) => <Cell key={i} fill={ORANGE[i % ORANGE.length]} />)}
+                        </Pie>
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} formatter={(v: any) => `KSh ${Number(v).toLocaleString()}`} />
+                        <Legend wrapperStyle={{ fontSize: 10 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : <p className="text-sm text-muted-foreground py-10 text-center">No donations yet.</p>}
+                </Card>
+
+                <Card title="Raised vs goal per fundraiser" icon={Target} className="lg:col-span-3">
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={perFundraiser} margin={{ left: -10, right: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} formatter={(v: any) => `KSh ${Number(v).toLocaleString()}`} />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      <Bar dataKey="raised" fill={ORANGE[0]} radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="goal" fill={ORANGE[2]} radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Card>
               </div>
-              <div className="space-y-2"><Label>Goal amount (KSh)</Label><Input type="number" value={form.goal_amount} onChange={(e) => setForm({...form, goal_amount: Number(e.target.value)})} /></div>
-            </div>
-            <Button onClick={create} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Plus className="h-4 w-4 mr-1" /> Create fundraiser</Button>
-          </div>
 
-          {funds.length === 0 ? <EmptyState icon={HeartHandshake} title="No fundraisers yet" /> : (
-            <div className="grid md:grid-cols-2 gap-4">
-              {funds.map(f => {
-                const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;
-                return (
-                  <div key={f.id} className="rounded-2xl border border-border bg-card p-6">
-                    <span className="text-xs uppercase tracking-widest text-brand-orange font-semibold">{CATEGORIES.find(c => c.value === f.category)?.label}</span>
-                    <h4 className="mt-2 font-serif text-xl">{f.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{f.description}</p>
-                    <div className="mt-5">
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="font-semibold">KSh {Number(f.raised_amount).toLocaleString()}</span>
-                        <span className="text-muted-foreground">of KSh {Number(f.goal_amount).toLocaleString()}</span>
+              {/* Fundraiser cards */}
+              <h3 className="font-serif text-xl mb-3">Fundraisers</h3>
+              <div className="grid md:grid-cols-2 gap-4 mb-8">
+                {funds.map(f => {
+                  const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;
+                  return (
+                    <div key={f.id} className="rounded-2xl border border-border bg-card p-5 hover:shadow-elegant transition-shadow">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
+                            {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
+                          </Badge>
+                          <h4 className="mt-2 font-serif text-lg">{f.title}</h4>
+                        </div>
                       </div>
-                      <Progress value={pct} className="h-2" />
+                      {f.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{f.description}</p>}
+                      <div className="mt-4">
+                        <div className="flex justify-between text-sm mb-1.5">
+                          <span className="font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(f.raised_amount).toLocaleString()}</span>
+                          <span className="text-muted-foreground text-xs">of KSh {Number(f.goal_amount).toLocaleString()} · {pct.toFixed(0)}%</span>
+                        </div>
+                        <Progress value={pct} className="h-2" />
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* Donor list */}
+              <Card title="Contributors" icon={Users}>
+                {donations.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-10">No contributions yet for {selectedMemorial?.full_name}.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+                          <th className="py-2.5 pl-1">Donor</th>
+                          <th className="py-2.5">Fundraiser</th>
+                          <th className="py-2.5">Message</th>
+                          <th className="py-2.5 text-right">Amount</th>
+                          <th className="py-2.5 text-right pr-1">When</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {donations.map(d => {
+                          const fund = funds.find(f => f.id === d.fundraiser_id);
+                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+                          const isPending = d.status === "pending";
+                          return (
+                            <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                              <td className="py-3 pl-1">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style={{ background: ORANGE[d.id.charCodeAt(0) % ORANGE.length] }}>
+                                    {name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">{name}</p>
+                                    {d.donor_email && !d.is_anonymous && <p className="text-xs text-muted-foreground">{d.donor_email}</p>}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-3 text-muted-foreground">{fund?.title || "—"}</td>
+                              <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "—"}</td>
+                              <td className="py-3 text-right font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(d.amount).toLocaleString()}</td>
+                              <td className="py-3 text-right pr-1 text-xs text-muted-foreground whitespace-nowrap">
+                                <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.created_at), "MMM d, yyyy")}</span>
+                                {isPending && <span className="ml-2 text-amber-600">· pending</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
-                );
-              })}
-            </div>
+                )}
+              </Card>
+            </>
           )}
         </>
       )}
     </>
   );
 };
+
+const StatCard = ({ icon: Icon, label, value, tint }: any) => (
+  <div className="rounded-2xl border border-border bg-card p-5 relative overflow-hidden">
+    <div className="absolute inset-0 opacity-[0.07]" style={{ background: `linear-gradient(135deg, ${tint}, transparent)` }} />
+    <div className="relative flex items-start justify-between">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
+        <p className="mt-2 font-serif text-2xl">{value}</p>
+      </div>
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${tint}20`, color: tint }}>
+        <Icon className="h-5 w-5" />
+      </div>
+    </div>
+  </div>
+);
+
+const Card = ({ title, icon: Icon, children, className = "" }: any) => (
+  <div className={`rounded-2xl border border-border bg-card p-6 ${className}`}>
+    <div className="flex items-center gap-2.5 mb-5">
+      <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Icon className="h-4 w-4" /></div>
+      <h3 className="font-serif text-lg">{title}</h3>
+    </div>
+    {children}
+  </div>
+);
 
 export default Fundraising;
