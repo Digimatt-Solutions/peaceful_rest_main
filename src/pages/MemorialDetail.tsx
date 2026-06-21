@@ -423,20 +423,23 @@ const MemorialDetail = () => {
                       {open && (
                         <div className="mt-6 grid sm:grid-cols-2 gap-3 pt-5 border-t border-border">
                           <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} className="rounded-xl" /></div>
-                          <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
+                          <div className="space-y-2"><Label>Email <span className="text-muted-foreground font-normal">(for receipt)</span></Label><Input type="email" value={donateForm.donor_email} onChange={(e) => setDonateForm({ ...donateForm, donor_email: e.target.value })} className="rounded-xl" /></div>
+                          <div className="space-y-2 sm:col-span-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
                           <div className="space-y-2 sm:col-span-2"><Label>Message <span className="text-muted-foreground font-normal">(optional)</span></Label><Textarea rows={2} value={donateForm.message} onChange={(e) => setDonateForm({ ...donateForm, message: e.target.value })} className="rounded-xl" /></div>
                           <label className="sm:col-span-2 inline-flex items-center gap-2 text-sm">
                             <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
                             Contribute anonymously
                           </label>
-                          <div className="sm:col-span-2 flex gap-2">
+                          <div className="sm:col-span-2 flex flex-wrap gap-2 items-center">
                             <Button onClick={() => donate(f.id)} disabled={donating} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
-                              {donating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit contribution"}
+                              {donating ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecting…</> : "Continue to secure checkout"}
                             </Button>
                             <Button variant="outline" onClick={() => setDonateOpen(null)} className="rounded-full">Cancel</Button>
+                            <span className="text-xs text-muted-foreground ml-1">Powered by Stripe · Cards & wallets accepted</span>
                           </div>
                         </div>
                       )}
+
                     </div>
                   );
                 })}
