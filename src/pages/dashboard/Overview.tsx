@@ -54,10 +54,15 @@ const Card = ({ title, icon: Icon, children, className = "" }: any) => (
 
 const COLORS = ["#f97316", "#fb923c", "#fdba74", "#fed7aa", "#c2410c", "#9a3412", "#ea580c", "#7c2d12"];
 
+const ChartSkeleton = ({ h = 260 }: { h?: number }) => (
+  <div className="w-full rounded-xl bg-muted/40 animate-pulse" style={{ height: h }} />
+);
+
 const Overview = () => {
   const { user } = useAuth();
   const { role, isSuperAdmin, isMemorialAdmin, isMourner, loading: roleLoading } = useUserRole();
 
+  const [dataLoading, setDataLoading] = useState(true);
   const [stats, setStats] = useState({
     memorials: 0, condolences: 0, donations: 0, visitors: 0,
     users: 0, fundraisers: 0, moments: 0, announcements: 0,
@@ -71,6 +76,9 @@ const Overview = () => {
   useEffect(() => {
     document.title = "Dashboard · Makiwa";
     if (!user || roleLoading) return;
+    setDataLoading(true);
+
+
 
     const load = async () => {
       // memorials scoped by role
@@ -182,6 +190,7 @@ const Overview = () => {
           .order("event_date").limit(5);
         setAnniversaries(a || []);
       }
+      setDataLoading(false);
     };
     load();
   }, [user, isSuperAdmin, isMourner, isMemorialAdmin, roleLoading]);
