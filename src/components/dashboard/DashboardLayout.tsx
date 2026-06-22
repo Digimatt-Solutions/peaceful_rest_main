@@ -73,7 +73,7 @@ export const DashboardLayout = () => {
   const initials = (profile?.full_name || user?.email || "U").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "User";
 
-  // Only filter once role is known — prevents the flash of wrong-role nav items.
+  // Only filter once role is known - prevents the flash of wrong-role nav items.
   const visibleNav = role ? allNav.filter(item => !item.roles || item.roles.includes(role)) : [];
 
   return (

@@ -72,7 +72,7 @@ const MyMemorials = () => {
                   <h3 className="font-serif text-xl">{m.full_name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     {m.date_of_birth && format(new Date(m.date_of_birth), "MMM d, yyyy")}
-                    {m.date_of_death && ` — ${format(new Date(m.date_of_death), "MMM d, yyyy")}`}
+                    {m.date_of_death && ` - ${format(new Date(m.date_of_death), "MMM d, yyyy")}`}
                   </p>
                   <Link to={`/dashboard/obituary?id=${m.id}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-orange">
                     Manage <ArrowUpRight className="h-4 w-4" />

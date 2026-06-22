@@ -52,7 +52,7 @@ const FamilyTree = () => {
 
   return (
     <>
-      <PageHeader title="Nuclear Family Tree" subtitle="Honor those who shaped their life — parents, spouse, children, siblings." />
+      <PageHeader title="Nuclear Family Tree" subtitle="Honor those who shaped their life - parents, spouse, children, siblings." />
 
       {memorials.length === 0 ? (
         <EmptyState icon={Users} title="Create a memorial first" description="Family tree is linked to a specific memorial." />

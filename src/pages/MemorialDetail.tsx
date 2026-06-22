@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { z } from "zod";
 
-const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "—";
+const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "-";
 
 const condolenceSchema = z.object({
   name: z.string().trim().min(2, "Please share your name").max(80),
@@ -216,7 +216,7 @@ const MemorialDetail = () => {
 
     <p className="mt-4 text-lg text-white/80 font-light tracking-wide">
       {fmt(memorial.date_of_birth)} 
-      <span className="mx-2 text-orange-400">—</span> 
+      <span className="mx-2 text-orange-400">-</span> 
       {fmt(memorial.date_of_death)}
     </p>
 

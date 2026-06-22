@@ -329,7 +329,7 @@ const Overview = () => {
                 <div key={r.id} className="rounded-xl border border-border p-4 bg-background/50">
                   <p className="text-sm line-clamp-3">"{r.message}"</p>
                   <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>— {r.name || "Anonymous"}</span>
+                    <span>- {r.name || "Anonymous"}</span>
                     <span>{format(new Date(r.created_at), "MMM d")}</span>
                   </div>
                 </div>

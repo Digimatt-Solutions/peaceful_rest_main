@@ -75,7 +75,7 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">Create a memorial</DialogTitle>
-          <DialogDescription>Start with the basics — you can add the full story afterwards.</DialogDescription>
+          <DialogDescription>Start with the basics - you can add the full story afterwards.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-5 mt-2">
           <div className="space-y-2">
