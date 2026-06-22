@@ -16,25 +16,27 @@ import {
 import { format, subDays, startOfDay } from "date-fns";
 
 const Stat = ({
-  label, value, icon: Icon, trend, accent = "orange",
-}: { label: string; value: string | number; icon: any; trend?: string; accent?: "orange" | "emerald" | "blue" | "purple" | "rose" }) => {
-  const accentMap: Record<string, string> = {
-    orange: "from-brand-orange/20 to-brand-orange/5 text-brand-orange",
-    emerald: "from-emerald-500/20 to-emerald-500/5 text-emerald-600",
-    blue: "from-blue-500/20 to-blue-500/5 text-blue-600",
-    purple: "from-purple-500/20 to-purple-500/5 text-purple-600",
-    rose: "from-rose-500/20 to-rose-500/5 text-rose-600",
+  label, value, icon: Icon, trend, accent = "primary",
+}: { label: string; value: string | number; icon: any; trend?: string; accent?: "primary" | "secondary" | "tertiary" | "quaternary" | "quinary" }) => {
+  // Unified orange-variant palette for every dashboard card.
+  const accentMap: Record<string, { grad: string; icon: string; ring: string }> = {
+    primary:    { grad: "from-[#f97316]/25 to-[#f97316]/5",  icon: "text-[#c2410c]", ring: "ring-[#f97316]/30" },
+    secondary:  { grad: "from-[#fb923c]/25 to-[#fb923c]/5",  icon: "text-[#9a3412]", ring: "ring-[#fb923c]/30" },
+    tertiary:   { grad: "from-[#fdba74]/30 to-[#fdba74]/5",  icon: "text-[#7c2d12]", ring: "ring-[#fdba74]/40" },
+    quaternary: { grad: "from-[#ea580c]/25 to-[#ea580c]/5",  icon: "text-[#7c2d12]", ring: "ring-[#ea580c]/30" },
+    quinary:    { grad: "from-[#fed7aa]/40 to-[#fed7aa]/5",  icon: "text-[#9a3412]", ring: "ring-[#fed7aa]/50" },
   };
+  const a = accentMap[accent];
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 hover:shadow-elegant hover:-translate-y-0.5 transition-all">
-      <div className={`absolute inset-0 bg-gradient-to-br opacity-50 ${accentMap[accent]}`} />
+    <div className={`group relative overflow-hidden rounded-2xl border border-brand-orange/20 bg-card p-5 hover:shadow-elegant hover:-translate-y-0.5 hover:border-brand-orange/40 transition-all ring-1 ${a.ring}`}>
+      <div className={`absolute inset-0 bg-gradient-to-br opacity-60 ${a.grad}`} />
       <div className="relative flex items-start justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
           <p className="mt-2 font-serif text-3xl">{value}</p>
           {trend && <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="h-3 w-3" /> {trend}</p>}
         </div>
-        <div className={`h-10 w-10 rounded-xl bg-background/80 backdrop-blur flex items-center justify-center ${accentMap[accent].split(" ").pop()}`}>
+        <div className={`h-11 w-11 rounded-xl bg-background/90 backdrop-blur flex items-center justify-center shadow-soft ${a.icon}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -235,14 +237,14 @@ const Overview = () => {
         )}
       />
 
-      {/* Stats grid - role aware */}
+      {/* Stats grid - role aware, unified orange-variant palette */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {isSuperAdmin && <Stat label="Total Users" value={stats.users} icon={Users} accent="blue" />}
-        <Stat label={isMourner ? "Memorials Followed" : "Memorials"} value={stats.memorials} icon={BookHeart} accent="orange" />
-        <Stat label="Visitors" value={stats.visitors.toLocaleString()} icon={Eye} accent="purple" />
-        <Stat label={isMourner ? "My Condolences" : "Condolences"} value={stats.condolences} icon={MessageCircle} accent="emerald" />
-        {!isSuperAdmin && <Stat label={isMourner ? "My Donations" : "Donations Raised"} value={`KSh ${stats.donations.toLocaleString()}`} icon={HeartHandshake} accent="rose" />}
-        {isSuperAdmin && <Stat label="Donations Raised" value={`KSh ${stats.donations.toLocaleString()}`} icon={HeartHandshake} accent="rose" />}
+        {isSuperAdmin && <Stat label="Total Users" value={stats.users} icon={Users} accent="quaternary" />}
+        <Stat label={isMourner ? "Memorials Followed" : "Memorials"} value={stats.memorials} icon={BookHeart} accent="primary" />
+        <Stat label="Visitors" value={stats.visitors.toLocaleString()} icon={Eye} accent="secondary" />
+        <Stat label={isMourner ? "My Condolences" : "Condolences"} value={stats.condolences} icon={MessageCircle} accent="tertiary" />
+        {!isSuperAdmin && <Stat label={isMourner ? "My Donations" : "Donations Raised"} value={`KSh ${stats.donations.toLocaleString()}`} icon={HeartHandshake} accent="quinary" />}
+        {isSuperAdmin && <Stat label="Donations Raised" value={`KSh ${stats.donations.toLocaleString()}`} icon={HeartHandshake} accent="quinary" />}
       </div>
 
       {/* Charts */}

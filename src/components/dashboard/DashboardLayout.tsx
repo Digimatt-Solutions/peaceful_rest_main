@@ -81,8 +81,8 @@ export const DashboardLayout = () => {
       {/* Sidebar */}
       <aside className={cn(
         "fixed lg:sticky top-0 inset-y-0 left-0 z-40 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 flex flex-col transition-all duration-300 h-screen border-r border-slate-200 dark:border-slate-700",
-        collapsed ? "lg:w-20" : "lg:w-72",
-        "w-72",
+        collapsed ? "lg:w-16" : "lg:w-64",
+        "w-64",
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-white/60 dark:bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>

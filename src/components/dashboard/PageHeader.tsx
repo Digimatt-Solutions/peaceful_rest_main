@@ -2,14 +2,17 @@ import { ReactNode } from "react";
 import { RefreshButton } from "./RefreshButton";
 
 export const PageHeader = ({ title, subtitle, action, hideRefresh }: { title: string; subtitle?: string; action?: ReactNode; hideRefresh?: boolean }) => (
-  <div className="flex items-end justify-between flex-wrap gap-4 mb-8 pb-6 border-b border-border">
-    <div>
-      <h1 className="font-serif text-3xl lg:text-4xl font-medium">{title}</h1>
-      {subtitle && <p className="mt-1 text-muted-foreground">{subtitle}</p>}
-    </div>
-    <div className="flex items-center gap-2 flex-wrap">
-      {action}
-      {!hideRefresh && <RefreshButton />}
+  <div className="relative mb-8 pb-6 border-b border-brand-orange/20">
+    <div className="absolute -top-2 left-0 h-1 w-16 rounded-full bg-gradient-to-r from-brand-orange to-brand-orange/30" />
+    <div className="flex items-end justify-between flex-wrap gap-4 pt-2">
+      <div>
+        <h1 className="font-serif text-3xl lg:text-4xl font-medium tracking-tight">{title}</h1>
+        {subtitle && <p className="mt-1.5 text-muted-foreground text-sm lg:text-base">{subtitle}</p>}
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        {action}
+        {!hideRefresh && <RefreshButton />}
+      </div>
     </div>
   </div>
 );
