@@ -108,7 +108,19 @@ const ActivityLogs = () => {
           <span className="inline-flex items-center gap-1.5 text-xs"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> live</span>
         </div>
         {loading ? (
-          <div className="p-12 text-center text-muted-foreground text-sm">Loading…</div>
+          <div className="divide-y divide-border">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="px-5 py-4 flex items-start gap-4">
+                <div className="h-9 w-9 rounded-full bg-muted animate-pulse shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3.5 w-1/3 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-2/3 rounded bg-muted/70 animate-pulse" />
+                </div>
+                <div className="h-3 w-16 rounded bg-muted animate-pulse" />
+              </div>
+            ))}
+          </div>
+
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center"><Activity className="h-8 w-8 mx-auto mb-3 text-muted-foreground" /><p className="text-sm text-muted-foreground">No activity recorded yet.</p></div>
         ) : (

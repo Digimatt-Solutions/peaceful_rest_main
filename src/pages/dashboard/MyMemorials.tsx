@@ -33,7 +33,20 @@ const MyMemorials = () => {
           />
         }
       />
-      {loading ? <p className="text-muted-foreground">Loading…</p>
+      {loading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="rounded-2xl border border-border overflow-hidden">
+              <div className="aspect-[5/4] bg-muted animate-pulse" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-1/2 rounded bg-muted/70 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+
         : memorials.length === 0 ? (
           <EmptyState
             icon={BookHeart}
