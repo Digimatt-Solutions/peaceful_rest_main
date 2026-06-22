@@ -151,9 +151,20 @@ const Fundraising = () => {
         )}
       />
 
-      {loading ? <p className="text-muted-foreground">Loading…</p>
-        : memorials.length === 0 ? <EmptyState icon={HeartHandshake} title="Create a memorial first" description="Fundraisers belong to a memorial. Create one to get started." />
+      {loading ? (
+        <div className="space-y-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-muted/40 animate-pulse" />)}
+          </div>
+          <div className="grid lg:grid-cols-3 gap-5">
+            <div className="h-64 rounded-2xl bg-muted/40 animate-pulse lg:col-span-2" />
+            <div className="h-64 rounded-2xl bg-muted/40 animate-pulse" />
+          </div>
+          <div className="h-72 rounded-2xl bg-muted/40 animate-pulse" />
+        </div>
+      ) : memorials.length === 0 ? <EmptyState icon={HeartHandshake} title="Create a memorial first" description="Fundraisers belong to a memorial. Create one to get started." />
         : (
+
         <>
           {/* Memorial selector */}
           <div className="mb-6 flex items-center gap-3 flex-wrap">
