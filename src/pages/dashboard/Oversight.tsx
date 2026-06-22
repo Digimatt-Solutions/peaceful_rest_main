@@ -108,7 +108,7 @@ const Oversight = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">{m.location || "—"}</td>
+                    <td className="px-5 py-3 text-muted-foreground">{m.location || "-"}</td>
                     <td className="px-5 py-3">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${m.is_public ? "bg-brand-orange/10 text-brand-orange" : "bg-muted text-muted-foreground"}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${m.is_public ? "bg-brand-orange" : "bg-muted-foreground"}`} />

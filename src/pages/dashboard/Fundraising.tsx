@@ -300,8 +300,8 @@ const Fundraising = () => {
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-3 text-muted-foreground">{fund?.title || "—"}</td>
-                              <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "—"}</td>
+                              <td className="py-3 text-muted-foreground">{fund?.title || "-"}</td>
+                              <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "-"}</td>
                               <td className="py-3 text-right font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(d.amount).toLocaleString()}</td>
                               <td className="py-3 text-right pr-1 text-xs text-muted-foreground whitespace-nowrap">
                                 <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.created_at), "MMM d, yyyy")}</span>

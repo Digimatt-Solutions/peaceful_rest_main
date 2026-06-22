@@ -115,7 +115,7 @@ const Auth = () => {
               Where lives are remembered with grace.
             </h2>
             <p className="text-brand-white/70 text-lg leading-relaxed">
-              Join thousands of families honoring the people who shaped them — through stories, candles, and shared memory.
+              Join thousands of families honoring the people who shaped them - through stories, candles, and shared memory.
             </p>
             <div className="flex items-center gap-6 pt-4 text-sm text-brand-white/60">
               <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand-orange" /> Bank-grade privacy</span>

@@ -89,7 +89,7 @@ const ActivityLogs = () => {
     <>
       <PageHeader
         title="Activity Logs"
-        subtitle="Real-time audit trail — every action across the system with timestamps."
+        subtitle="Real-time audit trail - every action across the system with timestamps."
       />
 
       <div className="mb-5 max-w-md relative">
