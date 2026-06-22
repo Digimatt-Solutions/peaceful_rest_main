@@ -201,6 +201,16 @@ const Overview = () => {
     return { title: "Welcome back", subtitle: "Your tributes, contributions, and memorials you follow." };
   }, [isSuperAdmin, isMemorialAdmin]);
 
+  // Pre-compute chart data once outside the render tree to avoid per-frame work.
+  const pieData = useMemo(() => {
+    if (isSuperAdmin && roleBreakdown.length) return roleBreakdown;
+    return [
+      { name: "Condolences", value: stats.condolences },
+      { name: "Donations", value: stats.donations > 0 ? Math.min(stats.donations, 100) : 0 },
+      { name: "Visitors", value: stats.visitors },
+    ].filter(x => x.value > 0);
+  }, [isSuperAdmin, roleBreakdown, stats.condolences, stats.donations, stats.visitors]);
+
   if (roleLoading || !role) {
     return (
       <div className="space-y-5">
@@ -211,6 +221,7 @@ const Overview = () => {
       </div>
     );
   }
+
 
   return (
     <>
@@ -237,62 +248,52 @@ const Overview = () => {
       {/* Charts */}
       <div className="mt-6 grid lg:grid-cols-3 gap-5">
         <Card title="14-day activity trend" icon={Activity} className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={series} margin={{ left: -10, right: 10, top: 5 }}>
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f97316" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fdba74" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="#fdba74" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-              <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
-              <Area type="monotone" dataKey="condolences" stroke="#f97316" fill="url(#g1)" strokeWidth={2.5} />
-              <Area type="monotone" dataKey="visitors" stroke="#c2410c" fill="url(#g2)" strokeWidth={2.5} />
-            </AreaChart>
-
-          </ResponsiveContainer>
+          {dataLoading ? <ChartSkeleton h={260} /> : (
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={series} margin={{ left: -10, right: 10, top: 5 }}>
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f97316" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#fdba74" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="#fdba74" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+                <Area type="monotone" dataKey="condolences" stroke="#f97316" fill="url(#g1)" strokeWidth={2.5} />
+                <Area type="monotone" dataKey="visitors" stroke="#c2410c" fill="url(#g2)" strokeWidth={2.5} />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </Card>
 
         <Card title={isSuperAdmin ? "User roles" : "Engagement mix"} icon={Shield}>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={isSuperAdmin && roleBreakdown.length ? roleBreakdown : [
-                  { name: "Condolences", value: stats.condolences },
-                  { name: "Donations", value: stats.donations > 0 ? Math.min(stats.donations, 100) : 0 },
-                  { name: "Visitors", value: stats.visitors },
-                ].filter(x => x.value > 0)}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={90}
-                paddingAngle={3}
-              >
-                {(isSuperAdmin && roleBreakdown.length ? roleBreakdown : [1, 2, 3]).map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
+          {dataLoading ? <ChartSkeleton h={260} /> : (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={3}>
+                  {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </Card>
       </div>
+
 
       {/* Bottom row */}
       <div className="mt-5 grid lg:grid-cols-3 gap-5">
         {!isMourner && (
           <Card title="Top memorials" icon={BookHeart} className="lg:col-span-2">
-            {topMemorials.length ? (
+            {dataLoading ? <ChartSkeleton h={220} /> : topMemorials.length ? (
+
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={topMemorials} layout="vertical" margin={{ left: 10, right: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
