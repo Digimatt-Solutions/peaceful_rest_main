@@ -91,6 +91,10 @@ const MemorialDetail = () => {
     toast.success("Your message was shared. Thank you.");
   };
 
+  // Receipt dialog state
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptDonation, setReceiptDonation] = useState<any>(null);
+
   // Verify Stripe checkout return
   useEffect(() => {
     const status = searchParams.get("donation");
@@ -99,11 +103,17 @@ const MemorialDetail = () => {
       (async () => {
         const { data, error } = await supabase.functions.invoke("verify-donation", { body: { session_id: sessionId } });
         if (!error && data?.status === "paid") {
+          // Fetch the donation record for the receipt
+          const { data: don } = await supabase.from("donations").select("*").eq("stripe_session_id", sessionId).maybeSingle();
+          if (don) {
+            const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
+            setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
+            setReceiptOpen(true);
+          }
           toast.success(`Thank you for your contribution of KSh ${Number(data.amount).toLocaleString()}!`);
         } else if (!error) {
           toast.info("Payment is processing. It will appear shortly.");
         }
-        // refresh fundraisers
         if (id) {
           const { data: fr } = await supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).order("created_at", { ascending: false });
           setFundraisers(fr || []);
@@ -117,7 +127,7 @@ const MemorialDetail = () => {
       setSearchParams(searchParams, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [memorial?.full_name]);
 
   const donate = async (fundraiserId: string) => {
     const amt = Number(donateForm.amount);
