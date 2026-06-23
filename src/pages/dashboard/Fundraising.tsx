@@ -40,6 +40,50 @@ const Fundraising = () => {
   const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptDonation, setReceiptDonation] = useState<any>(null);
+
+  const openReceipt = (d: any) => {
+    const fund = funds.find(f => f.id === d.fundraiser_id);
+    setReceiptDonation({
+      ...d,
+      fundraiser_title: fund?.title,
+      memorial_name: selectedMemorialRef(),
+    });
+    setReceiptOpen(true);
+  };
+
+  const selectedMemorialRef = () => memorials.find(m => m.id === memorialId)?.full_name;
+
+  const downloadContributorsCSV = () => {
+    if (!donations.length) return;
+    const rows = [
+      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Message", "Date"],
+      ...donations.map(d => {
+        const fund = funds.find(f => f.id === d.fundraiser_id);
+        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+        return [
+          `MKW-${d.id.slice(0,8).toUpperCase()}`,
+          name,
+          d.is_anonymous ? "" : (d.donor_email || ""),
+          fund?.title || "",
+          Number(d.amount).toString(),
+          d.status || "",
+          (d.message || "").replace(/\n/g, " "),
+          format(new Date(d.created_at), "yyyy-MM-dd HH:mm"),
+        ];
+      }),
+    ];
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contributors-${selectedMemorialRef() || "memorial"}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Contributors list downloaded");
+  };
 
   useEffect(() => {
     document.title = "Fundraising · Makiwa";
