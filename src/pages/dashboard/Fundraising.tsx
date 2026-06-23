@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar } from "lucide-react";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt } from "lucide-react";
+import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -39,6 +40,50 @@ const Fundraising = () => {
   const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptDonation, setReceiptDonation] = useState<any>(null);
+
+  const openReceipt = (d: any) => {
+    const fund = funds.find(f => f.id === d.fundraiser_id);
+    setReceiptDonation({
+      ...d,
+      fundraiser_title: fund?.title,
+      memorial_name: selectedMemorialRef(),
+    });
+    setReceiptOpen(true);
+  };
+
+  const selectedMemorialRef = () => memorials.find(m => m.id === memorialId)?.full_name;
+
+  const downloadContributorsCSV = () => {
+    if (!donations.length) return;
+    const rows = [
+      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Message", "Date"],
+      ...donations.map(d => {
+        const fund = funds.find(f => f.id === d.fundraiser_id);
+        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+        return [
+          `MKW-${d.id.slice(0,8).toUpperCase()}`,
+          name,
+          d.is_anonymous ? "" : (d.donor_email || ""),
+          fund?.title || "",
+          Number(d.amount).toString(),
+          d.status || "",
+          (d.message || "").replace(/\n/g, " "),
+          format(new Date(d.created_at), "yyyy-MM-dd HH:mm"),
+        ];
+      }),
+    ];
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contributors-${selectedMemorialRef() || "memorial"}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Contributors list downloaded");
+  };
 
   useEffect(() => {
     document.title = "Fundraising · Makiwa";
@@ -267,7 +312,17 @@ const Fundraising = () => {
               </div>
 
               {/* Donor list */}
-              <Card title="Contributors" icon={Users}>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Users className="h-4 w-4" /></div>
+                    <h3 className="font-serif text-lg">Contributors</h3>
+                    <Badge variant="outline" className="ml-1 border-brand-orange/30 text-brand-orange">{donations.length}</Badge>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={downloadContributorsCSV} disabled={!donations.length}>
+                    <Download className="h-4 w-4 mr-1.5" /> Download CSV
+                  </Button>
+                </div>
                 {donations.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-10">No contributions yet for {selectedMemorial?.full_name}.</p>
                 ) : (
@@ -279,7 +334,8 @@ const Fundraising = () => {
                           <th className="py-2.5">Fundraiser</th>
                           <th className="py-2.5">Message</th>
                           <th className="py-2.5 text-right">Amount</th>
-                          <th className="py-2.5 text-right pr-1">When</th>
+                          <th className="py-2.5">When</th>
+                          <th className="py-2.5 text-right pr-1">Receipt</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -303,9 +359,14 @@ const Fundraising = () => {
                               <td className="py-3 text-muted-foreground">{fund?.title || "-"}</td>
                               <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "-"}</td>
                               <td className="py-3 text-right font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(d.amount).toLocaleString()}</td>
-                              <td className="py-3 text-right pr-1 text-xs text-muted-foreground whitespace-nowrap">
+                              <td className="py-3 text-xs text-muted-foreground whitespace-nowrap">
                                 <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.created_at), "MMM d, yyyy")}</span>
                                 {isPending && <span className="ml-2 text-amber-600">· pending</span>}
+                              </td>
+                              <td className="py-3 text-right pr-1">
+                                <Button size="sm" variant="outline" className="h-8" onClick={() => openReceipt(d)}>
+                                  <Receipt className="h-3.5 w-3.5 mr-1" /> View
+                                </Button>
                               </td>
                             </tr>
                           );
@@ -314,11 +375,13 @@ const Fundraising = () => {
                     </table>
                   </div>
                 )}
-              </Card>
+              </div>
             </>
           )}
         </>
       )}
+
+      <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
     </>
   );
 };
