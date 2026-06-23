@@ -530,6 +530,7 @@ const MemorialDetail = () => {
       </div>
 
       <Footer />
+      <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
     </main>
   );
 };
