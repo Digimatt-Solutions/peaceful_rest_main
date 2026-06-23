@@ -16,6 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { z } from "zod";
+import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 
 const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "-";
 
