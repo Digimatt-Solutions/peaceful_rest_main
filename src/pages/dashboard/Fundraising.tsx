@@ -312,7 +312,17 @@ const Fundraising = () => {
               </div>
 
               {/* Donor list */}
-              <Card title="Contributors" icon={Users}>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Users className="h-4 w-4" /></div>
+                    <h3 className="font-serif text-lg">Contributors</h3>
+                    <Badge variant="outline" className="ml-1 border-brand-orange/30 text-brand-orange">{donations.length}</Badge>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={downloadContributorsCSV} disabled={!donations.length}>
+                    <Download className="h-4 w-4 mr-1.5" /> Download CSV
+                  </Button>
+                </div>
                 {donations.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-10">No contributions yet for {selectedMemorial?.full_name}.</p>
                 ) : (
@@ -324,7 +334,8 @@ const Fundraising = () => {
                           <th className="py-2.5">Fundraiser</th>
                           <th className="py-2.5">Message</th>
                           <th className="py-2.5 text-right">Amount</th>
-                          <th className="py-2.5 text-right pr-1">When</th>
+                          <th className="py-2.5">When</th>
+                          <th className="py-2.5 text-right pr-1">Receipt</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -348,9 +359,14 @@ const Fundraising = () => {
                               <td className="py-3 text-muted-foreground">{fund?.title || "-"}</td>
                               <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "-"}</td>
                               <td className="py-3 text-right font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(d.amount).toLocaleString()}</td>
-                              <td className="py-3 text-right pr-1 text-xs text-muted-foreground whitespace-nowrap">
+                              <td className="py-3 text-xs text-muted-foreground whitespace-nowrap">
                                 <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.created_at), "MMM d, yyyy")}</span>
                                 {isPending && <span className="ml-2 text-amber-600">· pending</span>}
+                              </td>
+                              <td className="py-3 text-right pr-1">
+                                <Button size="sm" variant="outline" className="h-8" onClick={() => openReceipt(d)}>
+                                  <Receipt className="h-3.5 w-3.5 mr-1" /> View
+                                </Button>
                               </td>
                             </tr>
                           );
@@ -359,11 +375,13 @@ const Fundraising = () => {
                     </table>
                   </div>
                 )}
-              </Card>
+              </div>
             </>
           )}
         </>
       )}
+
+      <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
     </>
   );
 };
