@@ -40,7 +40,7 @@ export const Hero = () => {
               <Button
                 asChild
                 size="lg"
-                className="rounded-full h-13 px-6 bg-brand-orange text-white hover:bg-brand-orange/90 shadow-glow font-medium text-base group"
+                className="rounded-full h-12 px-6 bg-brand-orange text-white hover:bg-brand-orange/90 shadow-glow font-medium text-base group"
               >
                 <Link to="/auth">
                   <Plus className="mr-1.5 h-4 w-4" />
@@ -53,7 +53,7 @@ export const Hero = () => {
                 asChild
                 size="lg"
                 variant="outline"
-                className="rounded-full h-13 px-6 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 font-medium text-base"
+                className="rounded-full h-12 px-6 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 font-medium text-base"
               >
                 <a href="#memorials">
                   Browse Memorials
