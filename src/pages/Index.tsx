@@ -5,9 +5,9 @@ import { Memorials } from "@/components/site/Memorials";
 import { Services } from "@/components/site/Services";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { WhyUs } from "@/components/site/WhyUs";
-import { Testimonials } from "@/components/site/Testimonials";
 import { CtaBanner } from "@/components/site/CtaBanner";
 import { Footer } from "@/components/site/Footer";
+import { trackVisit } from "@/lib/trackVisit";
 
 const Index = () => {
   useEffect(() => {
@@ -20,6 +20,7 @@ const Index = () => {
       document.head.appendChild(meta);
     }
     meta.setAttribute("content", desc);
+    trackVisit("/");
   }, []);
 
   return (
@@ -30,7 +31,7 @@ const Index = () => {
       <Services />
       <HowItWorks />
       <WhyUs />
-      <Testimonials />
+      
       <CtaBanner />
       <Footer />
     </main>

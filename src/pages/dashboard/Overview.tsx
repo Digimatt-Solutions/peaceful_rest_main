@@ -198,9 +198,9 @@ const Overview = () => {
   }, [user, isSuperAdmin, isMourner, isMemorialAdmin, roleLoading]);
 
   const roleHeader = useMemo(() => {
-    if (isSuperAdmin) return { title: "Super Admin Dashboard", subtitle: "Complete oversight of every memorial, user, and activity across the platform." };
-    if (isMemorialAdmin) return { title: "Memorial Admin Dashboard", subtitle: "Manage your memorials, track tributes and fundraising in one place." };
-    return { title: "Welcome back", subtitle: "Your tributes, contributions, and memorials you follow." };
+    if (isSuperAdmin) return { title: "Dashboard", subtitle: "Complete oversight of every memorial, user, and activity across the platform." };
+    if (isMemorialAdmin) return { title: "Dashboard", subtitle: "Manage your memorials, track tributes and fundraising in one place." };
+    return { title: "Dashboard", subtitle: "Your tributes, contributions, and memorials you follow." };
   }, [isSuperAdmin, isMemorialAdmin]);
 
   // Pre-compute chart data once outside the render tree to avoid per-frame work.
@@ -217,7 +217,7 @@ const Overview = () => {
     return (
       <div className="space-y-5">
         <div className="h-20 rounded-2xl bg-muted/40 animate-pulse" />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {[...Array(4)].map((_, i) => <div key={i} className="h-32 rounded-2xl bg-muted/40 animate-pulse" />)}
         </div>
       </div>
@@ -238,7 +238,7 @@ const Overview = () => {
       />
 
       {/* Stats grid - role aware, unified orange-variant palette */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {isSuperAdmin && <Stat label="Total Users" value={stats.users} icon={Users} accent="quaternary" />}
         <Stat label={isMourner ? "Memorials Followed" : "Memorials"} value={stats.memorials} icon={BookHeart} accent="primary" />
         <Stat label="Visitors" value={stats.visitors.toLocaleString()} icon={Eye} accent="secondary" />
