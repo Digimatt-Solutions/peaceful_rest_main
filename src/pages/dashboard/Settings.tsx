@@ -1,16 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { SiteTraffic } from "@/components/dashboard/SiteTraffic";
 import { toast } from "sonner";
+
 
 const Settings = () => {
   const { user, signOut } = useAuth();
+  const { isSuperAdmin } = useUserRole();
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [notifs, setNotifs] = useState(true);
@@ -34,7 +38,12 @@ const Settings = () => {
 
   return (
     <>
-      <PageHeader title="Settings" subtitle="Notifications, privacy, and account." />
+      <PageHeader title="Settings" subtitle="Notifications, privacy, analytics and account." />
+      {isSuperAdmin && (
+        <div className="mb-8">
+          <SiteTraffic />
+        </div>
+      )}
       <div className="max-w-2xl space-y-5">
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Preferences</h3>
