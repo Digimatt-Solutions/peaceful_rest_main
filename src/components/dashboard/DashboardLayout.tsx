@@ -21,7 +21,7 @@ import logo from "@/assets/makiwa-logo.png";
 type NavItem = { to: string; label: string; icon: any; end?: boolean; roles?: string[] };
 
 const allNav: NavItem[] = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/dashboard/memorials", label: "My Memorials", icon: BookHeart, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/obituary", label: "Obituary Management", icon: FileText, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/family", label: "Family Tree", icon: Users, roles: ["super_admin", "memorial_admin"] },

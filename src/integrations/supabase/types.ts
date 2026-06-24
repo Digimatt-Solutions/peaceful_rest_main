@@ -633,6 +633,48 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          country_code: string | null
+          created_at: string
+          device: string | null
+          id: string
+          os: string | null
+          path: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          os?: string | null
+          path: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          os?: string | null
+          path?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
