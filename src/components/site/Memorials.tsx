@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, MapPin, Flame } from "lucide-react";
+import {
+  ArrowUpRight,
+  MapPin,
+  Flame,
+  CalendarDays,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Memorial = {
@@ -18,7 +23,12 @@ type Memorial = {
 const formatDate = (d: string | null) => {
   if (!d) return "—";
   const date = new Date(d);
-  return date.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 };
 
 export const Memorials = () => {
@@ -28,7 +38,9 @@ export const Memorials = () => {
   useEffect(() => {
     supabase
       .from("memorials")
-      .select("id,full_name,date_of_birth,date_of_death,location,short_tribute,cover_photo_url,profile_photo_url")
+      .select(
+        "id,full_name,date_of_birth,date_of_death,location,short_tribute,cover_photo_url,profile_photo_url"
+      )
       .eq("is_public", true)
       .order("created_at", { ascending: false })
       .limit(6)
@@ -39,104 +51,203 @@ export const Memorials = () => {
   }, []);
 
   return (
-    <section id="memorials" className="py-20 sm:py-24 lg:py-32 bg-cream">
+    <section
+      id="memorials"
+      className="py-20 sm:py-24 lg:py-32 bg-[#faf8f5]"
+    >
       <div className="container-luxe">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-12 lg:mb-14">
-          <div className="max-w-2xl">
-            <span className="text-xs uppercase tracking-[0.25em] text-brand-orange font-semibold">In Loving Memory</span>
-            <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-5xl font-medium leading-tight">
-              Recently shared memorials
+
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
+
+          <div className="max-w-3xl">
+
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange">
+              <Flame className="h-3.5 w-3.5" />
+              In Loving Memory
+            </span>
+
+            <h2 className="mt-4 font-serif text-4xl lg:text-5xl font-medium leading-tight text-black">
+              Recently Shared Memorials
             </h2>
-            <p className="mt-4 text-muted-foreground text-base sm:text-lg">
-              Visit a memorial to leave a candle, share a story, or send condolences to the family.
+
+            <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
+              Discover memorial pages created by families and communities to
+              celebrate, honor and preserve the stories of loved ones.
             </p>
+
           </div>
-          <Button asChild variant="outline" className="rounded-full h-12 px-6 border-foreground/20 hover:bg-foreground hover:text-background">
+
+          <Button
+            asChild
+            variant="outline"
+            className="h-12 px-6 rounded-xl border-black/10 bg-white hover:bg-black hover:text-white"
+          >
             <Link to="/auth">
               View All Memorials
-              <ArrowUpRight className="ml-1 h-4 w-4" />
+              <ArrowUpRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+
         </div>
 
+        {/* Loading State */}
         {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
-            {[0, 1, 2].map(i => (
-              <div key={i} className="rounded-2xl bg-card overflow-hidden shadow-soft">
-                <div className="aspect-[4/5] bg-muted animate-pulse" />
-                <div className="p-6 space-y-3">
-                  <div className="h-4 bg-muted animate-pulse rounded w-2/3" />
-                  <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-black/5 bg-white"
+              >
+                <div className="h-72 bg-muted animate-pulse" />
+
+                <div className="p-6 space-y-4">
+                  <div className="h-5 w-2/3 rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-1/2 rounded bg-muted animate-pulse" />
+                  <div className="h-16 rounded bg-muted animate-pulse" />
                 </div>
               </div>
             ))}
           </div>
         ) : memorials.length === 0 ? (
-          <div className="rounded-3xl border border-border bg-card p-10 sm:p-16 text-center shadow-soft">
-            <div className="h-16 w-16 mx-auto rounded-full bg-brand-orange/10 flex items-center justify-center mb-5">
-              <Flame className="h-7 w-7 text-brand-orange candle-flicker" />
+
+          <div className="rounded-3xl bg-white border border-black/5 p-12 text-center shadow-sm">
+
+            <div className="h-16 w-16 mx-auto rounded-full bg-brand-orange/10 flex items-center justify-center mb-6">
+              <Flame className="h-7 w-7 text-brand-orange" />
             </div>
-            <h3 className="font-serif text-2xl sm:text-3xl">A space ready to be filled with memory</h3>
-            <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-              Be among the first to create a memorial on Makiwa. Honor a life, gather loved ones, and keep their story alive.
+
+            <h3 className="font-serif text-3xl text-black">
+              A Space Ready To Be Filled With Memory
+            </h3>
+
+            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              Be among the first to create a memorial on Makiwa. Honor a life,
+              gather loved ones and preserve cherished memories for generations.
             </p>
-            <Button asChild className="mt-7 rounded-full h-12 px-7 bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow">
-              <Link to="/auth">Create the first memorial</Link>
+
+            <Button
+              asChild
+              className="mt-8 bg-brand-orange hover:bg-brand-orange/90 text-white h-12 px-8 rounded-xl"
+            >
+              <Link to="/auth">
+                Create The First Memorial
+              </Link>
             </Button>
+
           </div>
+
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
-            {memorials.map((m, i) => {
-              const photo = m.profile_photo_url || m.cover_photo_url;
-              return (
-                <article
-                  key={m.id}
-                  className="group relative bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elegant transition-all duration-500 hover:-translate-y-1"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                    {photo ? (
-                      <img
-                        src={photo}
-                        alt={`Portrait of ${m.full_name}`}
-                        loading="lazy"
-                        className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-foreground/90 to-foreground">
-                        <span className="font-serif text-6xl text-brand-white/80">{m.full_name.charAt(0)}</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                    {m.location && (
-                      <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-brand-white/90 backdrop-blur text-xs font-medium tracking-wide flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3 text-brand-orange" />
-                        {m.location}
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 inset-x-0 p-6 text-brand-white">
-                      <h3 className="font-serif text-2xl font-semibold leading-tight">{m.full_name}</h3>
-                      <p className="text-sm text-brand-white/80 mt-1 tracking-wide">
-                        {formatDate(m.date_of_birth)} — {formatDate(m.date_of_death)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <p className="text-foreground/80 italic leading-relaxed line-clamp-3">
-                      "{m.short_tribute || "A life remembered with love."}"
-                    </p>
-                    <Link
-                      to={`/memorial/${m.id}`}
-                      className="mt-5 inline-flex items-center border-2 border-brand-white rounded-lg p-2 gap-2 text-sm font-semibold text-white bg-brand-orange hover:gap-3 transition-all"
-                    >
-                      View Memorial
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
+
+<div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+  {memorials.map((m) => {
+    const photo = m.profile_photo_url || m.cover_photo_url;
+
+    return (
+      <Link
+        key={m.id}
+        to={`/memorial/${m.id}`}
+        className="group block"
+      >
+        <article className="overflow-hidden rounded-[24px] bg-white border border-black/[0.06] shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]">
+
+          {/* Image */}
+          <div className="relative h-[355px] overflow-hidden">
+
+            {photo ? (
+              <img
+                src={photo}
+                alt={m.full_name}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-gradient-to-br from-brand-orange to-brand-orange/80">
+                <span className="font-serif text-7xl text-white">
+                  {m.full_name.charAt(0)}
+                </span>
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+
+            {/* Name Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+
+              <h3 className="font-serif text-[34px] leading-none font-medium">
+                {m.full_name}
+              </h3>
+
+              <div className="mt-4 flex items-center gap-2 text-sm text-white/90">
+                <CalendarDays className="h-4 w-4" />
+                <span>
+                  {formatDate(m.date_of_birth)}
+                </span>
+
+                <span>—</span>
+
+                <span>
+                  {formatDate(m.date_of_death)}
+                </span>
+              </div>
+
+            </div>
+
           </div>
+
+          {/* Content */}
+          <div className="p-7">
+
+            {m.location && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <MapPin className="h-4 w-4 text-brand-orange" />
+                <span>{m.location}</span>
+              </div>
+            )}
+
+            <div className="h-px bg-black/8" />
+
+            <div className="flex gap-3">
+
+              <div className="pt-1">
+                <span className="font-serif text-3xl text-brand-orange leading-none">
+                  “
+                </span>
+              </div>
+
+              <p className="italic text-[17px] leading-8 text-neutral-600 line-clamp-3">
+                {m.short_tribute ||
+                  "A life remembered with love, gratitude and cherished memories."}
+              </p>
+
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+
+              <div className="flex items-center gap-2 border-2 rounded-lg p-2 border-brand-orange/50 font-medium text-lg">
+
+                <span>View Memorial</span>
+
+                <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+
+              </div>
+
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#faf7f3] border border-black/5">
+
+                <Flame className="h-5 w-5 text-brand-orange" />
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </article>
+      </Link>
+    );
+  })}
+</div>
+
         )}
       </div>
     </section>

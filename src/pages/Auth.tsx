@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImage from "@/assets/hero-memorial.jpg";
+import heroImage from "@/assets/auth.png";
 import logo from "@/assets/makiwa-logo.png";
 
 const signUpSchema = z.object({
@@ -29,13 +29,11 @@ const roleOptions = [
   {
     value: "mourner",
     label: "Mourner / Participant",
-    desc: "Visit memorials, send condolences, share memories.",
     icon: Heart,
   },
   {
     value: "memorial_admin",
     label: "Memorial Admin",
-    desc: "Create and manage a memorial for your loved one.",
     icon: ShieldCheck,
   },
 ] as const;
@@ -101,29 +99,23 @@ const Auth = () => {
       {/* Visual side */}
       <div className="relative hidden lg:block overflow-hidden">
         <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-black/90 via-brand-black/40 to-brand-black/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(19_90%_54%/0.25),transparent_55%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-brand-black/10" />
+        <div  />
 
-        <div className="relative z-10 h-full flex flex-col justify-between p-12 xl:p-16 text-brand-white">
-          <Link to="/" className="flex items-center gap-3 group w-fit bg-brand-white/95 rounded-2xl px-4 py-2 border border-brand-orange/30">
+        <div className="relative z-10 h-full flex flex-col justify-between p-10 xl:p-16 text-brand-white">
+          <Link to="/" className="flex items-center gap-3 group w-fit bg-brand-white/80 rounded-2xl px-2 py-1 border border-brand-orange/30">
             <img src={logo} alt="Makiwa" className="h-10 w-auto object-contain" />
           </Link>
 
-          <div className="space-y-6 max-w-lg">
-            <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-medium">A Sanctuary of Remembrance</span>
-            <h2 className="font-serif text-5xl xl:text-6xl leading-[1.05]">
+          <div className="space-y-4 mt-96 max-w-xl">
+            <h2 className="font-serif text-5xl xl:text-5xl leading-[1.05]">
               Where lives are remembered with grace.
             </h2>
-            <p className="text-brand-white/70 text-lg leading-relaxed">
-              Join thousands of families honoring the people who shaped them - through stories, candles, and shared memory.
+            <p className="text-brand-white/80 text-lg leading-relaxed">
+              Join hundreds of families honoring the people who shaped them - through stories, candles, and shared memory.
             </p>
-            <div className="flex items-center gap-6 pt-4 text-sm text-brand-white/60">
-              <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand-orange" /> Bank-grade privacy</span>
-              <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand-orange" /> Forever-free memorials</span>
-            </div>
           </div>
-
-          <p className="text-xs text-brand-white/40">© Makiwa. Powered by <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
+          <p className="text-xs text-brand-white/60">© Makiwa. Powered by <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
               Digimatt Solutions
             </a>.</p>
         </div>
@@ -136,23 +128,23 @@ const Auth = () => {
         </Link>
 
         <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/80 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
-          <Link to="/" className="flex justify-center mb-6">
+          <Link to="/" className="flex justify-center mb-3">
             <img src={logo} alt="Makiwa" className="h-16 w-auto object-contain" />
           </Link>
 
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
-          <Tabs defaultValue="login" className="mt-8">
-            <TabsList className="grid grid-cols-2 w-full h-12 p-1 bg-muted rounded-10">
+          <Tabs defaultValue="login" className="mt-5">
+            <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-10">
               <TabsTrigger value="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
               <TabsTrigger value="signup" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="login" className="mt-8">
-              <form onSubmit={handleLogin} className="space-y-5">
+            <TabsContent value="login" className="mt-5">
+              <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="li-email">Email address</Label>
-                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-2 border-brand-orange/50 focus-visible:ring-brand-orange/40" required />
+                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -160,7 +152,7 @@ const Auth = () => {
                     <button type="button" className="text-xs text-brand-orange hover:underline">Forgot Password?</button>
                   </div>
                   <div className="relative">
-                    <Input id="li-pw" name="password" type={showPw ? "text" : "password"} className="h-12 rounded-xl pr-11 border-2 border-brand-orange/50 focus-visible:ring-brand-orange/40" required />
+                    <Input id="li-pw" name="password" type={showPw ? "text" : "password"} className="h-11 rounded-xl pr-11 border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
                     <button type="button" onClick={() => setShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -172,9 +164,9 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="mt-8">
-              <form onSubmit={handleSignUp} className="space-y-5">
-                <div className="space-y-2">
+            <TabsContent value="signup" className="mt-5">
+              <form onSubmit={handleSignUp} className="space-y-3">
+                <div className="space-y-1">
                   <Label>I am joining as</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {roleOptions.map(opt => {
@@ -194,31 +186,30 @@ const Auth = () => {
                         >
                           <Icon className={cn("h-5 w-5 mb-2", active ? "text-brand-orange" : "text-muted-foreground")} />
                           <p className="text-sm font-medium leading-tight">{opt.label}</p>
-                          <p className="text-xs text-muted-foreground mt-1 leading-snug">{opt.desc}</p>
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="su-name">Full name</Label>
-                  <Input id="su-name" name="fullName" placeholder="Your full name" className="h-12 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                  <Input id="su-name" name="fullName" placeholder="Your full name" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="su-email">Email</Label>
-                    <Input id="su-email" name="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                    <Input id="su-email" name="email" type="email" placeholder="you@example.com" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="su-phone">Phone <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                    <Input id="su-phone" name="phone" type="tel" className="h-12 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" />
+                    <Input id="su-phone" name="phone" type="tel" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" />
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="su-pw">Password</Label>
                   <div className="relative">
-                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8} placeholder="At least 8 characters" className="h-12 rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8} placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                     <button type="button" onClick={() => setShowSuPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showSuPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -231,11 +222,11 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
 
-          <p className="mt-8 text-xs text-center text-muted-foreground leading-relaxed">
+          <p className="mt-5 text-xs text-center text-muted-foreground leading-relaxed">
             By continuing you agree to our <a className="underline hover:text-foreground" href="#">Terms</a> and <a className="underline hover:text-foreground" href="#">Privacy Policy</a>.
           </p>
 
-          <p className="mt-6 text-[11px] text-center text-muted-foreground">
+          <p className="mt-2 text-[11px] text-center text-muted-foreground">
             Powered by{" "}
             <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
               Digimatt Solutions

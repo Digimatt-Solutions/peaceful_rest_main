@@ -39,7 +39,7 @@ export const Hero = () => {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7">
 
-            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight text-black">
+            <h1 className="font-serif text-5xl font-medium sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight text-black">
               Honoring Lives.
               <br />
               Sharing Memories.
