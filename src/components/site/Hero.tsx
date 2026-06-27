@@ -127,7 +127,7 @@ export const Hero = () => {
           {/* RIGHT CONTENT */}
           <div className="lg:col-span-5 flex justify-end">
 
-            <div className="mt-80 max-w-sm mr-20 rounded-3xl border border-brand-orange/20 bg-black/30 backdrop-blur-xl p-5 shadow-2xl">
+            <div className="mt-8 lg:mt-80 max-w-sm w-full lg:mr-20 rounded-3xl border border-brand-orange/20 bg-black/60 lg:bg-black/30 backdrop-blur-xl p-5 shadow-2xl">
 
               <Quote className="h-5 w-5 text-brand-orange " />
 
