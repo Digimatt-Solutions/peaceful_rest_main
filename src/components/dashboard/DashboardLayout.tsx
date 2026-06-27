@@ -85,8 +85,8 @@ export const DashboardLayout = () => {
         "w-64",
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-white/60 dark:bg-slate-800/40", collapsed ? "lg:justify-center lg:px-2" : "")}>
-          <Link to="/" className="flex items-left gap-2 min-w-0 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-left bg-white/50 dark:bg-slate-800/50">
+        <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-slate-100 dark:bg-slate-900", collapsed ? "lg:justify-center lg:px-2" : "")}>
+          <Link to="/" className="flex items-center gap-2 min-w-0 rounded-xl px-2.5 py-1.5 border border-brand-orange/30 w-full justify-center bg-transparent">
             <img src={logo} alt="Makiwa" className={cn("object-contain", collapsed ? "h-7 w-7" : "h-9 w-auto")} />
           </Link>
         </div>

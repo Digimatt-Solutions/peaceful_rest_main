@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import HERO_BG from "@/assets/bg2.png";
+import HERO_BG_MOBILE from "@/assets/hero.jpg";
 
 export const Hero = () => {
   return (
@@ -18,16 +19,17 @@ export const Hero = () => {
       id="home"
       className="relative min-h-screen flex items-center overflow-hidden pt-24"
     >
-      {/* Background */}
+      {/* Background - bg2 on large screens, hero.jpg on smaller */}
       <div className="absolute inset-0 z-0">
-        <img
-          src={HERO_BG}
-          alt="Makiwa Memorial Platform"
-          className="w-full h-full object-cover"
-        />
-
-        {/* Light overlay matching #fbeae0 */}
-        <div/>
+        <picture>
+          <source media="(min-width: 1024px)" srcSet={HERO_BG} />
+          <img
+            src={HERO_BG_MOBILE}
+            alt="Makiwa Memorial Platform"
+            className="w-full h-full object-cover"
+          />
+        </picture>
+        <div className="absolute inset-0 bg-white/70 lg:bg-transparent" />
       </div>
 
       {/* Soft orange ambient glow */}
