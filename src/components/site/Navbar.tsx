@@ -19,7 +19,7 @@ export const Navbar = () => {
   const { user } = useAuth();
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-brand-black/55 backdrop-blur-xl border-b border-brand-white/10">
+    <header className="fixed top-0 inset-x-0 z-50 bg-brand-black/90 backdrop-blur-xl border-b border-brand-white/10">
       <nav className="container-luxe flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2.5 group">
           <img src={logo} alt="Makiwa" className="h-10 w-auto object-contain" />
@@ -45,10 +45,10 @@ export const Navbar = () => {
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" className="rounded-full text-brand-white border border-brand-white/30 hover:bg-brand-white/10 hover:text-brand-white">
+              <Button asChild variant="ghost" className="rounded-lg text-brand-white border border-brand-white/60 hover:bg-brand-white/10 hover:text-brand-white">
                 <Link to="/auth"><LogIn className="mr-1.5 h-4 w-4" />Sign In</Link>
               </Button>
-              <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
+              <Button asChild className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
                 <Link to="/auth"><UserPlus className="mr-1.5 h-4 w-4" />Sign Up</Link>
               </Button>
             </>
