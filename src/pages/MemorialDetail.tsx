@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { z } from "zod";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
+import { MemorialQR } from "@/components/MemorialQR";
 
 const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "-";
 
@@ -195,102 +196,112 @@ const MemorialDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-20">
-  
-  {/* BACKGROUND (always stays behind) */}
-  <div className="absolute inset-0 z-0 h-[70vh] overflow-hidden">
-    {cover ? (
-      <img
-        src={cover}
-        alt={memorial.full_name}
-        className="w-full h-full object-cover"
-      />
-    ) : (
-      <div className="w-full h-full bg-gradient-to-br from-foreground to-foreground/80" />
-    )}
+      <section className="relative pt-20 overflow-hidden">
+        {/* Layered background */}
+        <div className="absolute inset-0 z-0 h-[88vh] min-h-[640px] overflow-hidden">
+          {cover ? (
+            <img
+              src={cover}
+              alt={memorial.full_name}
+              className="w-full h-full object-cover scale-105"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-neutral-900 to-neutral-800" />
+          )}
+          {/* Editorial gradient stack */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-brand-orange/15 blur-[160px]" />
+        </div>
 
-    {/* overlay (kept subtle so image is visible) */}
-    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/60" />
-  </div>
+        <div className="relative z-10 container-luxe pt-28 pb-20 lg:pt-36 lg:pb-28 text-white">
+          <div className="grid lg:grid-cols-12 gap-10 items-end">
+            <div className="lg:col-span-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-[11px] uppercase tracking-[0.3em]">
+                <Flame className="h-3.5 w-3.5 text-orange-400" />
+                In Loving Memory
+              </div>
 
-  {/* CONTENT (always above background) */}
-  <div className="relative z-10 container-luxe pt-24 pb-12 text-white">
-    
-    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-xs uppercase tracking-[0.2em]">
-      <Flame className="h-3.5 w-3.5 text-orange-400" /> 
-      In Loving Memory
-    </div>
+              <h1 className="mt-7 font-serif text-5xl sm:text-6xl lg:text-8xl font-medium leading-[0.95] tracking-tight">
+                {memorial.full_name}
+              </h1>
 
-    <h1 className="mt-6 font-serif text-5xl sm:text-6xl lg:text-7xl font-medium leading-[1.05]">
-      {memorial.full_name}
-    </h1>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-white/80">
+                <p className="text-lg font-light tracking-wide font-serif italic">
+                  {fmt(memorial.date_of_birth)}
+                  <span className="mx-3 text-orange-400">—</span>
+                  {fmt(memorial.date_of_death)}
+                </p>
+                {memorial.location && (
+                  <p className="inline-flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 text-orange-400" />
+                    {memorial.location}
+                  </p>
+                )}
+              </div>
 
-    <p className="mt-4 text-lg text-white/80 font-light tracking-wide">
-      {fmt(memorial.date_of_birth)} 
-      <span className="mx-2 text-orange-400">-</span> 
-      {fmt(memorial.date_of_death)}
-    </p>
+              {memorial.short_tribute && (
+                <div className="mt-8 max-w-2xl border-l-2 border-orange-400/70 pl-5">
+                  <p className="italic text-white/90 text-xl leading-relaxed font-serif">
+                    "{memorial.short_tribute}"
+                  </p>
+                </div>
+              )}
 
-    {memorial.location && (
-      <p className="mt-2 inline-flex items-center gap-2 text-white/70 text-sm">
-        <MapPin className="h-4 w-4 text-orange-400" /> 
-        {memorial.location}
-      </p>
-    )}
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Button
+                  onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
+                  className="rounded-xl bg-orange-400 text-black hover:bg-orange-500 h-12 px-6 border-orange-400"
+                >
+                  <Flame className="h-4 w-4 mr-2" />
+                  {candleLit ? "Candle lit" : "Light a candle"}
+                </Button>
 
-    {memorial.short_tribute && (
-      <p className="mt-6 max-w-2xl italic text-white/85 text-lg leading-relaxed font-serif">
-        "{memorial.short_tribute}"
-      </p>
-    )}
+                <Button
+                  onClick={share}
+                  variant="outline"
+                  className="rounded-xl h-12 px-6 bg-white/5 border-white/30 text-white hover:bg-white hover:text-black"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share memorial
+                </Button>
 
-    <div className="mt-8 flex flex-wrap gap-3">
-      <Button
-        onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
-        className="rounded-full bg-orange-400 text-black hover:bg-orange-500 h-12 px-6"
-      >
-        <Flame className="h-4 w-4 mr-2" />
-        {candleLit ? "Candle lit" : "Light a candle"}
-      </Button>
+                <a
+                  href="#condolence"
+                  className="inline-flex items-center gap-2 rounded-xl h-12 px-6 border border-white/30 bg-white/5 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium"
+                >
+                  <Heart className="h-4 w-4" />
+                  Send condolences
+                </a>
+              </div>
 
-      <Button
-        onClick={share}
-        variant="outline"
-        className="rounded-full h-12 px-6 border-white/30 text-black hover:bg-white hover:text-black"
-      >
-        <Share2 className="h-4 w-4 mr-2" />
-        Share memorial
-      </Button>
+              <div className="mt-12 grid grid-cols-3 gap-4 max-w-md border-t border-white/15 pt-6">
+                <Stat label="Visits" value={(memorial.visitor_count || 0).toLocaleString()} />
+                <Stat label="Condolences" value={condolences.length.toString()} />
+                <Stat label="Memories" value={memories.length.toString()} />
+              </div>
+            </div>
 
-      <a
-        href="#condolence"
-        className="inline-flex items-center gap-2 rounded-full h-12 px-6 border border-white/30 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium"
-      >
-        <Heart className="h-4 w-4" />
-        Send condolences
-      </a>
-    </div>
-
-    <div className="mt-10 flex items-center gap-8 text-xs text-white/70">
-      <span>
-        <strong className="text-white text-base font-serif">
-          {(memorial.visitor_count || 0).toLocaleString()}
-        </strong> visits
-      </span>
-      <span>
-        <strong className="text-white text-base font-serif">
-          {condolences.length}
-        </strong> condolences
-      </span>
-      <span>
-        <strong className="text-white text-base font-serif">
-          {memories.length}
-        </strong> memories
-      </span>
-    </div>
-
-  </div>
-</section>
+            {/* Right portrait card */}
+            {memorial.profile_photo_url && (
+              <div className="hidden lg:block lg:col-span-4">
+                <div className="relative ml-auto max-w-[340px] rounded-3xl overflow-hidden border border-white/15 shadow-2xl">
+                  <img
+                    src={memorial.profile_photo_url}
+                    alt={memorial.full_name}
+                    className="w-full h-[420px] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">Cherished Always</p>
+                    <p className="mt-1 font-serif text-xl">{memorial.full_name.split(" ")[0]}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
 
       <div className="container-luxe py-16 lg:py-24 grid lg:grid-cols-[1fr_320px] gap-12">
         {/* Main column */}
@@ -519,12 +530,11 @@ const MemorialDetail = () => {
             </div>
           )}
 
+          <MemorialQR memorialId={memorial.id} memorialName={memorial.full_name} />
+
           <div className="rounded-2xl border border-brand-orange/30 bg-gradient-to-b from-brand-orange/5 to-transparent p-6 text-center">
             <Flame className="h-6 w-6 mx-auto text-brand-orange candle-flicker" />
             <p className="mt-3 font-serif text-lg leading-tight">May their memory be a blessing.</p>
-            <Button onClick={share} className="mt-4 w-full rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
-              <Share2 className="h-4 w-4 mr-2" /> Share this memorial
-            </Button>
           </div>
         </aside>
       </div>
@@ -541,6 +551,13 @@ const SectionTitle = ({ icon: Icon, eyebrow, title }: { icon: any; eyebrow: stri
       <Icon className="h-3.5 w-3.5" /> {eyebrow}
     </div>
     <h2 className="mt-3 font-serif text-3xl sm:text-4xl font-medium">{title}</h2>
+  </div>
+);
+
+const Stat = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <p className="font-serif text-2xl text-white">{value}</p>
+    <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mt-1">{label}</p>
   </div>
 );
 

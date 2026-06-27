@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
+import { MemorialQR } from "@/components/MemorialQR";
 
 const empty = {
   full_name: "", gender: "", date_of_birth: "", date_of_death: "",
@@ -92,6 +93,28 @@ const ObituaryManagement = () => {
         subtitle="Add the photos, dates, and story you'd like to remember."
         action={id && <Button onClick={remove} variant="outline" className="rounded-full text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"><Trash2 className="h-4 w-4 mr-1" /> Delete</Button>}
       />
+
+      {id && form.full_name && (
+        <div className="mb-8 grid lg:grid-cols-[1fr_320px] gap-6 max-w-3xl">
+          <div className="rounded-2xl border border-brand-orange/30 bg-gradient-to-br from-brand-orange/5 to-transparent p-6">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-brand-orange font-semibold">Shareable Memorial</p>
+            <h3 className="mt-2 font-serif text-2xl">Spread the word</h3>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              A unique QR code has been generated for this memorial. Print it on the program, share it on social media, or send it via message. Anyone who scans it lands directly on this memorial page.
+            </p>
+            <a
+              href={`/memorial/${id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-orange hover:underline"
+            >
+              View public memorial page →
+            </a>
+          </div>
+          <MemorialQR memorialId={id} memorialName={form.full_name} size={160} />
+        </div>
+      )}
+
       <form onSubmit={save} className="space-y-7 max-w-3xl">
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Basic information</h3>

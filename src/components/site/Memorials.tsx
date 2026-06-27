@@ -43,7 +43,7 @@ export const Memorials = () => {
       )
       .eq("is_public", true)
       .order("created_at", { ascending: false })
-      .limit(6)
+      .limit(3)
       .then(({ data }) => {
         setMemorials((data as Memorial[]) || []);
         setLoading(false);
@@ -215,7 +215,7 @@ export const Memorials = () => {
                 </span>
               </div>
 
-              <p className="italic text-[17px] leading-8 text-neutral-600 line-clamp-3">
+              <p className="italic text-[16px] leading-7 text-neutral-600 line-clamp-2 min-h-[3.5rem] overflow-hidden text-ellipsis">
                 {m.short_tribute ||
                   "A life remembered with love, gratitude and cherished memories."}
               </p>
