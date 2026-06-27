@@ -530,12 +530,11 @@ const MemorialDetail = () => {
             </div>
           )}
 
+          <MemorialQR memorialId={memorial.id} memorialName={memorial.full_name} />
+
           <div className="rounded-2xl border border-brand-orange/30 bg-gradient-to-b from-brand-orange/5 to-transparent p-6 text-center">
             <Flame className="h-6 w-6 mx-auto text-brand-orange candle-flicker" />
             <p className="mt-3 font-serif text-lg leading-tight">May their memory be a blessing.</p>
-            <Button onClick={share} className="mt-4 w-full rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
-              <Share2 className="h-4 w-4 mr-2" /> Share this memorial
-            </Button>
           </div>
         </aside>
       </div>
@@ -552,6 +551,13 @@ const SectionTitle = ({ icon: Icon, eyebrow, title }: { icon: any; eyebrow: stri
       <Icon className="h-3.5 w-3.5" /> {eyebrow}
     </div>
     <h2 className="mt-3 font-serif text-3xl sm:text-4xl font-medium">{title}</h2>
+  </div>
+);
+
+const Stat = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <p className="font-serif text-2xl text-white">{value}</p>
+    <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mt-1">{label}</p>
   </div>
 );
 
