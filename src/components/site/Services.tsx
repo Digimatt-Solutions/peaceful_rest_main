@@ -1,17 +1,58 @@
-import { Building2, Flower2, Camera, Car, Tent, Printer, HeartPulse, Shield, UtensilsCrossed, ArrowUpRight } from "lucide-react";
+import {
+  Megaphone,
+  HeartHandshake,
+  ScrollText,
+  MessageCircle,
+  Camera,
+  Users,
+  CalendarHeart,
+  QrCode,
+  Flame,
+  ArrowUpRight,
+} from "lucide-react";
 import FEATURE_IMG from "@/assets/hero-memorial.jpg";
 
-
-const services = [
-  { icon: Building2, name: "Funeral Homes", desc: "Vetted partners offering dignified ceremonies." },
-  { icon: Flower2, name: "Floral Tributes", desc: "Wreaths, bouquets, and arrangements delivered." },
-  { icon: UtensilsCrossed, name: "Catering", desc: "Receptions and post-service gatherings." },
-  { icon: Tent, name: "Tents & Chairs", desc: "Outdoor service setup and rentals." },
-  { icon: Car, name: "Transport", desc: "Hearse, family cars, and group buses." },
-  { icon: Printer, name: "Printing", desc: "Programs, banners, and obituary booklets." },
-  { icon: Camera, name: "Photographers", desc: "Professional service photography & video." },
-  { icon: HeartPulse, name: "Counselors", desc: "Bereavement support for families." },
-  { icon: Shield, name: "Insurance Partners", desc: "Funeral cover and family protection plans." },
+const features = [
+  {
+    icon: ScrollText,
+    name: "Eulogy & Obituary Design",
+    desc: "Beautifully crafted obituary pages with biography, photos, dates and a lasting tribute.",
+  },
+  {
+    icon: Megaphone,
+    name: "Announcements",
+    desc: "Share funeral notices, service schedules and family updates with everyone, instantly.",
+  },
+  {
+    icon: HeartHandshake,
+    name: "Fundraising",
+    desc: "Raise contributions toward funeral, burial or family support with secure Stripe checkout.",
+  },
+  {
+    icon: MessageCircle,
+    name: "Official Condolences",
+    desc: "Receive heartfelt messages from friends, family and community in one moderated space.",
+  },
+  {
+    icon: Camera,
+    name: "Life Moments Gallery",
+    desc: "Preserve cherished photo memories in an elegant, scrollable timeline of their life.",
+  },
+  {
+    icon: Users,
+    name: "Family Tree",
+    desc: "Map out the family connections that surrounded and shaped the life remembered.",
+  },
+  {
+    icon: CalendarHeart,
+    name: "Anniversary Reminders",
+    desc: "Never forget important dates with automatic anniversary notices for the family.",
+  },
+  {
+    icon: QrCode,
+    name: "Shareable QR Codes",
+    desc: "Every memorial generates a unique QR code so loved ones can visit with a single scan.",
+  },
 ];
 
 export const Services = () => {
@@ -20,52 +61,69 @@ export const Services = () => {
       <div className="container-luxe">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-end mb-14 lg:mb-20">
           <div className="lg:col-span-7">
-            <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Trusted Services</span>
+            <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
+              What Makiwa Offers
+            </span>
             <h2 className="mt-4 font-serif text-4xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
-              Everything families<br className="hidden sm:block" /> need, in one place.
+              Every tool a family needs <br className="hidden sm:block" />
+              to honor, gather and remember.
             </h2>
           </div>
           <div className="lg:col-span-5">
             <p className="text-muted-foreground text-lg leading-relaxed">
-              From the first call to the final ceremony — connect with verified
-              professionals who understand what truly matters during difficult
-              moments.
+              From the first announcement to the lasting memorial, Makiwa brings
+              everything together — eulogies, condolences, fundraising and
+              shareable QR codes — in one calm, dignified place.
             </p>
           </div>
         </div>
 
-        {/* Editorial showcase row */}
+        {/* Editorial feature row */}
         <div className="grid lg:grid-cols-12 gap-6 mb-6">
           <div className="lg:col-span-7 relative rounded-[2rem] overflow-hidden aspect-[16/10] lg:aspect-auto lg:h-[440px] group">
             <img
               src={FEATURE_IMG}
-              alt="Soft white florals on a memorial table"
+              alt="A memorial gathering"
               className="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-black/90 via-brand-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-black/90 via-brand-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 text-brand-white">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange">Featured</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange flex items-center gap-2">
+                <Flame className="h-3 w-3" /> Featured
+              </span>
               <h3 className="mt-3 font-serif text-3xl lg:text-4xl font-medium max-w-md leading-tight">
-                Floral arrangements as gentle as the goodbye.
+                A complete digital memorial, designed with grace.
               </h3>
-              <a href="#" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold tracking-wide hover:gap-3 transition-all">
-                Browse florists <ArrowUpRight className="h-4 w-4" />
+              <p className="mt-3 max-w-md text-brand-white/75 text-sm leading-relaxed">
+                Build a private or public tribute, invite the community, and
+                keep their story alive across generations.
+              </p>
+              <a
+                href="#memorials"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold tracking-wide hover:gap-3 transition-all"
+              >
+                Explore memorials <ArrowUpRight className="h-4 w-4" />
               </a>
             </div>
           </div>
 
           <div className="lg:col-span-5 grid sm:grid-cols-2 lg:grid-cols-1 gap-6">
-            {services.slice(0, 2).map((s) => {
+            {features.slice(0, 2).map((s) => {
               const Icon = s.icon;
               return (
-                <div key={s.name} className="rounded-[2rem] border border-border bg-card p-7 lg:p-8 hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]">
+                <div
+                  key={s.name}
+                  className="rounded-[2rem] border border-border bg-card p-7 lg:p-8 hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]"
+                >
                   <div className="h-12 w-12 rounded-xl bg-brand-black flex items-center justify-center">
                     <Icon className="h-5 w-5 text-brand-white" />
                   </div>
                   <div className="mt-6">
                     <h3 className="font-serif text-2xl font-medium">{s.name}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                      {s.desc}
+                    </p>
                   </div>
                 </div>
               );
@@ -73,8 +131,8 @@ export const Services = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {services.slice(2).map((s) => {
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+          {features.slice(2).map((s) => {
             const Icon = s.icon;
             return (
               <div
@@ -84,8 +142,10 @@ export const Services = () => {
                 <div className="h-11 w-11 rounded-xl bg-brand-black flex items-center justify-center group-hover:bg-brand-orange transition-colors duration-500">
                   <Icon className="h-5 w-5 text-brand-white" />
                 </div>
-                <h3 className="mt-5 font-serif text-lg font-semibold">{s.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                <h3 className="mt-5 font-serif text-xl font-semibold">{s.name}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  {s.desc}
+                </p>
               </div>
             );
           })}
