@@ -7,7 +7,7 @@ interface ReceiptData {
   id: string;
   amount: number;
   donor_name?: string | null;
-  donor_email?: string | null;
+  donor_phone?: string | null;
   is_anonymous?: boolean;
   message?: string | null;
   created_at: string;
@@ -17,7 +17,7 @@ interface ReceiptData {
 }
 
 export const buildReceiptHTML = (d: ReceiptData) => {
-  const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+  const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
   const refNo = `MKW-${d.id.slice(0, 8).toUpperCase()}`;
   const date = format(new Date(d.created_at), "MMMM d, yyyy 'at' h:mm a");
   return `<!doctype html><html><head><meta charset="utf-8"/><title>Receipt ${refNo}</title>
@@ -57,7 +57,7 @@ export const buildReceiptHTML = (d: ReceiptData) => {
     <div class="grid">
       <div class="row"><div class="k">Donor</div><div class="v">${name}</div></div>
       <div class="row"><div class="k">Date</div><div class="v">${date}</div></div>
-      ${d.donor_email && !d.is_anonymous ? `<div class="row"><div class="k">Email</div><div class="v">${d.donor_email}</div></div>` : ""}
+      ${d.donor_phone && !d.is_anonymous ? `<div class="row"><div class="k">Phone</div><div class="v">${d.donor_phone}</div></div>` : ""}
       ${d.memorial_name ? `<div class="row"><div class="k">In memory of</div><div class="v">${d.memorial_name}</div></div>` : ""}
       ${d.fundraiser_title ? `<div class="row"><div class="k">Fundraiser</div><div class="v">${d.fundraiser_title}</div></div>` : ""}
     </div>

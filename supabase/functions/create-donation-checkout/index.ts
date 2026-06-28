@@ -17,7 +17,7 @@ serve(async (req) => {
       fundraiser_id,
       amount,
       donor_name,
-      donor_email,
+      donor_phone,
       message,
       is_anonymous,
       success_url,
@@ -70,7 +70,7 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "";
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: donor_email || undefined,
+      customer_email: undefined,
       line_items: [
         {
           price_data: {
@@ -103,7 +103,7 @@ serve(async (req) => {
       fundraiser_id,
       user_id: userId,
       donor_name: is_anonymous ? null : (donor_name || null),
-      donor_email: donor_email || null,
+      donor_phone: donor_phone || null,
       amount: Number(amount),
       message: message || null,
       is_anonymous: !!is_anonymous,

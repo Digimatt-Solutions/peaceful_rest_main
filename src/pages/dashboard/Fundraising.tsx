@@ -44,7 +44,7 @@ const Fundraising = () => {
   const [receiptDonation, setReceiptDonation] = useState<any>(null);
   const [openAddContrib, setOpenAddContrib] = useState(false);
   const [savingContrib, setSavingContrib] = useState(false);
-  const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
+  const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
@@ -61,14 +61,14 @@ const Fundraising = () => {
   const downloadContributorsCSV = () => {
     if (!donations.length) return;
     const rows = [
-      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Date"],
+      ["Reference", "Donor", "Phone", "Fundraiser", "Amount (KSh)", "Status", "Date"],
       ...donations.map(d => {
         const fund = funds.find(f => f.id === d.fundraiser_id);
-        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
         return [
           `MKW-${d.id.slice(0,8).toUpperCase()}`,
           name,
-          d.is_anonymous ? "" : (d.donor_email || ""),
+          d.is_anonymous ? "" : (d.donor_phone || ""),
           fund?.title || "",
           Number(d.amount).toString(),
           d.status || "",
@@ -132,7 +132,7 @@ const Fundraising = () => {
       fundraiser_id: contribForm.fundraiser_id,
       amount: amt,
       donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
-      donor_email: contribForm.is_anonymous ? null : (contribForm.donor_email || null),
+      donor_phone: contribForm.is_anonymous ? null : (contribForm.donor_phone || null),
       is_anonymous: contribForm.is_anonymous,
       status: "paid",
     }).select().maybeSingle();
@@ -146,7 +146,7 @@ const Fundraising = () => {
     setDonations([ins, ...donations]);
     setSavingContrib(false);
     setOpenAddContrib(false);
-    setContribForm({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
+    setContribForm({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
     toast.success("Contribution recorded");
   };
 
@@ -156,7 +156,7 @@ const Fundraising = () => {
   const totals = useMemo(() => {
     const raised = donations.reduce((s, d) => s + Number(d.amount || 0), 0);
     const goal = funds.reduce((s, f) => s + Number(f.goal_amount || 0), 0);
-    const uniqueDonors = new Set(donations.map(d => d.is_anonymous ? `anon-${d.id}` : (d.donor_email || d.donor_name || `id-${d.id}`))).size;
+    const uniqueDonors = new Set(donations.map(d => d.is_anonymous ? `anon-${d.id}` : (d.donor_phone || d.donor_name || `id-${d.id}`))).size;
     const avg = donations.length ? raised / donations.length : 0;
     return { raised, goal, uniqueDonors, avg, count: donations.length };
   }, [donations, funds]);
@@ -184,8 +184,8 @@ const Fundraising = () => {
   const topDonors = useMemo(() => {
     const map: Record<string, { name: string; total: number; count: number }> = {};
     donations.forEach(d => {
-      const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_email || d.donor_name || "Anonymous");
-      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+      const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_phone || d.donor_name || "Anonymous");
+      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
       if (!map[key]) map[key] = { name: display, total: 0, count: 0 };
       map[key].total += Number(d.amount || 0);
       map[key].count += 1;
@@ -375,7 +375,7 @@ const Fundraising = () => {
                       <tbody>
                         {donations.map(d => {
                           const fund = funds.find(f => f.id === d.fundraiser_id);
-                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
                           const isPending = d.status === "pending";
                           return (
                             <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
@@ -386,7 +386,7 @@ const Fundraising = () => {
                                   </div>
                                   <div>
                                     <p className="font-medium">{name}</p>
-                                    {d.donor_email && !d.is_anonymous && <p className="text-xs text-muted-foreground">{d.donor_email}</p>}
+                                    {d.donor_phone && !d.is_anonymous && <p className="text-xs text-muted-foreground">{d.donor_phone}</p>}
                                   </div>
                                 </div>
                               </td>
@@ -429,7 +429,7 @@ const Fundraising = () => {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-2"><Label>Donor name</Label><Input value={contribForm.donor_name} onChange={(e) => setContribForm({ ...contribForm, donor_name: e.target.value })} disabled={contribForm.is_anonymous} /></div>
-              <div className="space-y-2"><Label>Email <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="email" value={contribForm.donor_email} onChange={(e) => setContribForm({ ...contribForm, donor_email: e.target.value })} disabled={contribForm.is_anonymous} /></div>
+              <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="tel" value={contribForm.donor_phone} onChange={(e) => setContribForm({ ...contribForm, donor_phone: e.target.value })} disabled={contribForm.is_anonymous} /></div>
             </div>
             <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={contribForm.amount} onChange={(e) => setContribForm({ ...contribForm, amount: e.target.value })} /></div>
             <label className="inline-flex items-center gap-2 text-sm">

@@ -37,7 +37,7 @@ const MemorialDetail = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [fundraisers, setFundraisers] = useState<any[]>([]);
   const [donateOpen, setDonateOpen] = useState<string | null>(null);
-  const [donateForm, setDonateForm] = useState({ donor_name: "", donor_email: "", amount: "", message: "", is_anonymous: false });
+  const [donateForm, setDonateForm] = useState({ donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -141,7 +141,7 @@ const MemorialDetail = () => {
         fundraiser_id: fundraiserId,
         amount: amt,
         donor_name: donateForm.donor_name,
-        donor_email: donateForm.donor_email,
+        donor_phone: donateForm.donor_phone,
         message: donateForm.message,
         is_anonymous: donateForm.is_anonymous,
       },
@@ -445,7 +445,7 @@ const MemorialDetail = () => {
                       {open && (
                         <div className="mt-6 grid sm:grid-cols-2 gap-3 pt-5 border-t border-border">
                           <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} className="rounded-xl" /></div>
-                          <div className="space-y-2"><Label>Email <span className="text-muted-foreground font-normal">(for receipt)</span></Label><Input type="email" value={donateForm.donor_email} onChange={(e) => setDonateForm({ ...donateForm, donor_email: e.target.value })} className="rounded-xl" /></div>
+                          <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal">(for receipt)</span></Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} className="rounded-xl" /></div>
                           <div className="space-y-2 sm:col-span-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
                           
                           <label className="sm:col-span-2 inline-flex items-center gap-2 text-sm">
