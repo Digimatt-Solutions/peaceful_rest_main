@@ -141,7 +141,7 @@ const MemorialDetail = () => {
         fundraiser_id: fundraiserId,
         amount: amt,
         donor_name: donateForm.donor_name,
-        donor_email: donateForm.donor_email,
+        donor_phone: donateForm.donor_phone,
         message: donateForm.message,
         is_anonymous: donateForm.is_anonymous,
       },
