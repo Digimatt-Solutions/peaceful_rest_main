@@ -17,7 +17,7 @@ interface ReceiptData {
 }
 
 export const buildReceiptHTML = (d: ReceiptData) => {
-  const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+  const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
   const refNo = `MKW-${d.id.slice(0, 8).toUpperCase()}`;
   const date = format(new Date(d.created_at), "MMMM d, yyyy 'at' h:mm a");
   return `<!doctype html><html><head><meta charset="utf-8"/><title>Receipt ${refNo}</title>
