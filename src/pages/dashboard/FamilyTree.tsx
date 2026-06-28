@@ -57,6 +57,7 @@ const FamilyTree = () => {
     if (error) return toast.error(error.message);
     setMembers([...members, data as Member]);
     setName("");
+    setAddOpen(false);
     toast.success("Family member added");
   };
 
@@ -169,6 +170,33 @@ const FamilyTree = () => {
           <DialogFooter>
             <Button variant="outline" className="rounded-xl" onClick={() => setEditing(null)}>Cancel</Button>
             <Button onClick={saveEdit} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white">Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Add family member</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Mary Okonkwo" />
+            </div>
+            <div className="space-y-2">
+              <Label>Relationship</Label>
+              <Select value={relationship} onValueChange={setRelationship}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {RELATIONSHIPS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={add} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white">
+              <Plus className="h-4 w-4 mr-1" /> Add
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
