@@ -184,8 +184,8 @@ const Fundraising = () => {
   const topDonors = useMemo(() => {
     const map: Record<string, { name: string; total: number; count: number }> = {};
     donations.forEach(d => {
-      const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_email || d.donor_name || "Anonymous");
-      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+      const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_phone || d.donor_name || "Anonymous");
+      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
       if (!map[key]) map[key] = { name: display, total: 0, count: 0 };
       map[key].total += Number(d.amount || 0);
       map[key].count += 1;
