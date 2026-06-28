@@ -70,7 +70,7 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "";
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: donor_email || undefined,
+      customer_email: undefined,
       line_items: [
         {
           price_data: {
