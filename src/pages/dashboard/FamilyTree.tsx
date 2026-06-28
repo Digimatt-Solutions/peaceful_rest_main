@@ -27,6 +27,7 @@ const FamilyTree = () => {
   const [editing, setEditing] = useState<Member | null>(null);
   const [editName, setEditName] = useState("");
   const [editRel, setEditRel] = useState("Father");
+  const [addOpen, setAddOpen] = useState(false);
   const deceased = memorials.find(m => m.id === memorialId);
 
   useEffect(() => {
@@ -56,6 +57,7 @@ const FamilyTree = () => {
     if (error) return toast.error(error.message);
     setMembers([...members, data as Member]);
     setName("");
+    setAddOpen(false);
     toast.success("Family member added");
   };
 
@@ -97,7 +99,7 @@ const FamilyTree = () => {
         <EmptyState icon={Users} title="No memorials yet" description="Family tree is linked to a specific memorial." />
       ) : (
         <>
-          <div className="mb-8 flex flex-wrap items-end gap-3">
+          <div className="mb-6 flex flex-wrap items-end gap-3">
             <div className="space-y-2 flex-1 min-w-[220px]">
               <Label>Memorial</Label>
               <Select value={memorialId} onValueChange={setMemorialId}>
@@ -107,24 +109,8 @@ const FamilyTree = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-6 mb-8 grid sm:grid-cols-[1fr_180px_auto] gap-3 items-end">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Mary Okonkwo" />
-            </div>
-            <div className="space-y-2">
-              <Label>Relationship</Label>
-              <Select value={relationship} onValueChange={setRelationship}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {RELATIONSHIPS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={add} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
-              <Plus className="h-4 w-4 mr-1" /> Add
+            <Button onClick={() => setAddOpen(true)} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+              <Plus className="h-4 w-4 mr-1.5" /> Add family member
             </Button>
           </div>
 
@@ -132,7 +118,7 @@ const FamilyTree = () => {
             deceasedName={deceased?.full_name || "Loved One"}
             deceasedPhoto={deceased?.profile_photo_url}
             members={members}
-            className="mb-10"
+            className="mb-10 mx-auto"
           />
 
           <div className="space-y-6">
@@ -184,6 +170,33 @@ const FamilyTree = () => {
           <DialogFooter>
             <Button variant="outline" className="rounded-xl" onClick={() => setEditing(null)}>Cancel</Button>
             <Button onClick={saveEdit} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white">Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Add family member</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Mary Okonkwo" />
+            </div>
+            <div className="space-y-2">
+              <Label>Relationship</Label>
+              <Select value={relationship} onValueChange={setRelationship}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {RELATIONSHIPS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={add} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white">
+              <Plus className="h-4 w-4 mr-1" /> Add
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

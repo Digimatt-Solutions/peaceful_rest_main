@@ -42,6 +42,9 @@ const Fundraising = () => {
   const [loading, setLoading] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptDonation, setReceiptDonation] = useState<any>(null);
+  const [openAddContrib, setOpenAddContrib] = useState(false);
+  const [savingContrib, setSavingContrib] = useState(false);
+  const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
@@ -58,7 +61,7 @@ const Fundraising = () => {
   const downloadContributorsCSV = () => {
     if (!donations.length) return;
     const rows = [
-      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Message", "Date"],
+      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Date"],
       ...donations.map(d => {
         const fund = funds.find(f => f.id === d.fundraiser_id);
         const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
@@ -69,7 +72,6 @@ const Fundraising = () => {
           fund?.title || "",
           Number(d.amount).toString(),
           d.status || "",
-          (d.message || "").replace(/\n/g, " "),
           format(new Date(d.created_at), "yyyy-MM-dd HH:mm"),
         ];
       }),
@@ -118,6 +120,34 @@ const Fundraising = () => {
     setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
     setOpenCreate(false);
     toast.success("Fundraiser created");
+  };
+
+  const addManualContribution = async () => {
+    const amt = Number(contribForm.amount);
+    if (!contribForm.fundraiser_id) return toast.error("Select a fundraiser");
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!contribForm.is_anonymous && !contribForm.donor_name.trim()) return toast.error("Enter donor name");
+    setSavingContrib(true);
+    const { data: ins, error } = await supabase.from("donations").insert({
+      fundraiser_id: contribForm.fundraiser_id,
+      amount: amt,
+      donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
+      donor_email: contribForm.is_anonymous ? null : (contribForm.donor_email || null),
+      is_anonymous: contribForm.is_anonymous,
+      status: "paid",
+    }).select().maybeSingle();
+    if (error || !ins) { setSavingContrib(false); return toast.error(error?.message || "Failed"); }
+    const fund = funds.find(f => f.id === contribForm.fundraiser_id);
+    if (fund) {
+      const newRaised = Number(fund.raised_amount || 0) + amt;
+      await supabase.from("fundraisers").update({ raised_amount: newRaised }).eq("id", fund.id);
+      setFunds(funds.map(f => f.id === fund.id ? { ...f, raised_amount: newRaised } : f));
+    }
+    setDonations([ins, ...donations]);
+    setSavingContrib(false);
+    setOpenAddContrib(false);
+    setContribForm({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
+    toast.success("Contribution recorded");
   };
 
   const selectedMemorial = memorials.find(m => m.id === memorialId);
@@ -319,9 +349,14 @@ const Fundraising = () => {
                     <h3 className="font-serif text-lg">Contributors</h3>
                     <Badge variant="outline" className="ml-1 border-brand-orange/30 text-brand-orange">{donations.length}</Badge>
                   </div>
-                  <Button variant="outline" size="sm" onClick={downloadContributorsCSV} disabled={!donations.length}>
-                    <Download className="h-4 w-4 mr-1.5" /> Download CSV
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button size="sm" onClick={() => { setContribForm({ ...contribForm, fundraiser_id: funds[0]?.id || "" }); setOpenAddContrib(true); }} disabled={!funds.length} className="rounded-full bg-brand-orange text-white hover:bg-brand-orange/90">
+                      <Plus className="h-4 w-4 mr-1.5" /> Add contributor
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadContributorsCSV} disabled={!donations.length}>
+                      <Download className="h-4 w-4 mr-1.5" /> Download CSV
+                    </Button>
+                  </div>
                 </div>
                 {donations.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-10">No contributions yet for {selectedMemorial?.full_name}.</p>
@@ -332,7 +367,6 @@ const Fundraising = () => {
                         <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                           <th className="py-2.5 pl-1">Donor</th>
                           <th className="py-2.5">Fundraiser</th>
-                          <th className="py-2.5">Message</th>
                           <th className="py-2.5 text-right">Amount</th>
                           <th className="py-2.5">When</th>
                           <th className="py-2.5 text-right pr-1">Receipt</th>
@@ -357,7 +391,6 @@ const Fundraising = () => {
                                 </div>
                               </td>
                               <td className="py-3 text-muted-foreground">{fund?.title || "-"}</td>
-                              <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "-"}</td>
                               <td className="py-3 text-right font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(d.amount).toLocaleString()}</td>
                               <td className="py-3 text-xs text-muted-foreground whitespace-nowrap">
                                 <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.created_at), "MMM d, yyyy")}</span>
@@ -382,6 +415,33 @@ const Fundraising = () => {
       )}
 
       <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
+
+      <Dialog open={openAddContrib} onOpenChange={setOpenAddContrib}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Add contributor</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label>Fundraiser</Label>
+              <Select value={contribForm.fundraiser_id} onValueChange={(v) => setContribForm({ ...contribForm, fundraiser_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select fundraiser" /></SelectTrigger>
+                <SelectContent>{funds.map(f => <SelectItem key={f.id} value={f.id}>{f.title}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2"><Label>Donor name</Label><Input value={contribForm.donor_name} onChange={(e) => setContribForm({ ...contribForm, donor_name: e.target.value })} disabled={contribForm.is_anonymous} /></div>
+              <div className="space-y-2"><Label>Email <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="email" value={contribForm.donor_email} onChange={(e) => setContribForm({ ...contribForm, donor_email: e.target.value })} disabled={contribForm.is_anonymous} /></div>
+            </div>
+            <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={contribForm.amount} onChange={(e) => setContribForm({ ...contribForm, amount: e.target.value })} /></div>
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={contribForm.is_anonymous} onChange={(e) => setContribForm({ ...contribForm, is_anonymous: e.target.checked })} />
+              Record as anonymous
+            </label>
+            <Button onClick={addManualContribution} disabled={savingContrib} className="w-full rounded-full bg-brand-orange text-white hover:bg-brand-orange/90">
+              {savingContrib ? "Saving…" : "Record contribution"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
