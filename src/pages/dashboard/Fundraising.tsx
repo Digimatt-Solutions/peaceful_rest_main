@@ -58,7 +58,7 @@ const Fundraising = () => {
   const downloadContributorsCSV = () => {
     if (!donations.length) return;
     const rows = [
-      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Message", "Date"],
+      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Date"],
       ...donations.map(d => {
         const fund = funds.find(f => f.id === d.fundraiser_id);
         const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
@@ -69,7 +69,6 @@ const Fundraising = () => {
           fund?.title || "",
           Number(d.amount).toString(),
           d.status || "",
-          (d.message || "").replace(/\n/g, " "),
           format(new Date(d.created_at), "yyyy-MM-dd HH:mm"),
         ];
       }),
@@ -332,7 +331,6 @@ const Fundraising = () => {
                         <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                           <th className="py-2.5 pl-1">Donor</th>
                           <th className="py-2.5">Fundraiser</th>
-                          <th className="py-2.5">Message</th>
                           <th className="py-2.5 text-right">Amount</th>
                           <th className="py-2.5">When</th>
                           <th className="py-2.5 text-right pr-1">Receipt</th>
@@ -357,7 +355,6 @@ const Fundraising = () => {
                                 </div>
                               </td>
                               <td className="py-3 text-muted-foreground">{fund?.title || "-"}</td>
-                              <td className="py-3 text-muted-foreground max-w-xs truncate">{d.message || "-"}</td>
                               <td className="py-3 text-right font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(d.amount).toLocaleString()}</td>
                               <td className="py-3 text-xs text-muted-foreground whitespace-nowrap">
                                 <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.created_at), "MMM d, yyyy")}</span>
