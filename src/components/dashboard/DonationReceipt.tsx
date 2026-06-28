@@ -57,7 +57,7 @@ export const buildReceiptHTML = (d: ReceiptData) => {
     <div class="grid">
       <div class="row"><div class="k">Donor</div><div class="v">${name}</div></div>
       <div class="row"><div class="k">Date</div><div class="v">${date}</div></div>
-      ${d.donor_email && !d.is_anonymous ? `<div class="row"><div class="k">Email</div><div class="v">${d.donor_email}</div></div>` : ""}
+      ${d.donor_phone && !d.is_anonymous ? `<div class="row"><div class="k">Phone</div><div class="v">${d.donor_phone}</div></div>` : ""}
       ${d.memorial_name ? `<div class="row"><div class="k">In memory of</div><div class="v">${d.memorial_name}</div></div>` : ""}
       ${d.fundraiser_title ? `<div class="row"><div class="k">Fundraiser</div><div class="v">${d.fundraiser_title}</div></div>` : ""}
     </div>
