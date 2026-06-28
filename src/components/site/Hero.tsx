@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import HERO_BG from "@/assets/bg2.png";
-import HERO_BG_MOBILE from "@/assets/hero.jpg";
+import HERO_BG_MOBILE from "@/assets/hero-mobile.jpg";
 
 export const Hero = () => {
   return (
@@ -86,40 +86,24 @@ export const Hero = () => {
 
             </div>
 
-            {/* Memorial Pillars */}
-            <div className="mt-8 max-w-lg">
+            {/* Memorial Pillars - desktop only */}
+            <div className="mt-8 max-w-lg hidden sm:block">
               <div className="flex items-start gap-20 border-t border-black/10 pt-6">
-
                 <div className="text-center lg:text-left">
                   <Heart className="h-6 w-6 text-brand-orange mb-2" />
-                  <h3 className="font-semibold text-black">
-                    Honor
-                  </h3>
-                  <p className="text-sm text-black/60">
-                    with love
-                  </p>
+                  <h3 className="font-semibold text-black">Honor</h3>
+                  <p className="text-sm text-black/60">with love</p>
                 </div>
-
                 <div className="text-center lg:text-left">
                   <Users className="h-6 w-6 text-brand-orange mb-2" />
-                  <h3 className="font-semibold text-black">
-                    Share
-                  </h3>
-                  <p className="text-sm text-black/60">
-                    memories
-                  </p>
+                  <h3 className="font-semibold text-black">Share</h3>
+                  <p className="text-sm text-black/60">memories</p>
                 </div>
-
                 <div className="text-center lg:text-left">
                   <ShieldCheck className="h-6 w-6 text-brand-orange mb-2" />
-                  <h3 className="font-semibold text-black">
-                    Forever
-                  </h3>
-                  <p className="text-sm text-black/60">
-                    remembered
-                  </p>
+                  <h3 className="font-semibold text-black">Forever</h3>
+                  <p className="text-sm text-black/60">remembered</p>
                 </div>
-
               </div>
             </div>
           </div>
