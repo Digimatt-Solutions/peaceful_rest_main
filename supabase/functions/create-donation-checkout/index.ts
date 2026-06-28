@@ -17,7 +17,7 @@ serve(async (req) => {
       fundraiser_id,
       amount,
       donor_name,
-      donor_email,
+      donor_phone,
       message,
       is_anonymous,
       success_url,
