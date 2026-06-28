@@ -349,9 +349,14 @@ const Fundraising = () => {
                     <h3 className="font-serif text-lg">Contributors</h3>
                     <Badge variant="outline" className="ml-1 border-brand-orange/30 text-brand-orange">{donations.length}</Badge>
                   </div>
-                  <Button variant="outline" size="sm" onClick={downloadContributorsCSV} disabled={!donations.length}>
-                    <Download className="h-4 w-4 mr-1.5" /> Download CSV
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button size="sm" onClick={() => { setContribForm({ ...contribForm, fundraiser_id: funds[0]?.id || "" }); setOpenAddContrib(true); }} disabled={!funds.length} className="rounded-full bg-brand-orange text-white hover:bg-brand-orange/90">
+                      <Plus className="h-4 w-4 mr-1.5" /> Add contributor
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadContributorsCSV} disabled={!donations.length}>
+                      <Download className="h-4 w-4 mr-1.5" /> Download CSV
+                    </Button>
+                  </div>
                 </div>
                 {donations.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-10">No contributions yet for {selectedMemorial?.full_name}.</p>
