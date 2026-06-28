@@ -61,14 +61,14 @@ const Fundraising = () => {
   const downloadContributorsCSV = () => {
     if (!donations.length) return;
     const rows = [
-      ["Reference", "Donor", "Email", "Fundraiser", "Amount (KSh)", "Status", "Date"],
+      ["Reference", "Donor", "Phone", "Fundraiser", "Amount (KSh)", "Status", "Date"],
       ...donations.map(d => {
         const fund = funds.find(f => f.id === d.fundraiser_id);
-        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
         return [
           `MKW-${d.id.slice(0,8).toUpperCase()}`,
           name,
-          d.is_anonymous ? "" : (d.donor_email || ""),
+          d.is_anonymous ? "" : (d.donor_phone || ""),
           fund?.title || "",
           Number(d.amount).toString(),
           d.status || "",
