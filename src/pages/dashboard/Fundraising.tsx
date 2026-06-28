@@ -429,7 +429,7 @@ const Fundraising = () => {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-2"><Label>Donor name</Label><Input value={contribForm.donor_name} onChange={(e) => setContribForm({ ...contribForm, donor_name: e.target.value })} disabled={contribForm.is_anonymous} /></div>
-              <div className="space-y-2"><Label>Email <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="email" value={contribForm.donor_email} onChange={(e) => setContribForm({ ...contribForm, donor_email: e.target.value })} disabled={contribForm.is_anonymous} /></div>
+              <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="tel" value={contribForm.donor_phone} onChange={(e) => setContribForm({ ...contribForm, donor_phone: e.target.value })} disabled={contribForm.is_anonymous} /></div>
             </div>
             <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={contribForm.amount} onChange={(e) => setContribForm({ ...contribForm, amount: e.target.value })} /></div>
             <label className="inline-flex items-center gap-2 text-sm">
