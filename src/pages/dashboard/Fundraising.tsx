@@ -156,7 +156,7 @@ const Fundraising = () => {
   const totals = useMemo(() => {
     const raised = donations.reduce((s, d) => s + Number(d.amount || 0), 0);
     const goal = funds.reduce((s, f) => s + Number(f.goal_amount || 0), 0);
-    const uniqueDonors = new Set(donations.map(d => d.is_anonymous ? `anon-${d.id}` : (d.donor_email || d.donor_name || `id-${d.id}`))).size;
+    const uniqueDonors = new Set(donations.map(d => d.is_anonymous ? `anon-${d.id}` : (d.donor_phone || d.donor_name || `id-${d.id}`))).size;
     const avg = donations.length ? raised / donations.length : 0;
     return { raised, goal, uniqueDonors, avg, count: donations.length };
   }, [donations, funds]);
