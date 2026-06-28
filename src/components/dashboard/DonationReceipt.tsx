@@ -7,7 +7,7 @@ interface ReceiptData {
   id: string;
   amount: number;
   donor_name?: string | null;
-  donor_email?: string | null;
+  donor_phone?: string | null;
   is_anonymous?: boolean;
   message?: string | null;
   created_at: string;
