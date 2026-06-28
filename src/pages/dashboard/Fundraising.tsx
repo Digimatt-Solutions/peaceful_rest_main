@@ -415,6 +415,33 @@ const Fundraising = () => {
       )}
 
       <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
+
+      <Dialog open={openAddContrib} onOpenChange={setOpenAddContrib}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Add contributor</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label>Fundraiser</Label>
+              <Select value={contribForm.fundraiser_id} onValueChange={(v) => setContribForm({ ...contribForm, fundraiser_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Select fundraiser" /></SelectTrigger>
+                <SelectContent>{funds.map(f => <SelectItem key={f.id} value={f.id}>{f.title}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2"><Label>Donor name</Label><Input value={contribForm.donor_name} onChange={(e) => setContribForm({ ...contribForm, donor_name: e.target.value })} disabled={contribForm.is_anonymous} /></div>
+              <div className="space-y-2"><Label>Email <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="email" value={contribForm.donor_email} onChange={(e) => setContribForm({ ...contribForm, donor_email: e.target.value })} disabled={contribForm.is_anonymous} /></div>
+            </div>
+            <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={contribForm.amount} onChange={(e) => setContribForm({ ...contribForm, amount: e.target.value })} /></div>
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={contribForm.is_anonymous} onChange={(e) => setContribForm({ ...contribForm, is_anonymous: e.target.checked })} />
+              Record as anonymous
+            </label>
+            <Button onClick={addManualContribution} disabled={savingContrib} className="w-full rounded-full bg-brand-orange text-white hover:bg-brand-orange/90">
+              {savingContrib ? "Saving…" : "Record contribution"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
