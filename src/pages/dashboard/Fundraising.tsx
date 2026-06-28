@@ -132,7 +132,7 @@ const Fundraising = () => {
       fundraiser_id: contribForm.fundraiser_id,
       amount: amt,
       donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
-      donor_email: contribForm.is_anonymous ? null : (contribForm.donor_email || null),
+      donor_phone: contribForm.is_anonymous ? null : (contribForm.donor_phone || null),
       is_anonymous: contribForm.is_anonymous,
       status: "paid",
     }).select().maybeSingle();
