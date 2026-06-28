@@ -375,7 +375,7 @@ const Fundraising = () => {
                       <tbody>
                         {donations.map(d => {
                           const fund = funds.find(f => f.id === d.fundraiser_id);
-                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_email || "Anonymous");
+                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
                           const isPending = d.status === "pending";
                           return (
                             <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
@@ -386,7 +386,7 @@ const Fundraising = () => {
                                   </div>
                                   <div>
                                     <p className="font-medium">{name}</p>
-                                    {d.donor_email && !d.is_anonymous && <p className="text-xs text-muted-foreground">{d.donor_email}</p>}
+                                    {d.donor_phone && !d.is_anonymous && <p className="text-xs text-muted-foreground">{d.donor_phone}</p>}
                                   </div>
                                 </div>
                               </td>
