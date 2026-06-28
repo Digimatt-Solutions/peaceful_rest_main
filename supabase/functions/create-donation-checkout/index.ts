@@ -103,7 +103,7 @@ serve(async (req) => {
       fundraiser_id,
       user_id: userId,
       donor_name: is_anonymous ? null : (donor_name || null),
-      donor_email: donor_email || null,
+      donor_phone: donor_phone || null,
       amount: Number(amount),
       message: message || null,
       is_anonymous: !!is_anonymous,
