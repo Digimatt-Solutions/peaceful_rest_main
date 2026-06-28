@@ -42,6 +42,9 @@ const Fundraising = () => {
   const [loading, setLoading] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptDonation, setReceiptDonation] = useState<any>(null);
+  const [openAddContrib, setOpenAddContrib] = useState(false);
+  const [savingContrib, setSavingContrib] = useState(false);
+  const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
@@ -117,6 +120,34 @@ const Fundraising = () => {
     setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
     setOpenCreate(false);
     toast.success("Fundraiser created");
+  };
+
+  const addManualContribution = async () => {
+    const amt = Number(contribForm.amount);
+    if (!contribForm.fundraiser_id) return toast.error("Select a fundraiser");
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!contribForm.is_anonymous && !contribForm.donor_name.trim()) return toast.error("Enter donor name");
+    setSavingContrib(true);
+    const { data: ins, error } = await supabase.from("donations").insert({
+      fundraiser_id: contribForm.fundraiser_id,
+      amount: amt,
+      donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
+      donor_email: contribForm.is_anonymous ? null : (contribForm.donor_email || null),
+      is_anonymous: contribForm.is_anonymous,
+      status: "paid",
+    }).select().maybeSingle();
+    if (error || !ins) { setSavingContrib(false); return toast.error(error?.message || "Failed"); }
+    const fund = funds.find(f => f.id === contribForm.fundraiser_id);
+    if (fund) {
+      const newRaised = Number(fund.raised_amount || 0) + amt;
+      await supabase.from("fundraisers").update({ raised_amount: newRaised }).eq("id", fund.id);
+      setFunds(funds.map(f => f.id === fund.id ? { ...f, raised_amount: newRaised } : f));
+    }
+    setDonations([ins, ...donations]);
+    setSavingContrib(false);
+    setOpenAddContrib(false);
+    setContribForm({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
+    toast.success("Contribution recorded");
   };
 
   const selectedMemorial = memorials.find(m => m.id === memorialId);
