@@ -146,7 +146,7 @@ const Fundraising = () => {
     setDonations([ins, ...donations]);
     setSavingContrib(false);
     setOpenAddContrib(false);
-    setContribForm({ fundraiser_id: "", donor_name: "", donor_email: "", amount: "", is_anonymous: false });
+    setContribForm({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
     toast.success("Contribution recorded");
   };
 
