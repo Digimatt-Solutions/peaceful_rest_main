@@ -41,7 +41,7 @@ export const Hero = () => {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7">
 
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-7xl text-white lg:text-black font-medium leading-[0.95] tracking-tight">
+            <h1 className="font-serif text-5xl sm:text-5xl lg:text-7xl text-white lg:text-black font-medium leading-[0.95] tracking-tight">
               Honoring Lives.
               <br />
               Sharing Memories.
@@ -51,7 +51,7 @@ export const Hero = () => {
               </span>
             </h1>
 
-            <p className="mt-4 lg:mt-8 max-w-xl text-base sm:text-lg leading-relaxed text-white/75 lg:text-black">
+            <p className="mt-4 lg:mt-8 max-w-xl text-base text-xl sm:text-lg leading-relaxed text-white/75 lg:text-black">
               Makiwa is a compassionate online sanctuary where families and
               friends gather to celebrate lives, share stories, and preserve
               treasured memories for generations to come.
