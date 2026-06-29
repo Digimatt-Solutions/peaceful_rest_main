@@ -116,7 +116,7 @@ export const Services = () => {
                   key={s.name}
                   className="rounded-[2rem] border border-border bg-card p-7 lg:p-8 hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]"
                 >
-                  <div className="h-12 w-12 rounded-xl bg-brand-black flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-xl bg-brand-orange flex items-center justify-center">
                     <Icon className="h-5 w-5 text-brand-white" />
                   </div>
                   <div className="mt-6">
@@ -139,7 +139,7 @@ export const Services = () => {
                 key={s.name}
                 className="group relative p-7 rounded-2xl border border-border bg-card hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500"
               >
-                <div className="h-11 w-11 rounded-xl bg-brand-black flex items-center justify-center group-hover:bg-brand-orange transition-colors duration-500">
+                <div className="h-11 w-11 rounded-xl bg-brand-orange flex items-center justify-center group-hover:bg-brand-orange/80 transition-colors duration-500">
                   <Icon className="h-5 w-5 text-brand-white" />
                 </div>
                 <h3 className="mt-5 font-serif text-xl font-semibold">{s.name}</h3>

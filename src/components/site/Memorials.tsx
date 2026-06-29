@@ -283,7 +283,7 @@ export const Memorials = () => {
 
                         <div className="mt-2 flex items-center justify-between">
 
-                          <div className="flex items-center gap-2 border-2 rounded-lg p-2 border-brand-orange/50 font-medium text-lg">
+                          <div className="flex items-center gap-2 border-2 rounded-lg p-2 border-brand-orange/50 hover:bg-brand-orange font-medium text-md">
 
                             <span>View Memorial</span>
 

@@ -196,7 +196,7 @@ const MemorialDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-20 overflow-hidden">
+      <section className="relative pt-10 overflow-hidden">
         {/* Layered background */}
         <div className="absolute inset-0 z-0 h-[88vh] min-h-[640px] overflow-hidden">
           {cover ? (
@@ -217,11 +217,6 @@ const MemorialDetail = () => {
         <div className="relative z-10 container-luxe pt-28 pb-20 lg:pt-36 lg:pb-28 text-white">
           <div className="grid lg:grid-cols-12 gap-10 items-end">
             <div className="lg:col-span-8">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-[11px] uppercase tracking-[0.3em]">
-                <Flame className="h-3.5 w-3.5 text-orange-400" />
-                In Loving Memory
-              </div>
-
               <h1 className="mt-7 font-serif text-5xl sm:text-6xl lg:text-8xl font-medium leading-[0.95] tracking-tight">
                 {memorial.full_name}
               </h1>
@@ -229,7 +224,7 @@ const MemorialDetail = () => {
               <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-white/80">
                 <p className="text-lg font-light tracking-wide font-serif italic">
                   {fmt(memorial.date_of_birth)}
-                  <span className="mx-3 text-orange-400">—</span>
+                  <span className="mx-3 text-orange-400">-</span>
                   {fmt(memorial.date_of_death)}
                 </p>
                 {memorial.location && (

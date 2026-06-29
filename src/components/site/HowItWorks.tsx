@@ -4,7 +4,7 @@ const HOW_BG =
 const steps = [
   { n: "01", title: "Create the memorial", desc: "Add their photo, story, and the people they loved. Free to start, ready in minutes." },
   { n: "02", title: "Invite the community", desc: "Share a private link or QR code so family and friends can gather, near or far." },
-  { n: "03", title: "Honor & remember", desc: "Collect tributes, light candles, plan services, and keep their legacy alive — always." },
+  { n: "03", title: "Honor & remember", desc: "Collect tributes, light candles, plan services, and keep their legacy alive - always." },
 ];
 
 export const HowItWorks = () => {
