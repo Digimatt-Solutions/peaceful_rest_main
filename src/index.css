@@ -84,6 +84,12 @@
   html {
     scroll-behavior: smooth;
   }
+  /* Slightly scale down typography and spacing on small screens */
+  @media (max-width: 640px) {
+    html {
+      font-size: 14.5px;
+    }
+  }
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "ss01", "cv11";
@@ -92,6 +98,7 @@
     @apply font-serif tracking-tight;
   }
 }
+
 
 @layer utilities {
   .container-luxe {
