@@ -11,13 +11,17 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { Input } from "@/components/ui/input";
 import {
   ArrowUpRight,
   MapPin,
   Flame,
   CalendarDays,
+  Search,
+  X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
 
 type Memorial = {
   id: string;
@@ -43,23 +47,46 @@ const formatDate = (d: string | null) => {
   });
 };
 
+const computeAge = (dob: string | null, dod: string | null) => {
+  if (!dob || !dod) return null;
+  const birth = new Date(dob);
+  const death = new Date(dod);
+  let age = death.getFullYear() - birth.getFullYear();
+  const m = death.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && death.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+};
+
 export const Memorials = () => {
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     setLoading(true);
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    supabase
+
+    let query = supabase
       .from("memorials")
       .select(
         "id,full_name,date_of_birth,date_of_death,location,short_tribute,cover_photo_url,profile_photo_url",
         { count: "exact" }
       )
-      .eq("is_public", true)
+      .eq("is_public", true);
+
+    if (search.trim()) {
+      const q = search.trim();
+      query = query.or(
+        `full_name.ilike.%${q}%,location.ilike.%${q}%,short_tribute.ilike.%${q}%`
+      );
+    }
+
+    query
       .order("created_at", { ascending: false })
       .range(from, to)
       .then(({ data, count }) => {
@@ -67,14 +94,20 @@ export const Memorials = () => {
         setTotalCount(count || 0);
         setLoading(false);
       });
-  }, [page]);
+  }, [page, search]);
+
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(totalCount / PAGE_SIZE)),
     [totalCount]
   );
 
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
   const pageNumbers = useMemo(() => {
+
     const pages: (number | "ellipsis")[] = [];
     const maxVisible = 5;
     if (totalPages <= maxVisible) {
@@ -118,7 +151,7 @@ export const Memorials = () => {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
 
-          <div className="max-w-3xl">
+          <div className="max-w-3xl w-full">
 
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange">
               <Flame className="h-3.5 w-3.5" />
@@ -134,12 +167,33 @@ export const Memorials = () => {
               celebrate, honor and preserve the stories of loved ones.
             </p>
 
+            {/* Search Filter */}
+            <div className="mt-6 relative max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name, location or tribute..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-12 pl-10 pr-10 rounded-xl border-black/10 bg-white shadow-sm focus-visible:border-brand-orange focus-visible:ring-brand-orange/30"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-brand-orange hover:bg-brand-orange/10 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
           </div>
 
           <Button
             asChild
             variant="outline"
-            className="h-12 px-6 rounded-xl border-black/10 bg-white hover:bg-black hover:text-white"
+            className="h-12 px-6 rounded-xl border-black/10 bg-white hover:bg-black hover:text-white shrink-0"
           >
             <Link to="/auth">
               View All Memorials
@@ -148,6 +202,7 @@ export const Memorials = () => {
           </Button>
 
         </div>
+
 
         {/* Loading State */}
         {loading ? (
@@ -201,6 +256,7 @@ export const Memorials = () => {
             <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
               {memorials.map((m) => {
                 const photo = m.profile_photo_url || m.cover_photo_url;
+                const ageAtDeath = computeAge(m.date_of_birth, m.date_of_death);
 
                 return (
                   <Link
@@ -237,7 +293,7 @@ export const Memorials = () => {
                             {m.full_name}
                           </h3>
 
-                          <div className="mt-4 flex items-center gap-2 text-sm text-white/90">
+                          <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/90">
                             <CalendarDays className="h-4 w-4" />
                             <span>
                               {formatDate(m.date_of_birth)}
@@ -248,6 +304,12 @@ export const Memorials = () => {
                             <span>
                               {formatDate(m.date_of_death)}
                             </span>
+
+                            {ageAtDeath !== null && (
+                              <span className="text-white/75">
+                                (age {ageAtDeath})
+                              </span>
+                            )}
                           </div>
 
                         </div>

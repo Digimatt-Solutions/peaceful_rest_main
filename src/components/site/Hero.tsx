@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import HERO_BG from "@/assets/bg2.png";
-import HERO_BG_MOBILE from "@/assets/hero-mobile.jpg";
+import HERO_BG_MOBILE from "@/assets/hero-mobile-v2.jpg";
 
 export const Hero = () => {
   return (
@@ -41,7 +41,7 @@ export const Hero = () => {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7">
 
-            <h1 className="font-serif text-5xl text-white lg:text-black font-medium sm:text-5xl lg:text-7xl leading-[0.95] tracking-tight">
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-7xl text-white lg:text-black font-medium leading-[0.95] tracking-tight">
               Honoring Lives.
               <br />
               Sharing Memories.
@@ -51,22 +51,22 @@ export const Hero = () => {
               </span>
             </h1>
 
-            <p className="mt-4 lg:mt-8 max-w-xl text-lg leading-relaxed text-white/75 lg:text-black">
+            <p className="mt-4 lg:mt-8 max-w-xl text-base sm:text-lg leading-relaxed text-white/75 lg:text-black">
               Makiwa is a compassionate online sanctuary where families and
               friends gather to celebrate lives, share stories, and preserve
               treasured memories for generations to come.
             </p>
 
             {/* CTA Buttons */}
-            <div className="mt-7 flex flex-wrap gap-4">
+            <div className="mt-7 flex flex-wrap gap-3 sm:gap-4">
 
               <Button
                 asChild
                 size="lg"
-                className="h-12 px-4 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold shadow-lg"
+                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold shadow-lg"
               >
                 <Link to="/auth">
-                  <HeartHandshake className="mr-2 h-5 w-5" />
+                  <HeartHandshake className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   Create a Memorial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -76,15 +76,16 @@ export const Hero = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-12 px-4 rounded-xl borrder-white lg:border-black/55 bg-white/10 backdrop-blur-md text-white lg:text-black hover:bg-white"
+                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl borrder-white lg:border-black/55 bg-white/10 backdrop-blur-md text-white lg:text-black hover:bg-white"
               >
                 <a href="#memorials">
-                  <Users className="mr-2 h-5 w-5" />
+                  <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   Browse Memorials
                 </a>
               </Button>
 
             </div>
+
 
             {/* Memorial Pillars - desktop only */}
             <div className="mt-8 max-w-lg hidden sm:block">
