@@ -243,7 +243,7 @@ const MemorialDetail = () => {
                 </div>
               )}
 
-              <div className="mt-10 flex flex-wrap gap-3 hidden lg:block">
+              <div className="mt-10 flex-wrap gap-3 hidden lg:flex">
                 <Button
                   onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
                   className="rounded-xl bg-orange-400 text-black hover:bg-orange-500 h-12 px-6 border-orange-400"
@@ -275,7 +275,7 @@ const MemorialDetail = () => {
                 <Stat label="Condolences" value={condolences.length.toString()} />
                 <Stat label="Memories" value={memories.length.toString()} />
               </div>
-            </div>~
+            </div>
 
             {/* Right portrait card */}
             {memorial.profile_photo_url && (
@@ -298,7 +298,7 @@ const MemorialDetail = () => {
         </div>
       </section>
 
-      <div className="container-luxe py-16 lg:py-24 grid lg:grid-cols-[1fr_320px] gap-12">
+      <div className="container-luxe py-10 lg:py-20 grid lg:grid-cols-[1fr_320px] gap-12">
         {/* Main column */}
         <div className="space-y-20 min-w-0">
           {/* Biography */}
