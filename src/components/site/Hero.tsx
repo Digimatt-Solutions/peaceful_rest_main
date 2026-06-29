@@ -29,7 +29,7 @@ export const Hero = () => {
             className="w-full h-full object-cover"
           />
         </picture>
-        <div className="absolute inset-0 bg-white/70 lg:bg-transparent" />
+        <div className="absolute inset-0 bg-black/70 lg:bg-transparent" />
       </div>
 
       {/* Soft orange ambient glow */}
@@ -41,17 +41,17 @@ export const Hero = () => {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7">
 
-            <h1 className="font-serif text-5xl font-medium sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight text-black">
+            <h1 className="font-serif text-5xl text-white lg:text-black font-medium sm:text-5xl lg:text-7xl leading-[0.95] tracking-tight">
               Honoring Lives.
               <br />
               Sharing Memories.
               <br />
-              <span className="text-black">
+              <span className="text-white lg:text-black">
                 Keeping Love Alive.
               </span>
             </h1>
 
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-black/75">
+            <p className="mt-4 lg:mt-8 max-w-xl text-lg leading-relaxed text-white/75 lg:text-black">
               Makiwa is a compassionate online sanctuary where families and
               friends gather to celebrate lives, share stories, and preserve
               treasured memories for generations to come.
@@ -76,7 +76,7 @@ export const Hero = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-12 px-4 rounded-xl border-black/55 bg-white/40 backdrop-blur-md text-black hover:bg-white"
+                className="h-12 px-4 rounded-xl borrder-white lg:border-black/55 bg-white/10 backdrop-blur-md text-white lg:text-black hover:bg-white"
               >
                 <a href="#memorials">
                   <Users className="mr-2 h-5 w-5" />
@@ -109,7 +109,7 @@ export const Hero = () => {
           </div>
 
           {/* RIGHT CONTENT */}
-          <div className="lg:col-span-5 flex justify-end">
+          <div className="hidden lg:flex lg:col-span-5 justify-end">
 
             <div className="mt-8 lg:mt-80 max-w-sm w-full lg:mr-20 rounded-3xl border border-brand-orange/20 bg-black/60 lg:bg-black/30 backdrop-blur-xl p-5 shadow-2xl">
 
