@@ -243,7 +243,7 @@ const MemorialDetail = () => {
                 </div>
               )}
 
-              <div className="mt-10 flex flex-wrap gap-3">
+              <div className="mt-10 flex flex-wrap gap-3 hidden lg:block">
                 <Button
                   onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
                   className="rounded-xl bg-orange-400 text-black hover:bg-orange-500 h-12 px-6 border-orange-400"
@@ -275,7 +275,7 @@ const MemorialDetail = () => {
                 <Stat label="Condolences" value={condolences.length.toString()} />
                 <Stat label="Memories" value={memories.length.toString()} />
               </div>
-            </div>
+            </div>~
 
             {/* Right portrait card */}
             {memorial.profile_photo_url && (
