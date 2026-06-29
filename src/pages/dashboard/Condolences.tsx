@@ -180,76 +180,79 @@ const Condolences = () => {
           {items.length === 0 ? (
             <EmptyState icon={MessageCircle} title="No condolences yet" description="Tributes from visitors will appear here." />
           ) : (
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className="space-y-4">
               {items.map(c => (
                 <div
                   key={c.id}
-                  className={`group relative rounded-2xl border bg-card p-6 transition-all hover:shadow-elegant ${
-                    c.is_pinned ? "border-brand-orange/60 bg-gradient-to-br from-brand-orange/5 to-card" : "border-border"
+                  className={`group relative rounded-2xl border bg-card p-4 sm:p-5 transition-all hover:shadow-elegant ${
+                    c.is_pinned ? "border-brand-orange/60 bg-gradient-to-r from-brand-orange/5 to-card" : "border-border"
                   }`}
                 >
-                  {c.is_pinned && (
-                    <div className="absolute top-4 right-4 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-brand-orange font-semibold">
-                      <Pin className="h-3 w-3 fill-current" /> Pinned
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    {/* Avatar + sender info */}
+                    <div className="flex items-center gap-3 shrink-0 lg:w-56">
+                      <Avatar className="h-12 w-12 ring-2 ring-brand-orange/20">
+                        {c.avatar_url && <AvatarImage src={c.avatar_url} alt={c.name} />}
+                        <AvatarFallback className="bg-brand-orange/15 text-brand-orange font-semibold">
+                          {c.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium truncate">{c.name}</h4>
+                          {c.is_pinned && <Pin className="h-3 w-3 text-brand-orange fill-current" />}
+                          {c.user_id && <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">verified</span>}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                          {c.relationship && <span>{c.relationship}</span>}
+                          {c.country && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <MapPin className="h-3 w-3" /> {c.country}
+                            </span>
+                          )}
+                          <span>· {format(new Date(c.created_at), "MMM d, yyyy")}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12 ring-2 ring-brand-orange/20">
-                      {c.avatar_url && <AvatarImage src={c.avatar_url} alt={c.name} />}
-                      <AvatarFallback className="bg-brand-orange/15 text-brand-orange font-semibold">
-                        {c.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+
+                    {/* Message */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2 flex-wrap">
-                        <h4 className="font-serif text-lg truncate">{c.name}</h4>
-                        {c.user_id && <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">verified</span>}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap mt-0.5">
-                        {c.relationship && <span>{c.relationship}</span>}
-                        {c.country && (
-                          <span className="inline-flex items-center gap-0.5">
-                            <MapPin className="h-3 w-3" /> {c.country}
-                          </span>
-                        )}
-                        <span>· {format(new Date(c.created_at), "MMM d, yyyy")}</span>
-                      </div>
+                      <p className="text-sm text-foreground/90 leading-relaxed line-clamp-2">
+                        "{c.message}"
+                      </p>
                     </div>
-                  </div>
 
-                  <blockquote className="mt-4 pl-4 border-l-2 border-brand-orange/30 text-foreground/90 leading-relaxed italic">
-                    "{c.message}"
-                  </blockquote>
-
-                  <div className="mt-5 pt-4 border-t border-border/60 flex items-center justify-between gap-2">
-                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider border ${statusStyle(c.status)}`}>
-                      {c.status}
-                    </Badge>
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => update(c.id, { status: "approved" })}
-                        className="h-8 border-emerald-300/60 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-500"
-                      >
-                        <Check className="h-3.5 w-3.5 mr-1" /> Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => update(c.id, { is_pinned: !c.is_pinned })}
-                        className={`h-8 ${c.is_pinned ? "bg-brand-orange/10 border-brand-orange text-brand-orange" : "border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10"}`}
-                      >
-                        <Pin className="h-3.5 w-3.5 mr-1" /> {c.is_pinned ? "Unpin" : "Pin"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => update(c.id, { status: "hidden" })}
-                        className="h-8 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                      >
-                        <EyeOff className="h-3.5 w-3.5 mr-1" /> Hide
-                      </Button>
+                    {/* Status + actions */}
+                    <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-start sm:items-center lg:items-end xl:items-center gap-3 shrink-0 lg:w-auto">
+                      <Badge variant="outline" className={`text-[10px] uppercase tracking-wider border ${statusStyle(c.status)}`}>
+                        {c.status}
+                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => update(c.id, { status: "approved" })}
+                          className="h-8 rounded-lg border-emerald-300/60 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-500"
+                        >
+                          <Check className="h-3.5 w-3.5 mr-1" /> Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => update(c.id, { is_pinned: !c.is_pinned })}
+                          className={`h-8 rounded-lg ${c.is_pinned ? "bg-brand-orange/10 border-brand-orange text-brand-orange" : "border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10"}`}
+                        >
+                          <Pin className="h-3.5 w-3.5 mr-1" /> {c.is_pinned ? "Unpin" : "Pin"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => update(c.id, { status: "hidden" })}
+                          className="h-8 rounded-lg border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                        >
+                          <EyeOff className="h-3.5 w-3.5 mr-1" /> Hide
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
