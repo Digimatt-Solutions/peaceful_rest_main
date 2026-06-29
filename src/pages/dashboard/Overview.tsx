@@ -174,9 +174,9 @@ const Overview = () => {
         .slice(0, 5);
       setTopMemorials(tops);
 
-      // recent condolences
+      // recent condolences (cap at 3 latest)
       if (memIds.length || isMourner) {
-        let rq = supabase.from("condolences").select("id,message,name,created_at,memorial_id").order("created_at", { ascending: false }).limit(5);
+        let rq = supabase.from("condolences").select("id,message,name,created_at,memorial_id").order("created_at", { ascending: false }).limit(3);
         if (!isMourner && memIds.length) rq = rq.in("memorial_id", memIds);
         if (isMourner) rq = rq.eq("user_id", user.id);
         const { data: r } = await rq;
