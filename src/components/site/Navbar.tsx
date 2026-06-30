@@ -4,7 +4,7 @@ import { Menu, X, LogIn, UserPlus, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/makiwa-logo.png";
+import logo from "@/assets/makiwa-logo-light.png";
 
 const links = [
   { label: "Home", href: "#home" },
@@ -22,7 +22,7 @@ export const Navbar = () => {
     <header className="fixed top-0 inset-x-0 z-50 bg-brand-black/90 backdrop-blur-xl border-b border-brand-white/10">
       <nav className="container-luxe flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <img src={logo} alt="Makiwa" className="h-10 w-auto object-contain" />
+          <img src={logo} alt="Makiwa" className="h-12 w-auto object-contain" />
         </Link>
 
         <ul className="hidden lg:flex items-center gap-8">
