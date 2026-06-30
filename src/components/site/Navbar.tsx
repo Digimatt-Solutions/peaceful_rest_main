@@ -19,10 +19,10 @@ export const Navbar = () => {
   const { user } = useAuth();
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-brand-black/90 backdrop-blur-xl border-b border-brand-white/10">
+    <header className="fixed -top-1 inset-x-0 z-50 bg-brand-black/90 border-b border-brand-white/10">
       <nav className="container-luxe flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <img src={logo} alt="Makiwa" className="h-12 w-auto object-contain" />
+          <img src={logo} alt="Makiwa" className="h-8 w-auto object-contain" />
         </Link>
 
         <ul className="hidden lg:flex items-center gap-8">
@@ -66,7 +66,7 @@ export const Navbar = () => {
 
       {open && (
         <div className="lg:hidden bg-brand-black/95 backdrop-blur-xl border-t border-brand-white/10 animate-fade-up">
-          <ul className="container-luxe py-6 flex flex-col gap-4">
+          <ul className="container-luxe py-4 flex flex-col gap-4">
             {links.map((l) => (
               <li key={l.label}>
                 <a
@@ -78,7 +78,7 @@ export const Navbar = () => {
                 </a>
               </li>
             ))}
-            <li className="flex gap-3 pt-2">
+            <li className="flex gap-3 pt-1">
               {user ? (
                 <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/dashboard">Dashboard</Link></Button>
               ) : (

@@ -103,12 +103,9 @@ const Auth = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-brand-black/10" />
         <div  />
 
-        <div className="relative z-10 h-full flex flex-col justify-between p-10 xl:p-16 text-brand-white">
-          <div className="flex items-center gap-3 group w-fit opacity-0 pointer-events-none">
-            <span className="sr-only">Makiwa</span>
-          </div>
+        <div className="relative z-10 h-full flex flex-col justify-end gap-8 p-10 xl:p-14 text-brand-white">
 
-          <div className="space-y-4 mt-96 max-w-xl">
+          <div className="space-y-4 max-w-xl">
             <h2 className="font-serif text-5xl xl:text-5xl leading-[1.05]">
               Where lives are remembered with grace.
             </h2>
@@ -129,7 +126,7 @@ const Auth = () => {
         </Link>
 
         <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/80 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
-          <Link to="/" className="flex flex-col items-center gap-2 mb-3">
+          <Link to="/" className="flex flex-col items-center gap-2 mb-4">
             <img src={logoMark} alt="" className="h-14 w-14 object-contain rounded-lg" />
             <img src={logoText} alt="Makiwa" className="h-7 w-auto object-contain" />
           </Link>
