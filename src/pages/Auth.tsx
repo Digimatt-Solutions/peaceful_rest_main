@@ -11,7 +11,8 @@ import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus } 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
-import logo from "@/assets/makiwa-logo.png";
+import logoMark from "@/assets/makiwa-mark.png";
+import logoText from "@/assets/makiwa-logo-black.png";
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
@@ -103,9 +104,9 @@ const Auth = () => {
         <div  />
 
         <div className="relative z-10 h-full flex flex-col justify-between p-10 xl:p-16 text-brand-white">
-          <Link to="/" className="flex items-center gap-3 group w-fit bg-brand-white/80 rounded-2xl px-2 py-1 border border-brand-orange/30">
-            <img src={logo} alt="Makiwa" className="h-10 w-auto object-contain" />
-          </Link>
+          <div className="flex items-center gap-3 group w-fit opacity-0 pointer-events-none">
+            <span className="sr-only">Makiwa</span>
+          </div>
 
           <div className="space-y-4 mt-96 max-w-xl">
             <h2 className="font-serif text-5xl xl:text-5xl leading-[1.05]">
@@ -128,8 +129,9 @@ const Auth = () => {
         </Link>
 
         <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/80 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
-          <Link to="/" className="flex justify-center mb-3">
-            <img src={logo} alt="Makiwa" className="h-16 w-auto object-contain" />
+          <Link to="/" className="flex flex-col items-center gap-2 mb-3">
+            <img src={logoMark} alt="" className="h-14 w-14 object-contain rounded-lg" />
+            <img src={logoText} alt="Makiwa" className="h-7 w-auto object-contain" />
           </Link>
 
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
