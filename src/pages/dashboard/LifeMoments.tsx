@@ -67,6 +67,7 @@ const LifeMoments = () => {
     setItems([data, ...items]);
     setForm({ title: "", description: "", memory_date: "" });
     setPhotos([]);
+    setDialogOpen(false);
     toast.success("Memory added");
   };
 
