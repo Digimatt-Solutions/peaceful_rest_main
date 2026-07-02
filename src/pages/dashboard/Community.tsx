@@ -37,7 +37,7 @@ const Community = () => {
   }, [user]);
 
   const loadFeed = async () => {
-    const { data: ps } = await supabase.from("community_posts").select("*").order("created_at", { ascending: false }).limit(50);
+    const { data: ps } = await supabase.from("community_posts").select("*").neq("category", "blog").order("created_at", { ascending: false }).limit(50);
     setPosts(ps || []);
     const userIds = [...new Set((ps || []).map((p: any) => p.user_id))];
     if (userIds.length) {
