@@ -137,7 +137,7 @@ export const Services = () => {
             return (
               <div
                 key={s.name}
-                className="group relative p-7 rounded-2xl border border-border bg-card hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500"
+                className="group relative p-7 rounded-2xl bg-white shadow-[0_10px_30px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_45px_-15px_rgba(249,115,22,0.28)] hover:-translate-y-1 transition-all duration-500"
               >
                 <div className="h-11 w-11 rounded-xl bg-brand-orange flex items-center justify-center group-hover:bg-brand-orange/80 transition-colors duration-500">
                   <Icon className="h-5 w-5 text-brand-white" />
