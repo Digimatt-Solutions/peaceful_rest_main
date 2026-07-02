@@ -340,6 +340,83 @@ const Community = () => {
           })}
         </div>
       )}
+        </div>
+
+        {/* Right sidebar: Blog / Announcements */}
+        <aside className="space-y-4 lg:sticky lg:top-24">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center">
+                  <Newspaper className="h-4 w-4" />
+                </div>
+                <h3 className="font-serif text-lg">Blog</h3>
+              </div>
+              {isSuperAdmin && (
+                <Button size="sm" onClick={openNewBlog} className="h-8 rounded-full bg-brand-orange hover:bg-brand-orange/90 text-white">
+                  <Plus className="h-3.5 w-3.5 mr-1" /> New
+                </Button>
+              )}
+            </div>
+            {blogs.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-4 text-center">No posts yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {blogs.map(b => (
+                  <article key={b.id} className="group rounded-xl overflow-hidden border border-border/70 bg-background hover:shadow-md transition-shadow">
+                    {b.image_url && <img src={b.image_url} alt="" className="w-full h-32 object-cover" />}
+                    <div className="p-3">
+                      <h4 className="font-serif text-sm font-medium leading-tight line-clamp-2">{b.title}</h4>
+                      {b.body && b.body.trim() && b.body !== " " && (
+                        <p className="mt-1 text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">{b.body}</p>
+                      )}
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(b.created_at), { addSuffix: true })}</span>
+                        {isSuperAdmin && (
+                          <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => openEditBlog(b)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                            <button onClick={() => deleteBlog(b.id)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      <Dialog open={blogOpen} onOpenChange={setBlogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">{blogEditing ? "Edit blog post" : "New blog post"}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Input placeholder="Title" value={blogForm.title} onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })} />
+            <Textarea placeholder="Write the post…" rows={6} value={blogForm.body} onChange={(e) => setBlogForm({ ...blogForm, body: e.target.value })} />
+            {blogForm.image_url && (
+              <div className="relative inline-block">
+                <img src={blogForm.image_url} alt="" className="h-32 rounded-lg object-cover" />
+                <button onClick={() => setBlogForm({ ...blogForm, image_url: "" })} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-black/80 text-white inline-flex items-center justify-center">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            <label className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
+              <ImageIcon className="h-4 w-4" />
+              {blogUploading ? "Uploading…" : "Add photo"}
+              <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadBlogImage(e.target.files[0])} disabled={blogUploading} />
+            </label>
+            <Button onClick={saveBlog} disabled={blogSaving} className="w-full rounded-full bg-brand-orange text-white hover:bg-brand-orange/90">
+              {blogSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : blogEditing ? "Update" : "Publish"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
