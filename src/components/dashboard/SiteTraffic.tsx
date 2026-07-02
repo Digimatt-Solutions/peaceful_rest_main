@@ -115,7 +115,7 @@ export const SiteTraffic = () => {
   const countries = useMemo(() => tally("country").slice(0, 10), [visits]);
   const devices = useMemo(() => tally("device"), [visits]);
   const browsers = useMemo(() => tally("browser"), [visits]);
-  const topPages = useMemo(() => tally("path").slice(0, 8), [visits]);
+  const topPages = useMemo(() => tally("path").slice(0, 5), [visits]);
 
   const totalVisits = visits.length;
   const uniqueCountries = new Set(visits.map(v => v.country).filter(Boolean)).size;

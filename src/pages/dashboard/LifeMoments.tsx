@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Camera, Plus, Trash2, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -20,6 +21,7 @@ const LifeMoments = () => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     document.title = "Life Moments · Makiwa";
@@ -65,6 +67,7 @@ const LifeMoments = () => {
     setItems([data, ...items]);
     setForm({ title: "", description: "", memory_date: "" });
     setPhotos([]);
+    setDialogOpen(false);
     toast.success("Memory added");
   };
 
@@ -81,41 +84,52 @@ const LifeMoments = () => {
       <PageHeader title="Life Moments" subtitle="A timeline of cherished photos and memories." />
       {memorials.length === 0 ? <EmptyState icon={Camera} title="Create a memorial first" /> : (
         <>
-          <div className="mb-6 max-w-sm">
-            <Select value={memorialId} onValueChange={setMemorialId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
-            </Select>
+          <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
+            <div className="max-w-sm w-full sm:w-auto flex-1 min-w-[220px]">
+              <Select value={memorialId} onValueChange={setMemorialId}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+                  <Plus className="h-4 w-4 mr-1" /> Add memory
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle className="font-serif text-2xl">Share a moment</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Date</Label><Input type="date" value={form.memory_date} onChange={(e) => setForm({...form, memory_date: e.target.value})} /></div>
+                    <div className="space-y-2 sm:col-span-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} /></div>
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label>Photos <span className="text-xs text-muted-foreground font-normal">(add multiple)</span></Label>
+                      {photos.length > 0 && (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-2">
+                          {photos.map((url, i) => (
+                            <div key={i} className="relative group">
+                              <img src={url} alt="" className="h-24 w-full rounded-lg object-cover" />
+                              <button onClick={() => setPhotos(p => p.filter((_, idx) => idx !== i))} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-black/80 text-white inline-flex items-center justify-center">
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <Input type="file" accept="image/*" multiple onChange={(e) => e.target.files && uploadFiles(e.target.files)} disabled={uploading} />
+                      {uploading && <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Uploading…</p>}
+                    </div>
+                  </div>
+                  <Button onClick={add} disabled={saving} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />} Add memory
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 mb-8 space-y-4">
-            <h3 className="font-serif text-xl">Share a moment</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Date</Label><Input type="date" value={form.memory_date} onChange={(e) => setForm({...form, memory_date: e.target.value})} /></div>
-              <div className="space-y-2 sm:col-span-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} /></div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Photos <span className="text-xs text-muted-foreground font-normal">(add multiple)</span></Label>
-                {photos.length > 0 && (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-2">
-                    {photos.map((url, i) => (
-                      <div key={i} className="relative group">
-                        <img src={url} alt="" className="h-24 w-full rounded-lg object-cover" />
-                        <button onClick={() => setPhotos(p => p.filter((_, idx) => idx !== i))} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-black/80 text-white inline-flex items-center justify-center">
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <Input type="file" accept="image/*" multiple onChange={(e) => e.target.files && uploadFiles(e.target.files)} disabled={uploading} />
-                {uploading && <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Uploading…</p>}
-              </div>
-            </div>
-            <Button onClick={add} disabled={saving} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />} Add memory
-            </Button>
-          </div>
 
           {items.length === 0 ? <EmptyState icon={Camera} title="No moments yet" /> : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

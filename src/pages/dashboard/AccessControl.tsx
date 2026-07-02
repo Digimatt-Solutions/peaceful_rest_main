@@ -129,39 +129,59 @@ const AccessControl = () => {
         </TabsList>
 
         <TabsContent value="users">
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
-            <div className="px-5 py-3 border-b border-border bg-muted/30 text-sm font-medium text-muted-foreground">
-              {allUsers.length} registered user{allUsers.length !== 1 ? "s" : ""}
-            </div>
-            <div className="divide-y divide-border">
-              {allUsers.map(u => {
-                const r = userRoles[u.id] || "mourner";
-                const isSuper = r === "super_admin";
+          <div className="space-y-5">
+            {(() => {
+              const groups: { key: string; label: string; badge: string }[] = [
+                { key: "super_admin", label: "Super Admins", badge: "bg-brand-orange/15 text-brand-orange" },
+                { key: "memorial_admin", label: "Memorial Admins / Family Reps", badge: "bg-amber-500/15 text-amber-700" },
+                { key: "mourner", label: "Mourners", badge: "bg-slate-500/15 text-slate-600" },
+              ];
+              return groups.map(g => {
+                const list = allUsers.filter(u => (userRoles[u.id] || "mourner") === g.key);
                 return (
-                <div key={u.id} className="p-4 flex items-center gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={u.avatar_url} />
-                    <AvatarFallback className="bg-brand-orange text-white">{(u.full_name || u.email || "?").charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{u.full_name || "Unnamed"} {isSuper && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-brand-orange/15 text-brand-orange uppercase tracking-wider">Super Admin</span>}</p>
-                    <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                  <div key={g.key} className="rounded-2xl border border-border bg-card overflow-hidden">
+                    <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] uppercase tracking-widest font-semibold px-2 py-1 rounded ${g.badge}`}>{g.label}</span>
+                        <span className="text-xs text-muted-foreground">{list.length} user{list.length !== 1 ? "s" : ""}</span>
+                      </div>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {list.map(u => {
+                        const r = userRoles[u.id] || "mourner";
+                        const isSuper = r === "super_admin";
+                        return (
+                          <div key={u.id} className="p-4 flex items-center gap-4">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={u.avatar_url} />
+                              <AvatarFallback className="bg-brand-orange text-white">{(u.full_name || u.email || "?").charAt(0).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{u.full_name || "Unnamed"}</p>
+                              <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                            </div>
+                            <Select value={r} onValueChange={(v) => changeRole(u.id, v)} disabled={isSuper}>
+                              <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {ROLE_OPTIONS.map(r => <SelectItem key={r.v} value={r.v}>{r.l}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <Button size="sm" variant="ghost" onClick={() => deleteUser(u.id)} disabled={isSuper} title={isSuper ? "Super admin cannot be deleted" : "Delete permanently"}>
+                              <Trash2 className={`h-4 w-4 ${isSuper ? "text-muted-foreground/40" : "text-destructive"}`} />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                      {list.length === 0 && <div className="p-6 text-center text-muted-foreground text-xs">No users in this group.</div>}
+                    </div>
                   </div>
-                  <Select value={r} onValueChange={(v) => changeRole(u.id, v)} disabled={isSuper}>
-                    <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {ROLE_OPTIONS.map(r => <SelectItem key={r.v} value={r.v}>{r.l}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Button size="sm" variant="ghost" onClick={() => deleteUser(u.id)} disabled={isSuper} title={isSuper ? "Super admin cannot be deleted" : "Delete permanently"}>
-                    <Trash2 className={`h-4 w-4 ${isSuper ? "text-muted-foreground/40" : "text-destructive"}`} />
-                  </Button>
-                </div>
-              );})}
-              {allUsers.length === 0 && <div className="p-12 text-center text-muted-foreground text-sm">No users yet.</div>}
-            </div>
+                );
+              });
+            })()}
+            {allUsers.length === 0 && <div className="p-12 text-center text-muted-foreground text-sm rounded-2xl border border-border bg-card">No users yet.</div>}
           </div>
         </TabsContent>
+
 
         <TabsContent value="memorial">
           {memorials.length === 0 ? <EmptyState icon={ShieldCheck} title="Create a memorial first" /> : (

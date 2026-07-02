@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -13,6 +16,7 @@ type Profile = { id: string; full_name: string | null; avatar_url: string | null
 
 const Community = () => {
   const { user } = useAuth();
+  const { isSuperAdmin } = useUserRole();
   const [posts, setPosts] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [likes, setLikes] = useState<Record<string, { count: number; mine: boolean }>>({});
@@ -25,15 +29,72 @@ const Community = () => {
   const [posting, setPosting] = useState(false);
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
 
+  // Admin blog state
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogOpen, setBlogOpen] = useState(false);
+  const [blogEditing, setBlogEditing] = useState<any | null>(null);
+  const [blogForm, setBlogForm] = useState({ title: "", body: "", image_url: "" });
+  const [blogUploading, setBlogUploading] = useState(false);
+  const [blogSaving, setBlogSaving] = useState(false);
+
   useEffect(() => {
     document.title = "Community · Makiwa";
     loadFeed();
+    loadBlogs();
     if (user) supabase.from("profiles").select("id,full_name,avatar_url,email").eq("id", user.id).maybeSingle()
       .then(({ data }) => setMyProfile(data as Profile));
   }, [user]);
 
+  const loadBlogs = async () => {
+    const { data } = await supabase.from("community_posts").select("*").eq("category", "blog").order("created_at", { ascending: false }).limit(20);
+    setBlogs(data || []);
+  };
+
+  const uploadBlogImage = async (file: File) => {
+    if (!user) return;
+    setBlogUploading(true);
+    const path = `${user.id}/blog/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("memorial-media").upload(path, file);
+    if (error) { toast.error(error.message); setBlogUploading(false); return; }
+    const { data } = supabase.storage.from("memorial-media").getPublicUrl(path);
+    setBlogForm(f => ({ ...f, image_url: data.publicUrl }));
+    setBlogUploading(false);
+  };
+
+  const openNewBlog = () => { setBlogEditing(null); setBlogForm({ title: "", body: "", image_url: "" }); setBlogOpen(true); };
+  const openEditBlog = (b: any) => { setBlogEditing(b); setBlogForm({ title: b.title || "", body: b.body || "", image_url: b.image_url || "" }); setBlogOpen(true); };
+
+  const saveBlog = async () => {
+    if (!user || !blogForm.title.trim()) return toast.error("Title required");
+    setBlogSaving(true);
+    if (blogEditing) {
+      const { data, error } = await (supabase as any).from("community_posts")
+        .update({ title: blogForm.title, body: blogForm.body || " ", image_url: blogForm.image_url || null })
+        .eq("id", blogEditing.id).select().maybeSingle();
+      setBlogSaving(false);
+      if (error) return toast.error(error.message);
+      setBlogs(bs => bs.map(x => x.id === data.id ? data : x));
+    } else {
+      const { data, error } = await (supabase as any).from("community_posts")
+        .insert({ user_id: user.id, category: "blog", title: blogForm.title, body: blogForm.body || " ", image_url: blogForm.image_url || null })
+        .select().maybeSingle();
+      setBlogSaving(false);
+      if (error) return toast.error(error.message);
+      setBlogs(bs => [data, ...bs]);
+    }
+    setBlogOpen(false);
+    toast.success("Saved");
+  };
+
+  const deleteBlog = async (id: string) => {
+    if (!confirm("Delete this post?")) return;
+    await supabase.from("community_posts").delete().eq("id", id);
+    setBlogs(bs => bs.filter(b => b.id !== id));
+  };
+
+
   const loadFeed = async () => {
-    const { data: ps } = await supabase.from("community_posts").select("*").order("created_at", { ascending: false }).limit(50);
+    const { data: ps } = await supabase.from("community_posts").select("*").neq("category", "blog").order("created_at", { ascending: false }).limit(50);
     setPosts(ps || []);
     const userIds = [...new Set((ps || []).map((p: any) => p.user_id))];
     if (userIds.length) {
@@ -135,6 +196,8 @@ const Community = () => {
     <>
       <PageHeader title="Community" subtitle="Share, react and comment with the Makiwa community." />
 
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+        <div className="min-w-0">
       {/* Composer */}
       {user && (
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 mb-6 shadow-sm">
@@ -277,6 +340,83 @@ const Community = () => {
           })}
         </div>
       )}
+        </div>
+
+        {/* Right sidebar: Blog / Announcements */}
+        <aside className="space-y-4 lg:sticky lg:top-24">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center">
+                  <Newspaper className="h-4 w-4" />
+                </div>
+                <h3 className="font-serif text-lg">Blog</h3>
+              </div>
+              {isSuperAdmin && (
+                <Button size="sm" onClick={openNewBlog} className="h-8 rounded-full bg-brand-orange hover:bg-brand-orange/90 text-white">
+                  <Plus className="h-3.5 w-3.5 mr-1" /> New
+                </Button>
+              )}
+            </div>
+            {blogs.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-4 text-center">No posts yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {blogs.map(b => (
+                  <article key={b.id} className="group rounded-xl overflow-hidden border border-border/70 bg-background hover:shadow-md transition-shadow">
+                    {b.image_url && <img src={b.image_url} alt="" className="w-full h-32 object-cover" />}
+                    <div className="p-3">
+                      <h4 className="font-serif text-sm font-medium leading-tight line-clamp-2">{b.title}</h4>
+                      {b.body && b.body.trim() && b.body !== " " && (
+                        <p className="mt-1 text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">{b.body}</p>
+                      )}
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(b.created_at), { addSuffix: true })}</span>
+                        {isSuperAdmin && (
+                          <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => openEditBlog(b)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                            <button onClick={() => deleteBlog(b.id)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      <Dialog open={blogOpen} onOpenChange={setBlogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">{blogEditing ? "Edit blog post" : "New blog post"}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Input placeholder="Title" value={blogForm.title} onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })} />
+            <Textarea placeholder="Write the post…" rows={6} value={blogForm.body} onChange={(e) => setBlogForm({ ...blogForm, body: e.target.value })} />
+            {blogForm.image_url && (
+              <div className="relative inline-block">
+                <img src={blogForm.image_url} alt="" className="h-32 rounded-lg object-cover" />
+                <button onClick={() => setBlogForm({ ...blogForm, image_url: "" })} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-black/80 text-white inline-flex items-center justify-center">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            <label className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
+              <ImageIcon className="h-4 w-4" />
+              {blogUploading ? "Uploading…" : "Add photo"}
+              <input type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadBlogImage(e.target.files[0])} disabled={blogUploading} />
+            </label>
+            <Button onClick={saveBlog} disabled={blogSaving} className="w-full rounded-full bg-brand-orange text-white hover:bg-brand-orange/90">
+              {blogSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : blogEditing ? "Update" : "Publish"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

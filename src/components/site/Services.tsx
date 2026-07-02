@@ -57,7 +57,7 @@ const features = [
 
 export const Services = () => {
   return (
-    <section id="services" className="py-24 lg:py-32 bg-background">
+    <section id="services" className="py-24 lg:py-32 bg-[#faf7f2]">
       <div className="container-luxe">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-end mb-14 lg:mb-20">
           <div className="lg:col-span-7">
@@ -114,7 +114,7 @@ export const Services = () => {
               return (
                 <div
                   key={s.name}
-                  className="rounded-[2rem] border border-border bg-card p-7 lg:p-8 hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]"
+                  className="rounded-[2rem] bg-white p-7 lg:p-8 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_-15px_rgba(249,115,22,0.25)] hover:-translate-y-1 transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]"
                 >
                   <div className="h-12 w-12 rounded-xl bg-brand-orange flex items-center justify-center">
                     <Icon className="h-5 w-5 text-brand-white" />
@@ -137,7 +137,7 @@ export const Services = () => {
             return (
               <div
                 key={s.name}
-                className="group relative p-7 rounded-2xl border border-border bg-card hover:border-brand-orange/40 hover:shadow-elegant transition-all duration-500"
+                className="group relative p-7 rounded-2xl bg-white shadow-[0_10px_30px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_45px_-15px_rgba(249,115,22,0.28)] hover:-translate-y-1 transition-all duration-500"
               >
                 <div className="h-11 w-11 rounded-xl bg-brand-orange flex items-center justify-center group-hover:bg-brand-orange/80 transition-colors duration-500">
                   <Icon className="h-5 w-5 text-brand-white" />
