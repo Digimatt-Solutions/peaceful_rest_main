@@ -196,6 +196,8 @@ const Community = () => {
     <>
       <PageHeader title="Community" subtitle="Share, react and comment with the Makiwa community." />
 
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+        <div className="min-w-0">
       {/* Composer */}
       {user && (
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 mb-6 shadow-sm">
