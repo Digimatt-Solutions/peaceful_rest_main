@@ -29,12 +29,69 @@ const Community = () => {
   const [posting, setPosting] = useState(false);
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
 
+  // Admin blog state
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogOpen, setBlogOpen] = useState(false);
+  const [blogEditing, setBlogEditing] = useState<any | null>(null);
+  const [blogForm, setBlogForm] = useState({ title: "", body: "", image_url: "" });
+  const [blogUploading, setBlogUploading] = useState(false);
+  const [blogSaving, setBlogSaving] = useState(false);
+
   useEffect(() => {
     document.title = "Community · Makiwa";
     loadFeed();
+    loadBlogs();
     if (user) supabase.from("profiles").select("id,full_name,avatar_url,email").eq("id", user.id).maybeSingle()
       .then(({ data }) => setMyProfile(data as Profile));
   }, [user]);
+
+  const loadBlogs = async () => {
+    const { data } = await supabase.from("community_posts").select("*").eq("category", "blog").order("created_at", { ascending: false }).limit(20);
+    setBlogs(data || []);
+  };
+
+  const uploadBlogImage = async (file: File) => {
+    if (!user) return;
+    setBlogUploading(true);
+    const path = `${user.id}/blog/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("memorial-media").upload(path, file);
+    if (error) { toast.error(error.message); setBlogUploading(false); return; }
+    const { data } = supabase.storage.from("memorial-media").getPublicUrl(path);
+    setBlogForm(f => ({ ...f, image_url: data.publicUrl }));
+    setBlogUploading(false);
+  };
+
+  const openNewBlog = () => { setBlogEditing(null); setBlogForm({ title: "", body: "", image_url: "" }); setBlogOpen(true); };
+  const openEditBlog = (b: any) => { setBlogEditing(b); setBlogForm({ title: b.title || "", body: b.body || "", image_url: b.image_url || "" }); setBlogOpen(true); };
+
+  const saveBlog = async () => {
+    if (!user || !blogForm.title.trim()) return toast.error("Title required");
+    setBlogSaving(true);
+    if (blogEditing) {
+      const { data, error } = await (supabase as any).from("community_posts")
+        .update({ title: blogForm.title, body: blogForm.body || " ", image_url: blogForm.image_url || null })
+        .eq("id", blogEditing.id).select().maybeSingle();
+      setBlogSaving(false);
+      if (error) return toast.error(error.message);
+      setBlogs(bs => bs.map(x => x.id === data.id ? data : x));
+    } else {
+      const { data, error } = await (supabase as any).from("community_posts")
+        .insert({ user_id: user.id, category: "blog", title: blogForm.title, body: blogForm.body || " ", image_url: blogForm.image_url || null })
+        .select().maybeSingle();
+      setBlogSaving(false);
+      if (error) return toast.error(error.message);
+      setBlogs(bs => [data, ...bs]);
+    }
+    setBlogOpen(false);
+    toast.success("Saved");
+  };
+
+  const deleteBlog = async (id: string) => {
+    if (!confirm("Delete this post?")) return;
+    await supabase.from("community_posts").delete().eq("id", id);
+    setBlogs(bs => bs.filter(b => b.id !== id));
+  };
+
 
   const loadFeed = async () => {
     const { data: ps } = await supabase.from("community_posts").select("*").neq("category", "blog").order("created_at", { ascending: false }).limit(50);
