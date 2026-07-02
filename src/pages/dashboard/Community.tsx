@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -13,6 +16,7 @@ type Profile = { id: string; full_name: string | null; avatar_url: string | null
 
 const Community = () => {
   const { user } = useAuth();
+  const { isSuperAdmin } = useUserRole();
   const [posts, setPosts] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [likes, setLikes] = useState<Record<string, { count: number; mine: boolean }>>({});
