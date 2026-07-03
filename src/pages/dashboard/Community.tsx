@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X } from "lucide-react";
+import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -189,6 +189,21 @@ const Community = () => {
     setComments(c => ({ ...c, [postId]: (c[postId] || []).filter(x => x.id !== id) }));
   };
 
+  const sharePost = async (p: any) => {
+    const url = `${window.location.origin}/dashboard/community#post-${p.id}`;
+    const text = p.title || (p.body && p.body.trim()) || "Community post on Makiwa";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Makiwa community", text, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard");
+      }
+    } catch {
+      /* user dismissed */
+    }
+  };
+
   const me = myProfile;
   const myInitial = (me?.full_name || me?.email || user?.email || "?").charAt(0).toUpperCase();
 
@@ -277,12 +292,15 @@ const Community = () => {
                   )}
                 </div>
 
-                <div className="px-2 py-1 grid grid-cols-2 border-b border-border">
+                <div className="px-2 py-1 grid grid-cols-3 border-b border-border">
                   <button onClick={() => toggleLike(p.id)} className={`flex items-center justify-center gap-2 py-2 rounded-md hover:bg-muted text-sm font-medium ${lk.mine ? "text-red-500" : "text-muted-foreground"}`}>
                     <Heart className={`h-4 w-4 ${lk.mine ? "fill-red-500" : ""}`} /> Like
                   </button>
                   <button onClick={() => setOpenComments(o => ({ ...o, [p.id]: !o[p.id] }))} className="flex items-center justify-center gap-2 py-2 rounded-md hover:bg-muted text-sm font-medium text-muted-foreground">
                     <MessageCircle className="h-4 w-4" /> Comment
+                  </button>
+                  <button onClick={() => sharePost(p)} className="flex items-center justify-center gap-2 py-2 rounded-md hover:bg-muted text-sm font-medium text-muted-foreground">
+                    <Share2 className="h-4 w-4" /> Share
                   </button>
                 </div>
 
