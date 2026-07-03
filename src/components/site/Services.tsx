@@ -57,7 +57,7 @@ const features = [
 
 export const Services = () => {
   return (
-    <section id="services" className="py-24 lg:py-32 bg-[#faf7f2]">
+    <section id="services" className="py-24 lg:py-32 bg-[#f1ece3]">
       <div className="container-luxe">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-end mb-14 lg:mb-20">
           <div className="lg:col-span-7">

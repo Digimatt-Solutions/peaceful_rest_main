@@ -98,7 +98,7 @@ const Auth = () => {
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-background">
       {/* Visual side */}
-      <div className="relative hidden lg:block overflow-hidden">
+      <div className="relative hidden lg:block overflow-hidden bg-neutral-800">
         <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-brand-black/10" />
         <div  />

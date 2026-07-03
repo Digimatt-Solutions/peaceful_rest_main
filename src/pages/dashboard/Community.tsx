@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X } from "lucide-react";
+import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { logActivity } from "@/lib/activity";
 
 type Profile = { id: string; full_name: string | null; avatar_url: string | null; email: string | null };
 
@@ -154,6 +155,7 @@ const Community = () => {
     setLikes(l => ({ ...l, [data.id]: { count: 0, mine: false } }));
     setComments(c => ({ ...c, [data.id]: [] }));
     setBody(""); setImageUrl("");
+    logActivity("create", { entity_type: "community_post", entity_id: data.id, description: "Created a community post" });
   };
 
   const toggleLike = async (postId: string) => {
@@ -162,8 +164,10 @@ const Community = () => {
     setLikes(l => ({ ...l, [postId]: { count: cur.count + (cur.mine ? -1 : 1), mine: !cur.mine } }));
     if (cur.mine) {
       await (supabase as any).from("community_post_likes").delete().eq("post_id", postId).eq("user_id", user.id);
+      logActivity("unlike", { entity_type: "community_post", entity_id: postId, description: "Removed like from a post" });
     } else {
       await (supabase as any).from("community_post_likes").insert({ post_id: postId, user_id: user.id });
+      logActivity("like", { entity_type: "community_post", entity_id: postId, description: "Liked a community post" });
     }
   };
 
@@ -177,16 +181,35 @@ const Community = () => {
     setComments(c => ({ ...c, [postId]: [...(c[postId] || []), data] }));
     setCommentDrafts(d => ({ ...d, [postId]: "" }));
     if (myProfile) setProfiles(p => ({ ...p, [user.id]: myProfile }));
+    logActivity("comment", { entity_type: "community_post", entity_id: postId, description: "Commented on a community post" });
   };
 
   const deletePost = async (id: string) => {
     await supabase.from("community_posts").delete().eq("id", id);
     setPosts(posts.filter(p => p.id !== id));
+    logActivity("delete", { entity_type: "community_post", entity_id: id, description: "Deleted a community post" });
   };
 
   const deleteComment = async (postId: string, id: string) => {
     await (supabase as any).from("community_post_comments").delete().eq("id", id);
     setComments(c => ({ ...c, [postId]: (c[postId] || []).filter(x => x.id !== id) }));
+    logActivity("delete", { entity_type: "community_post_comment", entity_id: id, description: "Deleted a comment" });
+  };
+
+  const sharePost = async (p: any) => {
+    const url = `${window.location.origin}/dashboard/community#post-${p.id}`;
+    const text = p.title || (p.body && p.body.trim()) || "Community post on Makiwa";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Makiwa community", text, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard");
+      }
+      logActivity("share", { entity_type: "community_post", entity_id: p.id, description: "Shared a community post" });
+    } catch {
+      /* user dismissed */
+    }
   };
 
   const me = myProfile;
@@ -277,12 +300,15 @@ const Community = () => {
                   )}
                 </div>
 
-                <div className="px-2 py-1 grid grid-cols-2 border-b border-border">
+                <div className="px-2 py-1 grid grid-cols-3 border-b border-border">
                   <button onClick={() => toggleLike(p.id)} className={`flex items-center justify-center gap-2 py-2 rounded-md hover:bg-muted text-sm font-medium ${lk.mine ? "text-red-500" : "text-muted-foreground"}`}>
                     <Heart className={`h-4 w-4 ${lk.mine ? "fill-red-500" : ""}`} /> Like
                   </button>
                   <button onClick={() => setOpenComments(o => ({ ...o, [p.id]: !o[p.id] }))} className="flex items-center justify-center gap-2 py-2 rounded-md hover:bg-muted text-sm font-medium text-muted-foreground">
                     <MessageCircle className="h-4 w-4" /> Comment
+                  </button>
+                  <button onClick={() => sharePost(p)} className="flex items-center justify-center gap-2 py-2 rounded-md hover:bg-muted text-sm font-medium text-muted-foreground">
+                    <Share2 className="h-4 w-4" /> Share
                   </button>
                 </div>
 
@@ -364,7 +390,7 @@ const Community = () => {
               <div className="space-y-4">
                 {blogs.map(b => (
                   <article key={b.id} className="group rounded-xl overflow-hidden border border-border/70 bg-background hover:shadow-md transition-shadow">
-                    {b.image_url && <img src={b.image_url} alt="" className="w-full h-32 object-cover" />}
+                    {b.image_url && <img src={b.image_url} alt="" className="w-full h-52 object-cover" />}
                     <div className="p-3">
                       <h4 className="font-serif text-sm font-medium leading-tight line-clamp-2">{b.title}</h4>
                       {b.body && b.body.trim() && b.body !== " " && (

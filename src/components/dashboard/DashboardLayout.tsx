@@ -1,9 +1,10 @@
-import { NavLink, Outlet, useNavigate, Link } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/lib/activity";
 import {
   LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HeartHandshake,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
@@ -70,6 +71,24 @@ export const DashboardLayout = () => {
     supabase.from("profiles").select("full_name,avatar_url,email").eq("id", user.id).maybeSingle()
       .then(({ data }) => setProfile(data));
   }, [user]);
+
+  // Log every dashboard page visit for the activity trail (throttled per-path).
+  const location = useLocation();
+  const lastLoggedRef = useRef<{ path: string; ts: number }>({ path: "", ts: 0 });
+  useEffect(() => {
+    if (!user) return;
+    const path = location.pathname;
+    const now = Date.now();
+    if (lastLoggedRef.current.path === path && now - lastLoggedRef.current.ts < 60_000) return;
+    lastLoggedRef.current = { path, ts: now };
+    const nav = allNav.find(n => n.to === path);
+    const pageLabel = nav?.label || path.replace(/^\/dashboard\/?/, "") || "Dashboard";
+    logActivity("page_view", {
+      entity_type: "page",
+      description: `Visited ${pageLabel}`,
+      metadata: { path, referrer: document.referrer || null },
+    });
+  }, [user, location.pathname]);
 
   const handleSignOut = async () => { await signOut(); navigate("/"); };
   const initials = (profile?.full_name || user?.email || "U").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
