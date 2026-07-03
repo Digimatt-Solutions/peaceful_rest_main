@@ -1,9 +1,7 @@
-import { ShieldCheck, Globe2, Users, Sparkles } from "lucide-react";
-
-const COMMUNITY_IMG =
-  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=85";
-const SECONDARY_IMG =
-  "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=900&q=85";
+import { ShieldCheck, Globe2, Users, Sparkles, Quote } from "lucide-react";
+import elderImg from "@/assets/why-african-elder.jpg";
+import familyImg from "@/assets/why-african-family.jpg";
+import candleImg from "@/assets/why-african-candle.jpg";
 
 const features = [
   { icon: ShieldCheck, title: "Private & secure", desc: "Bank-grade security with full control over who sees each memorial." },
@@ -14,53 +12,95 @@ const features = [
 
 export const WhyUs = () => {
   return (
-    <section id="about" className="py-24 lg:py-32 bg-cream">
-      <div className="container-luxe grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-        <div className="lg:col-span-6 relative">
-          <div className="grid grid-cols-5 gap-4">
-            <div className="col-span-3">
+    <section id="about" className="relative py-24 lg:py-32 bg-cream overflow-hidden">
+      {/* Editorial backdrop accents */}
+      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-brand-orange/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 -left-32 h-96 w-96 rounded-full bg-brand-black/5 blur-3xl" />
+
+      <div className="container-luxe relative grid lg:grid-cols-12 gap-14 lg:gap-20 items-center">
+        {/* Image collage */}
+        <div className="lg:col-span-6">
+          <div className="grid grid-cols-6 grid-rows-6 gap-4 lg:gap-5 h-[560px] lg:h-[640px]">
+            {/* Main portrait — spans tall */}
+            <div className="col-span-4 row-span-6 relative rounded-[28px] overflow-hidden shadow-elegant group">
               <img
-                src={COMMUNITY_IMG}
-                alt="Hands held together in support"
+                src={elderImg}
+                alt="African elder reflecting in warm window light"
                 loading="lazy"
-                className="rounded-3xl shadow-elegant aspect-[4/5] object-cover w-full"
+                width={896}
+                height={1152}
+                className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-black/60 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-7 text-brand-white">
+                <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-brand-orange font-semibold">
+                  <Quote className="h-3 w-3" /> Remembered
+                </span>
+                <p className="mt-2 font-serif text-lg lg:text-xl leading-snug max-w-[260px]">
+                  “When we speak of them, they are near.”
+                </p>
+              </div>
+            </div>
+
+            {/* Family embrace — top right */}
+            <div className="col-span-2 row-span-3 rounded-[24px] overflow-hidden shadow-soft">
+              <img
+                src={familyImg}
+                alt="An African family embracing at golden hour"
+                loading="lazy"
+                width={768}
+                height={1024}
+                className="w-full h-full object-cover"
               />
             </div>
-            <div className="col-span-2 flex flex-col gap-4 pt-12">
-              <img
-                src={SECONDARY_IMG}
-                alt="A peaceful candle moment"
-                loading="lazy"
-                className="rounded-3xl shadow-soft aspect-[3/4] object-cover w-full"
-              />
-              <div className="rounded-3xl bg-brand-black text-brand-white p-5 lg:p-6 shadow-elegant">
-                <div className="font-serif text-3xl lg:text-4xl text-brand-orange leading-none">98%</div>
-                <p className="mt-2 text-xs lg:text-sm text-brand-white/75 leading-relaxed">
+
+            {/* Stat card — middle right */}
+            <div className="col-span-2 row-span-2 rounded-[24px] bg-brand-black text-brand-white p-5 lg:p-6 shadow-elegant flex flex-col justify-between">
+              <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange font-semibold">Impact</span>
+              <div>
+                <div className="font-serif text-4xl lg:text-5xl text-brand-orange leading-none">98%</div>
+                <p className="mt-1.5 text-[11px] lg:text-xs text-brand-white/75 leading-relaxed">
                   of families say Makiwa helped them feel less alone.
                 </p>
               </div>
             </div>
+
+            {/* Candle — bottom right */}
+            <div className="col-span-2 row-span-1 rounded-[20px] overflow-hidden shadow-soft">
+              <img
+                src={candleImg}
+                alt="A hand holding a lit memorial candle at dusk"
+                loading="lazy"
+                width={768}
+                height={768}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
 
+        {/* Copy */}
         <div className="lg:col-span-6">
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Why Makiwa</span>
-          <h2 className="mt-4 font-serif text-4xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
-            A thoughtful home for the stories that matter most.
+          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
+            <span className="h-px w-8 bg-brand-orange" /> Why Makiwa
+          </span>
+          <h2 className="mt-5 font-serif text-4xl lg:text-6xl font-medium leading-[1.03] tracking-tight">
+            A thoughtful home <br className="hidden lg:block" />
+            for the stories <em className="not-italic text-brand-orange">that matter most.</em>
           </h2>
-          <p className="mt-6 text-muted-foreground text-lg leading-relaxed">
-            We built Makiwa with bereavement counselors, funeral directors, and grieving
-            families. Every feature has a purpose: to make remembering easier, and grief a
-            little less lonely.
+          <p className="mt-6 text-muted-foreground text-lg leading-relaxed max-w-xl">
+            Built with bereavement counselors, funeral directors, and grieving
+            families across Africa and beyond — every feature has a purpose: to
+            make remembering easier, and grief a little less lonely.
           </p>
 
-          <div className="mt-10 grid sm:grid-cols-2 gap-7">
+          <div className="mt-10 grid sm:grid-cols-2 gap-x-8 gap-y-7">
             {features.map((f) => {
               const Icon = f.icon;
               return (
-                <div key={f.title} className="flex gap-4">
-                  <div className="shrink-0 h-11 w-11 rounded-xl bg-brand-black flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-brand-orange" />
+                <div key={f.title} className="group flex gap-4">
+                  <div className="shrink-0 h-12 w-12 rounded-2xl bg-brand-black flex items-center justify-center group-hover:bg-brand-orange transition-colors duration-500">
+                    <Icon className="h-5 w-5 text-brand-orange group-hover:text-brand-white transition-colors duration-500" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-base">{f.title}</h3>
