@@ -33,7 +33,7 @@ const Stat = ({
       <div className="relative flex items-start justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
-          <p className="mt-2 font-serif text-3xl">{value}</p>
+          <p className="mt-2 font-serif text-2xl sm:text-[26px]">{value}</p>
           {trend && <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="h-3 w-3" /> {trend}</p>}
         </div>
         <div className={`h-11 w-11 rounded-xl bg-background/90 backdrop-blur flex items-center justify-center shadow-soft ${a.icon}`}>

@@ -364,7 +364,7 @@ const Community = () => {
               <div className="space-y-4">
                 {blogs.map(b => (
                   <article key={b.id} className="group rounded-xl overflow-hidden border border-border/70 bg-background hover:shadow-md transition-shadow">
-                    {b.image_url && <img src={b.image_url} alt="" className="w-full h-32 object-cover" />}
+                    {b.image_url && <img src={b.image_url} alt="" className="w-full h-52 object-cover" />}
                     <div className="p-3">
                       <h4 className="font-serif text-sm font-medium leading-tight line-clamp-2">{b.title}</h4>
                       {b.body && b.body.trim() && b.body !== " " && (
