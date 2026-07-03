@@ -155,6 +155,7 @@ const Community = () => {
     setLikes(l => ({ ...l, [data.id]: { count: 0, mine: false } }));
     setComments(c => ({ ...c, [data.id]: [] }));
     setBody(""); setImageUrl("");
+    logActivity("create", { entity_type: "community_post", entity_id: data.id, description: "Created a community post" });
   };
 
   const toggleLike = async (postId: string) => {
@@ -163,8 +164,10 @@ const Community = () => {
     setLikes(l => ({ ...l, [postId]: { count: cur.count + (cur.mine ? -1 : 1), mine: !cur.mine } }));
     if (cur.mine) {
       await (supabase as any).from("community_post_likes").delete().eq("post_id", postId).eq("user_id", user.id);
+      logActivity("unlike", { entity_type: "community_post", entity_id: postId, description: "Removed like from a post" });
     } else {
       await (supabase as any).from("community_post_likes").insert({ post_id: postId, user_id: user.id });
+      logActivity("like", { entity_type: "community_post", entity_id: postId, description: "Liked a community post" });
     }
   };
 
@@ -178,16 +181,19 @@ const Community = () => {
     setComments(c => ({ ...c, [postId]: [...(c[postId] || []), data] }));
     setCommentDrafts(d => ({ ...d, [postId]: "" }));
     if (myProfile) setProfiles(p => ({ ...p, [user.id]: myProfile }));
+    logActivity("comment", { entity_type: "community_post", entity_id: postId, description: "Commented on a community post" });
   };
 
   const deletePost = async (id: string) => {
     await supabase.from("community_posts").delete().eq("id", id);
     setPosts(posts.filter(p => p.id !== id));
+    logActivity("delete", { entity_type: "community_post", entity_id: id, description: "Deleted a community post" });
   };
 
   const deleteComment = async (postId: string, id: string) => {
     await (supabase as any).from("community_post_comments").delete().eq("id", id);
     setComments(c => ({ ...c, [postId]: (c[postId] || []).filter(x => x.id !== id) }));
+    logActivity("delete", { entity_type: "community_post_comment", entity_id: id, description: "Deleted a comment" });
   };
 
   const sharePost = async (p: any) => {
@@ -200,6 +206,7 @@ const Community = () => {
         await navigator.clipboard.writeText(url);
         toast.success("Link copied to clipboard");
       }
+      logActivity("share", { entity_type: "community_post", entity_id: p.id, description: "Shared a community post" });
     } catch {
       /* user dismissed */
     }
