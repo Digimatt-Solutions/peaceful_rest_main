@@ -19,8 +19,12 @@ import {
   CalendarDays,
   Search,
   X,
+  Eye,
+  MessageCircle,
+  Share2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 
 type Memorial = {
@@ -32,6 +36,7 @@ type Memorial = {
   short_tribute: string | null;
   cover_photo_url: string | null;
   profile_photo_url: string | null;
+  visitor_count: number | null;
 };
 
 const PAGE_SIZE = 3;
@@ -65,6 +70,7 @@ export const Memorials = () => {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
+  const [condCounts, setCondCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setLoading(true);
@@ -74,7 +80,7 @@ export const Memorials = () => {
     let query = supabase
       .from("memorials")
       .select(
-        "id,full_name,date_of_birth,date_of_death,location,short_tribute,cover_photo_url,profile_photo_url",
+        "id,full_name,date_of_birth,date_of_death,location,short_tribute,cover_photo_url,profile_photo_url,visitor_count",
         { count: "exact" }
       )
       .eq("is_public", true);
@@ -89,10 +95,24 @@ export const Memorials = () => {
     query
       .order("created_at", { ascending: false })
       .range(from, to)
-      .then(({ data, count }) => {
-        setMemorials((data as Memorial[]) || []);
+      .then(async ({ data, count }) => {
+        const rows = (data as Memorial[]) || [];
+        setMemorials(rows);
         setTotalCount(count || 0);
         setLoading(false);
+
+        const ids = rows.map(r => r.id);
+        if (ids.length) {
+          const { data: cs } = await supabase
+            .from("condolences")
+            .select("memorial_id")
+            .in("memorial_id", ids);
+          const tally: Record<string, number> = {};
+          (cs || []).forEach((c: any) => {
+            tally[c.memorial_id] = (tally[c.memorial_id] || 0) + 1;
+          });
+          setCondCounts(tally);
+        }
       });
   }, [page, search]);
 
