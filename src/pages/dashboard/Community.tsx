@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MessagesSquare, Image as ImageIcon, Heart, MessageCircle, Send, Trash2, Loader2, Newspaper, Plus, Pencil, X, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { logActivity } from "@/lib/activity";
 
 type Profile = { id: string; full_name: string | null; avatar_url: string | null; email: string | null };
 
