@@ -378,20 +378,31 @@ export const Memorials = () => {
 
                         </div>
 
-                        <div className="mt-2 flex items-center justify-between">
+                        <div className="mt-3 flex items-center justify-between gap-3">
 
-                          <div className="flex items-center gap-2 border-2 rounded-lg p-2 border-brand-orange/50 hover:bg-brand-orange font-medium text-md">
-
-                            <span>View Memorial</span>
-
-                            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
-
+                          <div className="flex items-center gap-3 text-xs text-neutral-600">
+                            <span className="inline-flex items-center gap-1.5" title="Views">
+                              <Eye className="h-4 w-4 text-brand-orange" />
+                              <span className="font-medium">{(m.visitor_count || 0).toLocaleString()}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1.5" title="Condolences">
+                              <MessageCircle className="h-4 w-4 text-brand-orange" />
+                              <span className="font-medium">{condCounts[m.id] || 0}</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => shareMemorial(e, m)}
+                              className="inline-flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                              aria-label="Share memorial"
+                            >
+                              <Share2 className="h-4 w-4" />
+                              <span className="hidden sm:inline">Share</span>
+                            </button>
                           </div>
 
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#faf7f3] border border-black/5">
-
-                            <Flame className="h-5 w-5 text-brand-orange" />
-
+                          <div className="flex items-center gap-2 border-2 rounded-lg px-3 py-1.5 border-brand-orange/50 group-hover:bg-brand-orange group-hover:text-white transition-colors font-medium text-sm">
+                            <span>View</span>
+                            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                           </div>
 
                         </div>
