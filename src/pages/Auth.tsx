@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
+import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
