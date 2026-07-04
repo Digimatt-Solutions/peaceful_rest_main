@@ -25,7 +25,16 @@ const actionColor = (a: string) => {
   if (a.includes("create")) return "bg-emerald-500/15 text-emerald-600 border-emerald-500/30";
   if (a.includes("update") || a.includes("role")) return "bg-amber-500/15 text-amber-600 border-amber-500/30";
   if (a.includes("login") || a.includes("logout") || a.includes("signup")) return "bg-blue-500/15 text-blue-600 border-blue-500/30";
+  if (a.startsWith("visited")) return "bg-violet-500/15 text-violet-600 border-violet-500/30";
   return "bg-slate-500/15 text-slate-600 border-slate-500/30";
+};
+
+const formatAction = (l: Log) => {
+  if (l.action?.startsWith("visited") || l.action === "page_view") {
+    const page = l?.metadata?.page || l.action.replace(/^visited_/, "").replace(/_/g, " ");
+    return `visited: ${page}`;
+  }
+  return l.action.replace(/_/g, " ");
 };
 
 const PAGE_SIZE = 25;
@@ -133,8 +142,8 @@ const ActivityLogs = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-sm">{l.actor_name || "Unknown"}</span>
-                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${actionColor(l.action)}`}>{l.action.replace(/_/g, " ")}</Badge>
-                    {l.entity_type && <span className="text-xs text-muted-foreground">on <span className="font-medium">{l.entity_type}</span></span>}
+                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${actionColor(l.action)}`}>{formatAction(l)}</Badge>
+                    {l.entity_type && l.entity_type !== "page" && <span className="text-xs text-muted-foreground">on <span className="font-medium">{l.entity_type}</span></span>}
                   </div>
                   {l.description && <p className="text-sm text-muted-foreground mt-0.5">{l.description}</p>}
                   <p className="text-xs text-muted-foreground/70 mt-0.5">{l.actor_email}</p>

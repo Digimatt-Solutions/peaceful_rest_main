@@ -83,10 +83,10 @@ export const DashboardLayout = () => {
     lastLoggedRef.current = { path, ts: now };
     const nav = allNav.find(n => n.to === path);
     const pageLabel = nav?.label || path.replace(/^\/dashboard\/?/, "") || "Dashboard";
-    logActivity("page_view", {
+    logActivity(`visited_${pageLabel.toLowerCase().replace(/\s+/g, "_")}`, {
       entity_type: "page",
       description: `Visited ${pageLabel}`,
-      metadata: { path, referrer: document.referrer || null },
+      metadata: { path, page: pageLabel, referrer: document.referrer || null },
     });
   }, [user, location.pathname]);
 
