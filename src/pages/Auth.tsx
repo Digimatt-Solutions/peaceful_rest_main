@@ -147,7 +147,7 @@ const Auth = () => {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="li-email">Email address</Label>
-                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
+                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -161,9 +161,35 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><LogIn className="h-4 w-4 mr-2" />Sign In</>)}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><LogIn className="h-4 w-4 mr-2" />Sign In</>)}
+                  </Button>
+                  {bioAvailable && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!loginEmail) { toast.error("Enter your email first"); return; }
+                        setBioLoading(true);
+                        try {
+                          await signInWithFingerprint(loginEmail.trim());
+                          toast.success("Signed in with fingerprint");
+                          navigate("/dashboard");
+                        } catch (err: any) {
+                          toast.error(err.message || "Fingerprint sign-in failed");
+                        } finally {
+                          setBioLoading(false);
+                        }
+                      }}
+                      disabled={bioLoading}
+                      aria-label="Sign in with fingerprint"
+                      title="Sign in with fingerprint"
+                      className="h-12 w-12 shrink-0 inline-flex items-center justify-center rounded-full border-2 border-brand-orange/50 text-brand-orange hover:bg-brand-orange/10 transition-colors disabled:opacity-50"
+                    >
+                      {bioLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Fingerprint className="h-5 w-5" />}
+                    </button>
+                  )}
+                </div>
               </form>
             </TabsContent>
 
