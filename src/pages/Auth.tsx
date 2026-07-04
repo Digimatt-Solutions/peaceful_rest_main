@@ -44,9 +44,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [bioLoading, setBioLoading] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<"mourner" | "memorial_admin">("mourner");
   const [showPw, setShowPw] = useState(false);
   const [showSuPw, setShowSuPw] = useState(false);
+  const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
 
   useEffect(() => {
     document.title = "Sign In · Makiwa";
