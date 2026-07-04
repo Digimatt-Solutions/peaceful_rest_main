@@ -1,5 +1,5 @@
 import { ShieldCheck, Globe2, Users, Sparkles, Quote } from "lucide-react";
-import elderImg from "@/assets/why-african-elder.jpg";
+import elderImg from "@/assets/why-sunset-reflection.jpg";
 import familyImg from "@/assets/why-african-family.jpg";
 import candleImg from "@/assets/why-african-candle.jpg";
 
@@ -25,7 +25,7 @@ export const WhyUs = () => {
             <div className="col-span-4 row-span-6 relative rounded-[28px] overflow-hidden shadow-elegant group">
               <img
                 src={elderImg}
-                alt="African elder reflecting in warm window light"
+                alt="A person gazing at a warm African sunset in quiet reflection"
                 loading="lazy"
                 width={896}
                 height={1152}
