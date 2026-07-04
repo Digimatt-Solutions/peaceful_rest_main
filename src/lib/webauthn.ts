@@ -6,7 +6,7 @@ export const isWebAuthnSupported = () => browserSupportsWebAuthn();
 export const registerFingerprint = async (deviceName?: string) => {
   const { data: opts, error } = await supabase.functions.invoke("webauthn-register-options");
   if (error) throw new Error(error.message);
-  const attestationResponse = await startRegistration({ optionsJSON: opts.options });
+  const attestationResponse = await startRegistration(opts.options);
   const { data: verify, error: vErr } = await supabase.functions.invoke("webauthn-register-verify", {
     body: { attestationResponse, deviceName: deviceName || navigator.userAgent.split(") ")[0].split(" (")[1] || "This device" },
   });
@@ -18,7 +18,7 @@ export const registerFingerprint = async (deviceName?: string) => {
 export const signInWithFingerprint = async (email: string) => {
   const { data: opts, error } = await supabase.functions.invoke("webauthn-login-options", { body: { email } });
   if (error) throw new Error(error.message);
-  const assertionResponse = await startAuthentication({ optionsJSON: opts.options });
+  const assertionResponse = await startAuthentication(opts.options);
   const { data: verify, error: vErr } = await supabase.functions.invoke("webauthn-login-verify", {
     body: { email, assertionResponse },
   });
