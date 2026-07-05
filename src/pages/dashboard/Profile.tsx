@@ -152,16 +152,32 @@ const Profile = () => {
                 </p>
               </div>
             </div>
-            <Button
-              onClick={enrollFingerprint}
-              disabled={!bioAvailable || bioBusy}
-              className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
-            >
-              {bioBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> Register fingerprint</>}
-            </Button>
+            {inIframe ? (
+              <Button
+                onClick={() => window.open(window.location.href, "_blank", "noopener")}
+                className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" /> Open in new tab to register
+              </Button>
+            ) : (
+              <Button
+                onClick={enrollFingerprint}
+                disabled={!bioAvailable || bioBusy}
+                className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
+              >
+                {bioBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> Register fingerprint</>}
+              </Button>
+            )}
           </div>
 
-          {!bioAvailable && (
+          {inIframe && (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 text-amber-700 border border-amber-500/20 px-3 py-2 text-xs">
+              <Info className="h-4 w-4 shrink-0 mt-0.5" />
+              Browsers block the fingerprint prompt inside embedded previews. Open the app in a new tab to register your fingerprint.
+            </div>
+          )}
+
+          {!bioAvailable && !inIframe && (
             <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 text-amber-700 border border-amber-500/20 px-3 py-2 text-xs">
               <Info className="h-4 w-4 shrink-0 mt-0.5" />
               This browser or device does not support biometric sign-in.
