@@ -13,8 +13,9 @@ import {
   Fingerprint, ShieldCheck, Trash2, Plus, Info, Clock
 } from "lucide-react";
 import { toast } from "sonner";
-import { isWebAuthnSupported, registerFingerprint, listFingerprints, removeFingerprint } from "@/lib/webauthn";
+import { isWebAuthnSupported, registerFingerprint, listFingerprints, removeFingerprint, isInIframe } from "@/lib/webauthn";
 import { formatDistanceToNow } from "date-fns";
+import { ExternalLink } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
