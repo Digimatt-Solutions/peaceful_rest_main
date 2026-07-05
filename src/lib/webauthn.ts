@@ -8,6 +8,9 @@ export const isInIframe = () => {
 };
 
 export const registerFingerprint = async (deviceName?: string) => {
+  if (isInIframe()) {
+    throw new Error("Fingerprint sign-in cannot run inside the editor preview. Open the app in a new tab and try again.");
+  }
   const { data: opts, error } = await supabase.functions.invoke("webauthn-register-options");
   if (error) throw new Error(error.message || "Could not start fingerprint registration");
   if (!opts?.options) throw new Error(opts?.error || "Registration options unavailable");
