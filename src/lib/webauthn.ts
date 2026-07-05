@@ -31,6 +31,9 @@ export const registerFingerprint = async (deviceName?: string) => {
 };
 
 export const signInWithFingerprint = async (email: string) => {
+  if (isInIframe()) {
+    throw new Error("Fingerprint sign-in cannot run inside the editor preview. Open the app in a new tab and try again.");
+  }
   const { data: opts, error } = await supabase.functions.invoke("webauthn-login-options", { body: { email } });
   if (error) throw new Error(error.message || "Fingerprint sign-in unavailable");
   if (!opts?.options) throw new Error(opts?.error || "No fingerprint registered for this account");
