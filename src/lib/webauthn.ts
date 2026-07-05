@@ -9,7 +9,7 @@ export const registerFingerprint = async (deviceName?: string) => {
   if (!opts?.options) throw new Error(opts?.error || "Registration options unavailable");
   let attestationResponse;
   try {
-    attestationResponse = await startRegistration({ optionsJSON: opts.options });
+    attestationResponse = await startRegistration(opts.options);
   } catch (e: any) {
     if (e?.name === "InvalidStateError") throw new Error("This device is already registered on your account");
     if (e?.name === "NotAllowedError") throw new Error("Fingerprint prompt was cancelled or denied");
@@ -29,7 +29,7 @@ export const signInWithFingerprint = async (email: string) => {
   if (!opts?.options) throw new Error(opts?.error || "No fingerprint registered for this account");
   let assertionResponse;
   try {
-    assertionResponse = await startAuthentication({ optionsJSON: opts.options });
+    assertionResponse = await startAuthentication(opts.options);
   } catch (e: any) {
     if (e?.name === "NotAllowedError") throw new Error("Fingerprint prompt was cancelled or denied");
     throw new Error(e?.message || "Fingerprint scan failed");
