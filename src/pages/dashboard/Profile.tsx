@@ -25,6 +25,7 @@ const Profile = () => {
   const [creds, setCreds] = useState<any[]>([]);
   const [bioBusy, setBioBusy] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
+  const inIframe = typeof window !== "undefined" && isInIframe();
 
   useEffect(() => {
     document.title = "Profile · Makiwa";
