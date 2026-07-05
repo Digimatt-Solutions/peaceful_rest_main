@@ -395,6 +395,16 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setDonatingFund(f);
+                          setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+                          setOpenDonate(true);
+                        }}
+                        className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
+                      >
+                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
                     </div>
                   );
                 })}
