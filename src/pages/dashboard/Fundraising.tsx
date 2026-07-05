@@ -405,6 +405,7 @@ const Fundraising = () => {
                         className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
                       >
                         <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
+                      </Button>
                     </div>
                   );
                 })}
