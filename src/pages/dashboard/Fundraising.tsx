@@ -103,6 +103,61 @@ const Fundraising = () => {
     });
   }, [user, isSuperAdmin]);
 
+  // Handle Paystack callback (?reference=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get("reference") || params.get("trxref");
+    if (!reference) return;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("paystack-verify", { body: { reference } });
+      if (error) { toast.error("Could not verify payment"); return; }
+      if (data?.paid) toast.success("Payment received. Thank you!");
+      else toast.error("Payment was not completed");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("reference"); url.searchParams.delete("trxref");
+      window.history.replaceState({}, "", url.toString());
+      if (memorialId) {
+        const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
+        setFunds(fs || []);
+        const ids = (fs || []).map(f => f.id);
+        if (ids.length) {
+          const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+          setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memorialId]);
+
+  const startPaystackDonation = async () => {
+    if (!donatingFund) return;
+    const amt = Number(donateForm.amount);
+    if (!donateForm.email) return toast.error("Enter your email");
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!donateForm.is_anonymous && !donateForm.donor_name.trim()) return toast.error("Enter your name");
+    setDonating(true);
+    const callback_url = `${window.location.origin}${window.location.pathname}`;
+    const { data, error } = await supabase.functions.invoke("paystack-initialize", {
+      body: {
+        fundraiser_id: donatingFund.id,
+        amount: amt,
+        email: donateForm.email.trim(),
+        donor_name: donateForm.donor_name,
+        donor_phone: donateForm.donor_phone,
+        message: donateForm.message,
+        is_anonymous: donateForm.is_anonymous,
+        callback_url,
+      },
+    });
+    setDonating(false);
+    if (error || !data?.authorization_url) {
+      toast.error(data?.error || error?.message || "Could not start payment");
+      return;
+    }
+    window.location.href = data.authorization_url;
+  };
+
+
   useEffect(() => {
     if (!memorialId) { setFunds([]); setDonations([]); return; }
     (async () => {
