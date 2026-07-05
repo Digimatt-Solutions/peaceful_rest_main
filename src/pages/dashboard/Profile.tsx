@@ -153,7 +153,7 @@ const Profile = () => {
             <Button
               onClick={enrollFingerprint}
               disabled={!bioAvailable || bioBusy}
-              className="rounded-full bg-brand-black text-brand-white hover:bg-brand-black/85"
+              className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
             >
               {bioBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> Register fingerprint</>}
             </Button>
