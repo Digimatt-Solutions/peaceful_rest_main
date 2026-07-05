@@ -92,9 +92,44 @@ const Auth = () => {
     const parsed = loginSchema.safeParse({ email: fd.get("email"), password: fd.get("password") });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     setLoading(true);
+    // Pre-check lockout
+    try {
+      const { data: check } = await supabase.functions.invoke("login-guard", {
+        body: { action: "check", email: parsed.data.email },
+      });
+      if (check?.locked) {
+        setLoading(false);
+        const mins = check.locked_until ? Math.max(1, Math.ceil((new Date(check.locked_until).getTime() - Date.now()) / 60000)) : 60;
+        toast.error(`Account temporarily locked. Try again in ~${mins} minute${mins === 1 ? "" : "s"}.`);
+        return;
+      }
+    } catch {}
+
     const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
+    if (error) {
+      try {
+        const { data: fail } = await supabase.functions.invoke("login-guard", {
+          body: { action: "fail", email: parsed.data.email },
+        });
+        setLoading(false);
+        if (fail?.locked) {
+          toast.error("Too many failed attempts. Account locked for 1 hour.");
+        } else {
+          toast.error(`${error.message} · ${fail?.remaining ?? "?"} attempt${fail?.remaining === 1 ? "" : "s"} left`);
+        }
+      } catch {
+        setLoading(false);
+        toast.error(error.message);
+      }
+      return;
+    }
+    // success — reset counter
+    try {
+      await supabase.functions.invoke("login-guard", {
+        body: { action: "success", email: parsed.data.email },
+      });
+    } catch {}
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
     toast.success("Welcome back");
     navigate("/dashboard");
   };
