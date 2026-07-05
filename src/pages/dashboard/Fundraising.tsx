@@ -45,6 +45,10 @@ const Fundraising = () => {
   const [openAddContrib, setOpenAddContrib] = useState(false);
   const [savingContrib, setSavingContrib] = useState(false);
   const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
+  const [openDonate, setOpenDonate] = useState(false);
+  const [donatingFund, setDonatingFund] = useState<any>(null);
+  const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+  const [donating, setDonating] = useState(false);
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
