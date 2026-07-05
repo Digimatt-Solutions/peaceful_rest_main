@@ -45,6 +45,10 @@ const Fundraising = () => {
   const [openAddContrib, setOpenAddContrib] = useState(false);
   const [savingContrib, setSavingContrib] = useState(false);
   const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
+  const [openDonate, setOpenDonate] = useState(false);
+  const [donatingFund, setDonatingFund] = useState<any>(null);
+  const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+  const [donating, setDonating] = useState(false);
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
@@ -98,6 +102,61 @@ const Fundraising = () => {
       setLoading(false);
     });
   }, [user, isSuperAdmin]);
+
+  // Handle Paystack callback (?reference=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get("reference") || params.get("trxref");
+    if (!reference) return;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("paystack-verify", { body: { reference } });
+      if (error) { toast.error("Could not verify payment"); return; }
+      if (data?.paid) toast.success("Payment received. Thank you!");
+      else toast.error("Payment was not completed");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("reference"); url.searchParams.delete("trxref");
+      window.history.replaceState({}, "", url.toString());
+      if (memorialId) {
+        const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
+        setFunds(fs || []);
+        const ids = (fs || []).map(f => f.id);
+        if (ids.length) {
+          const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+          setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memorialId]);
+
+  const startPaystackDonation = async () => {
+    if (!donatingFund) return;
+    const amt = Number(donateForm.amount);
+    if (!donateForm.email) return toast.error("Enter your email");
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!donateForm.is_anonymous && !donateForm.donor_name.trim()) return toast.error("Enter your name");
+    setDonating(true);
+    const callback_url = `${window.location.origin}${window.location.pathname}`;
+    const { data, error } = await supabase.functions.invoke("paystack-initialize", {
+      body: {
+        fundraiser_id: donatingFund.id,
+        amount: amt,
+        email: donateForm.email.trim(),
+        donor_name: donateForm.donor_name,
+        donor_phone: donateForm.donor_phone,
+        message: donateForm.message,
+        is_anonymous: donateForm.is_anonymous,
+        callback_url,
+      },
+    });
+    setDonating(false);
+    if (error || !data?.authorization_url) {
+      toast.error(data?.error || error?.message || "Could not start payment");
+      return;
+    }
+    window.location.href = data.authorization_url;
+  };
+
 
   useEffect(() => {
     if (!memorialId) { setFunds([]); setDonations([]); return; }
@@ -336,6 +395,17 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setDonatingFund(f);
+                          setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+                          setOpenDonate(true);
+                        }}
+                        className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
+                      >
+                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
+                      </Button>
                     </div>
                   );
                 })}
@@ -440,6 +510,39 @@ const Fundraising = () => {
               {savingContrib ? "Saving…" : "Record contribution"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openDonate} onOpenChange={setOpenDonate}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl">Donate via Paystack</DialogTitle>
+          </DialogHeader>
+          {donatingFund && (
+            <div className="space-y-4 mt-2">
+              <div className="rounded-xl bg-brand-orange/5 border border-brand-orange/20 p-3">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Contributing to</p>
+                <p className="font-serif text-lg">{donatingFund.title}</p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} /></div>
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={donateForm.email} onChange={(e) => setDonateForm({ ...donateForm, email: e.target.value })} required /></div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} disabled={donateForm.is_anonymous} /></div>
+                <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} /></div>
+              </div>
+              <div className="space-y-2"><Label>Message <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Textarea rows={2} value={donateForm.message} onChange={(e) => setDonateForm({ ...donateForm, message: e.target.value })} /></div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
+                Donate anonymously
+              </label>
+              <Button onClick={startPaystackDonation} disabled={donating} className="w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90 h-11">
+                {donating ? "Redirecting to Paystack…" : `Pay KSh ${Number(donateForm.amount || 0).toLocaleString()} securely`}
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">Payments are processed securely by Paystack. You'll be redirected to complete checkout.</p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

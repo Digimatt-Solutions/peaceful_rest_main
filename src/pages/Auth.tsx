@@ -92,9 +92,44 @@ const Auth = () => {
     const parsed = loginSchema.safeParse({ email: fd.get("email"), password: fd.get("password") });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     setLoading(true);
+    // Pre-check lockout
+    try {
+      const { data: check } = await supabase.functions.invoke("login-guard", {
+        body: { action: "check", email: parsed.data.email },
+      });
+      if (check?.locked) {
+        setLoading(false);
+        const mins = check.locked_until ? Math.max(1, Math.ceil((new Date(check.locked_until).getTime() - Date.now()) / 60000)) : 60;
+        toast.error(`Account temporarily locked. Try again in ~${mins} minute${mins === 1 ? "" : "s"}.`);
+        return;
+      }
+    } catch {}
+
     const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
+    if (error) {
+      try {
+        const { data: fail } = await supabase.functions.invoke("login-guard", {
+          body: { action: "fail", email: parsed.data.email },
+        });
+        setLoading(false);
+        if (fail?.locked) {
+          toast.error("Too many failed attempts. Account locked for 1 hour.");
+        } else {
+          toast.error(`${error.message} · ${fail?.remaining ?? "?"} attempt${fail?.remaining === 1 ? "" : "s"} left`);
+        }
+      } catch {
+        setLoading(false);
+        toast.error(error.message);
+      }
+      return;
+    }
+    // success — reset counter
+    try {
+      await supabase.functions.invoke("login-guard", {
+        body: { action: "success", email: parsed.data.email },
+      });
+    } catch {}
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
     toast.success("Welcome back");
     navigate("/dashboard");
   };
@@ -162,7 +197,7 @@ const Auth = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
+                  <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><LogIn className="h-4 w-4 mr-2" />Sign In</>)}
                   </Button>
                   {bioAvailable && (
@@ -184,7 +219,7 @@ const Auth = () => {
                       disabled={bioLoading}
                       aria-label="Sign in with fingerprint"
                       title="Sign in with fingerprint"
-                      className="h-12 w-12 shrink-0 inline-flex items-center justify-center rounded-full border-2 border-brand-orange/50 text-brand-orange hover:bg-brand-orange/10 transition-colors disabled:opacity-50"
+                      className="h-12 w-12 shrink-0 inline-flex items-center justify-center rounded-lg border-2 border-brand-orange/50 text-brand-orange hover:bg-brand-orange/10 transition-colors disabled:opacity-50"
                     >
                       {bioLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Fingerprint className="h-5 w-5" />}
                     </button>
