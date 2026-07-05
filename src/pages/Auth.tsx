@@ -197,7 +197,7 @@ const Auth = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
+                  <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><LogIn className="h-4 w-4 mr-2" />Sign In</>)}
                   </Button>
                   {bioAvailable && (
@@ -219,7 +219,7 @@ const Auth = () => {
                       disabled={bioLoading}
                       aria-label="Sign in with fingerprint"
                       title="Sign in with fingerprint"
-                      className="h-12 w-12 shrink-0 inline-flex items-center justify-center rounded-full border-2 border-brand-orange/50 text-brand-orange hover:bg-brand-orange/10 transition-colors disabled:opacity-50"
+                      className="h-12 w-12 shrink-0 inline-flex items-center justify-center rounded-lg border-2 border-brand-orange/50 text-brand-orange hover:bg-brand-orange/10 transition-colors disabled:opacity-50"
                     >
                       {bioLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Fingerprint className="h-5 w-5" />}
                     </button>
