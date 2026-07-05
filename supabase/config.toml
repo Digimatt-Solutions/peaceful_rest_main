@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.verify-donation]
 verify_jwt = false
+
+[functions.login-guard]
+verify_jwt = false
+
+[functions.paystack-initialize]
+verify_jwt = false
+
+[functions.paystack-verify]
+verify_jwt = false
