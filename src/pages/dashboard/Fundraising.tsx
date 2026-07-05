@@ -512,6 +512,39 @@ const Fundraising = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={openDonate} onOpenChange={setOpenDonate}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl">Donate via Paystack</DialogTitle>
+          </DialogHeader>
+          {donatingFund && (
+            <div className="space-y-4 mt-2">
+              <div className="rounded-xl bg-brand-orange/5 border border-brand-orange/20 p-3">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Contributing to</p>
+                <p className="font-serif text-lg">{donatingFund.title}</p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} /></div>
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={donateForm.email} onChange={(e) => setDonateForm({ ...donateForm, email: e.target.value })} required /></div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} disabled={donateForm.is_anonymous} /></div>
+                <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} /></div>
+              </div>
+              <div className="space-y-2"><Label>Message <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Textarea rows={2} value={donateForm.message} onChange={(e) => setDonateForm({ ...donateForm, message: e.target.value })} /></div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
+                Donate anonymously
+              </label>
+              <Button onClick={startPaystackDonation} disabled={donating} className="w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90 h-11">
+                {donating ? "Redirecting to Paystack…" : `Pay KSh ${Number(donateForm.amount || 0).toLocaleString()} securely`}
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">Payments are processed securely by Paystack. You'll be redirected to complete checkout.</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
