@@ -3,6 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const isWebAuthnSupported = () => browserSupportsWebAuthn();
 
+export const isInIframe = () => {
+  try { return window.self !== window.top; } catch { return true; }
+};
+
 export const registerFingerprint = async (deviceName?: string) => {
   const { data: opts, error } = await supabase.functions.invoke("webauthn-register-options");
   if (error) throw new Error(error.message || "Could not start fingerprint registration");
