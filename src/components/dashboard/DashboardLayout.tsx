@@ -251,7 +251,10 @@ export const DashboardLayout = () => {
                   {theme === "dark" ? "Light mode" : "Dark mode"}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="cursor-pointer text-destructive focus:bg-brand-orange focus:text-white hover:!bg-brand-orange hover:!text-white [&_svg]:focus:text-white [&_svg]:hover:text-white"
+                >
                   <LogOut className="h-4 w-4 mr-2" /> Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
