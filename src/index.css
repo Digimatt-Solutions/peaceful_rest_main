@@ -104,16 +104,34 @@
 
 @layer components {
   /* SaaS card system — white cards on light-gray page, gentle gray hairline
-     border + soft elevation so they read as floating panels. */
-  main .rounded-2xl.border,
-  main .rounded-xl.border {
+     border + soft elevation so they read as floating panels. Applies to every
+     dashboard card across every user role (super admin, memorial admin,
+     mourner) since they all render inside the shared <main>. */
+  main .rounded-2xl,
+  main .rounded-xl {
     @apply bg-card shadow-sm transition-all duration-200;
-    border-color: hsl(214 32% 91%);
+    border: 1px solid hsl(214 32% 91%);
   }
-  main .rounded-2xl.border:hover,
-  main .rounded-xl.border:hover {
+  main .rounded-2xl:hover,
+  main .rounded-xl:hover {
     @apply shadow-md;
     border-color: hsl(214 32% 86%);
+  }
+  /* Exceptions: elements that should NOT read as floating cards */
+  main .rounded-2xl.no-card,
+  main .rounded-xl.no-card,
+  main button.rounded-2xl,
+  main button.rounded-xl,
+  main a.rounded-2xl,
+  main a.rounded-xl,
+  main img.rounded-2xl,
+  main img.rounded-xl,
+  main .avatar .rounded-2xl,
+  main [role="tablist"] .rounded-2xl,
+  main [role="tablist"] .rounded-xl {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
   }
 
   /* Inputs, selects, textareas — matching gray hairline for consistency */
