@@ -146,6 +146,23 @@
     border-color: hsl(var(--brand-orange) / 0.5);
   }
 
+  /* Select dropdowns — gray hairline border + white panel */
+  main .select-trigger {
+    background-color: hsl(var(--card));
+    border-color: hsl(214 32% 89%);
+  }
+  main .select-trigger:hover {
+    border-color: hsl(214 32% 82%);
+  }
+  main .select-trigger:focus-visible {
+    border-color: hsl(var(--brand-orange) / 0.5);
+    outline: none;
+  }
+  main .select-content {
+    background-color: hsl(var(--card)) !important;
+    border-color: hsl(214 32% 89%) !important;
+  }
+
   /* In-card outlined buttons pick up the brand orange border. Only applies to
      buttons that already declare a border, so dropdowns/tabs/icon toggles are
      untouched. Opt out with .no-orange-outline. */
