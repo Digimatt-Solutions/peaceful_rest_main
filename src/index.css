@@ -120,8 +120,8 @@
   /* Exceptions: elements that should NOT read as floating cards */
   main .rounded-2xl.no-card,
   main .rounded-xl.no-card,
-  main button.rounded-2xl,
-  main button.rounded-xl,
+  main button.rounded-2xl:not(.select-trigger),
+  main button.rounded-xl:not(.select-trigger),
   main a.rounded-2xl,
   main a.rounded-xl,
   main img.rounded-2xl,
