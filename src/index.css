@@ -103,16 +103,44 @@
 
 
 @layer components {
-  /* SaaS card system — every dashboard card gets soft elevation + white bg,
-     borders fade into the light-gray page for a clean, premium feel. */
+  /* SaaS card system — white cards on light-gray page, gentle gray hairline
+     border + soft elevation so they read as floating panels. */
   main .rounded-2xl.border,
   main .rounded-xl.border {
-    @apply border-transparent bg-card shadow-sm transition-all duration-200;
+    @apply bg-card shadow-sm transition-all duration-200;
+    border-color: hsl(214 32% 91%);
   }
   main .rounded-2xl.border:hover,
   main .rounded-xl.border:hover {
     @apply shadow-md;
+    border-color: hsl(214 32% 86%);
   }
+
+  /* Inputs, selects, textareas — matching gray hairline for consistency */
+  main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  main select,
+  main textarea {
+    border-color: hsl(214 32% 89%);
+  }
+  main input:focus-visible,
+  main select:focus-visible,
+  main textarea:focus-visible {
+    border-color: hsl(var(--brand-orange) / 0.5);
+  }
+
+  /* In-card buttons: orange outlined style. Applies to any <button> that lives
+     inside a card and doesn't already opt into a brand-filled background. */
+  main .rounded-2xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline),
+  main .rounded-xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline) {
+    border: 1px solid hsl(var(--brand-orange) / 0.4);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  }
+  main .rounded-2xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline):hover,
+  main .rounded-xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline):hover {
+    background-color: hsl(var(--brand-orange) / 0.08);
+    border-color: hsl(var(--brand-orange) / 0.7);
+  }
+
   /* Small orange-tinted icon container helper */
   .icon-tint {
     @apply inline-flex items-center justify-center rounded-lg bg-brand-orange/10 text-brand-orange;
