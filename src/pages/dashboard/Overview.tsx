@@ -228,7 +228,7 @@ const Overview = () => {
       />
 
       {/* Stats grid - role aware, unified orange-variant palette */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {isSuperAdmin && <Stat label="Total Users" value={stats.users} icon={Users} accent="quaternary" />}
         <Stat label={isMourner ? "Memorials Followed" : "Memorials"} value={stats.memorials} icon={BookHeart} accent="primary" />
         <Stat label="Visitors" value={stats.visitors.toLocaleString()} icon={Eye} accent="secondary" />
@@ -238,7 +238,7 @@ const Overview = () => {
       </div>
 
       {/* Charts */}
-      <div className="mt-6 grid lg:grid-cols-3 gap-5">
+      <div className="mt-8 grid lg:grid-cols-3 gap-6">
         <Card title="14-day activity trend" icon={Activity} className="lg:col-span-2">
           {dataLoading ? <ChartSkeleton h={260} /> : (
             <ResponsiveContainer width="100%" height={260}>
@@ -281,7 +281,7 @@ const Overview = () => {
 
 
       {/* Bottom row */}
-      <div className="mt-5 grid lg:grid-cols-3 gap-5">
+      <div className="mt-8 grid lg:grid-cols-3 gap-6">
         {!isMourner && (
           <Card title="Top memorials" icon={BookHeart} className="lg:col-span-2">
             {dataLoading ? <ChartSkeleton h={220} /> : topMemorials.length ? (
