@@ -120,8 +120,8 @@
   /* Exceptions: elements that should NOT read as floating cards */
   main .rounded-2xl.no-card,
   main .rounded-xl.no-card,
-  main button.rounded-2xl,
-  main button.rounded-xl,
+  main button.rounded-2xl:not(.select-trigger),
+  main button.rounded-xl:not(.select-trigger),
   main a.rounded-2xl,
   main a.rounded-xl,
   main img.rounded-2xl,
@@ -144,6 +144,23 @@
   main select:focus-visible,
   main textarea:focus-visible {
     border-color: hsl(var(--brand-orange) / 0.5);
+  }
+
+  /* Select dropdowns — gray hairline border + white panel */
+  main .select-trigger {
+    background-color: hsl(var(--card));
+    border-color: hsl(214 32% 89%);
+  }
+  main .select-trigger:hover {
+    border-color: hsl(214 32% 82%);
+  }
+  main .select-trigger:focus-visible {
+    border-color: hsl(var(--brand-orange) / 0.5);
+    outline: none;
+  }
+  main .select-content {
+    background-color: hsl(var(--card)) !important;
+    border-color: hsl(214 32% 89%) !important;
   }
 
   /* In-card outlined buttons pick up the brand orange border. Only applies to
