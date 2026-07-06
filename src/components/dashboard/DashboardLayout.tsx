@@ -262,7 +262,7 @@ export const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-6 lg:p-10 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-6 lg:p-10 lg:py-12 max-w-7xl w-full mx-auto space-y-2">
           <Outlet />
         </main>
       </div>
