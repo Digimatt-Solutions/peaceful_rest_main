@@ -102,6 +102,23 @@
 }
 
 
+@layer components {
+  /* SaaS card system — every dashboard card gets soft elevation + white bg,
+     borders fade into the light-gray page for a clean, premium feel. */
+  main .rounded-2xl.border,
+  main .rounded-xl.border {
+    @apply border-transparent bg-card shadow-sm transition-all duration-200;
+  }
+  main .rounded-2xl.border:hover,
+  main .rounded-xl.border:hover {
+    @apply shadow-md;
+  }
+  /* Small orange-tinted icon container helper */
+  .icon-tint {
+    @apply inline-flex items-center justify-center rounded-lg bg-brand-orange/10 text-brand-orange;
+  }
+}
+
 @layer utilities {
   .container-luxe {
     @apply mx-auto max-w-7xl px-6 lg:px-10;
