@@ -16,27 +16,17 @@ import {
 import { format, subDays, startOfDay } from "date-fns";
 
 const Stat = ({
-  label, value, icon: Icon, trend, accent = "primary",
-}: { label: string; value: string | number; icon: any; trend?: string; accent?: "primary" | "secondary" | "tertiary" | "quaternary" | "quinary" }) => {
-  // Unified orange-variant palette for every dashboard card.
-  const accentMap: Record<string, { grad: string; icon: string; ring: string }> = {
-    primary:    { grad: "from-[#f97316]/25 to-[#f97316]/5",  icon: "text-[#c2410c]", ring: "ring-[#f97316]/30" },
-    secondary:  { grad: "from-[#fb923c]/25 to-[#fb923c]/5",  icon: "text-[#9a3412]", ring: "ring-[#fb923c]/30" },
-    tertiary:   { grad: "from-[#fdba74]/30 to-[#fdba74]/5",  icon: "text-[#7c2d12]", ring: "ring-[#fdba74]/40" },
-    quaternary: { grad: "from-[#ea580c]/25 to-[#ea580c]/5",  icon: "text-[#7c2d12]", ring: "ring-[#ea580c]/30" },
-    quinary:    { grad: "from-[#fed7aa]/40 to-[#fed7aa]/5",  icon: "text-[#9a3412]", ring: "ring-[#fed7aa]/50" },
-  };
-  const a = accentMap[accent];
+  label, value, icon: Icon, trend,
+}: { label: string; value: string | number; icon: any; trend?: string; accent?: string }) => {
   return (
-    <div className={`group relative overflow-hidden rounded-2xl border border-brand-orange/20 bg-card p-5 hover:shadow-elegant hover:-translate-y-0.5 hover:border-brand-orange/40 transition-all ring-1 ${a.ring}`}>
-      <div className={`absolute inset-0 bg-gradient-to-br opacity-60 ${a.grad}`} />
-      <div className="relative flex items-start justify-between">
-        <div>
+    <div className="group rounded-2xl bg-card p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
-          <p className="mt-2 font-serif text-2xl sm:text-[26px]">{value}</p>
+          <p className="mt-2 font-serif text-2xl sm:text-[26px] truncate">{value}</p>
           {trend && <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="h-3 w-3" /> {trend}</p>}
         </div>
-        <div className={`h-11 w-11 rounded-xl bg-background/90 backdrop-blur flex items-center justify-center shadow-soft ${a.icon}`}>
+        <div className="h-10 w-10 rounded-xl bg-brand-orange/10 text-brand-orange flex items-center justify-center shrink-0 transition-colors group-hover:bg-brand-orange/15">
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -45,9 +35,9 @@ const Stat = ({
 };
 
 const Card = ({ title, icon: Icon, children, className = "" }: any) => (
-  <div className={`rounded-2xl border border-border bg-card p-6 ${className}`}>
+  <div className={`rounded-2xl bg-card p-6 shadow-sm ${className}`}>
     <div className="flex items-center gap-2.5 mb-5">
-      <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Icon className="h-4 w-4" /></div>
+      <div className="h-8 w-8 rounded-lg bg-brand-orange/10 text-brand-orange flex items-center justify-center"><Icon className="h-4 w-4" /></div>
       <h3 className="font-serif text-lg">{title}</h3>
     </div>
     {children}
