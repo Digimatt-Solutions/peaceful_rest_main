@@ -128,18 +128,25 @@
     border-color: hsl(var(--brand-orange) / 0.5);
   }
 
-  /* In-card buttons: orange outlined style. Applies to any <button> that lives
-     inside a card and doesn't already opt into a brand-filled background. */
-  main .rounded-2xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline),
-  main .rounded-xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline) {
-    border: 1px solid hsl(var(--brand-orange) / 0.4);
+  /* In-card outlined buttons pick up the brand orange border. Only applies to
+     buttons that already declare a border, so dropdowns/tabs/icon toggles are
+     untouched. Opt out with .no-orange-outline. */
+  main .rounded-2xl button.border,
+  main .rounded-2xl button.border-input,
+  main .rounded-xl button.border,
+  main .rounded-xl button.border-input {
+    border-color: hsl(var(--brand-orange) / 0.45);
     transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   }
-  main .rounded-2xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline):hover,
-  main .rounded-xl button:not([class*="bg-brand-orange"]):not([class*="bg-destructive"]):not([class*="bg-red"]):not([class*="variant"]):not([data-state]):not(.no-orange-outline):hover {
+  main .rounded-2xl button.border:hover,
+  main .rounded-2xl button.border-input:hover,
+  main .rounded-xl button.border:hover,
+  main .rounded-xl button.border-input:hover {
     background-color: hsl(var(--brand-orange) / 0.08);
-    border-color: hsl(var(--brand-orange) / 0.7);
+    border-color: hsl(var(--brand-orange) / 0.75);
+    color: hsl(var(--brand-orange));
   }
+  .no-orange-outline { border-color: hsl(var(--border)) !important; }
 
   /* Small orange-tinted icon container helper */
   .icon-tint {
