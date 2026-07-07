@@ -170,12 +170,6 @@ const Profile = () => {
             )}
           </div>
 
-          {inIframe && (
-            <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 text-amber-700 border border-amber-500/20 px-3 py-2 text-xs">
-              <Info className="h-4 w-4 shrink-0 mt-0.5" />
-              Browsers block the fingerprint prompt inside embedded previews. Open the app in a new tab to register your fingerprint.
-            </div>
-          )}
 
           {!bioAvailable && !inIframe && (
             <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 text-amber-700 border border-amber-500/20 px-3 py-2 text-xs">
