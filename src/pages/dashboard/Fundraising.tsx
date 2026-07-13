@@ -163,8 +163,20 @@ const Fundraising = () => {
 
 
   useEffect(() => {
-    if (!memorialId) { setFunds([]); setDonations([]); return; }
+    supabase.from("platform_settings").select("platform_fee_percent").limit(1).maybeSingle()
+      .then(({ data }) => { if (data?.platform_fee_percent != null) setPlatformFeePct(Number(data.platform_fee_percent)); });
+  }, []);
+
+  useEffect(() => {
+    if (!memorialId) { setFunds([]); setDonations([]); setBankAccount(null); return; }
     (async () => {
+      const { data: ba } = await supabase
+        .from("memorial_bank_accounts")
+        .select("*")
+        .eq("memorial_id", memorialId)
+        .eq("is_active", true)
+        .maybeSingle();
+      setBankAccount(ba);
       const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
       setFunds(fs || []);
       const ids = (fs || []).map(f => f.id);
