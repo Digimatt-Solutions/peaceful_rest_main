@@ -340,6 +340,40 @@ const Fundraising = () => {
             )}
           </div>
 
+          {/* Payout bank account panel */}
+          <div className={`mb-6 rounded-2xl border p-5 flex items-start gap-4 flex-wrap ${bankAccount ? "border-border bg-card" : "border-amber-300 bg-amber-50"}`}>
+            <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${bankAccount ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+              {bankAccount ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+            </div>
+            <div className="flex-1 min-w-[240px]">
+              {bankAccount ? (
+                <>
+                  <p className="font-serif text-lg">Payouts go to {bankAccount.resolved_account_name || bankAccount.account_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {bankAccount.bank_name} · •••• {String(bankAccount.account_number).slice(-4)} · Platform fee {platformFeePct}% per donation
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-serif text-lg text-amber-900">Add a payout bank account to publish fundraisers</p>
+                  <p className="text-sm text-amber-800/80">
+                    All contributions for {selectedMemorial?.full_name || "this memorial"} settle directly to the bank account you register with Paystack. A {platformFeePct}% platform fee is deducted per donation.
+                  </p>
+                </>
+              )}
+            </div>
+            <Button
+              onClick={() => setBankOpen(true)}
+              variant={bankAccount ? "outline" : "default"}
+              className={bankAccount ? "rounded-full" : "rounded-full bg-brand-orange text-white hover:bg-brand-orange/90"}
+            >
+              <Banknote className="h-4 w-4 mr-1.5" />
+              {bankAccount ? "Change account" : "Add bank account"}
+            </Button>
+          </div>
+
+
+
           {/* Summary cards */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard icon={Wallet} label="Total raised" value={`KSh ${totals.raised.toLocaleString()}`} tint={ORANGE[0]} />
