@@ -443,9 +443,16 @@ const Fundraising = () => {
                     <div key={f.id} className="rounded-2xl border border-border bg-card p-5 hover:shadow-elegant transition-shadow">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
-                            {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
-                          </Badge>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
+                              {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
+                            </Badge>
+                            {f.status !== "active" && (
+                              <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-amber-300 text-amber-700 bg-amber-50">
+                                {f.status || "draft"}
+                              </Badge>
+                            )}
+                          </div>
                           <h4 className="mt-2 font-serif text-lg">{f.title}</h4>
                         </div>
                       </div>
@@ -457,21 +464,33 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setDonatingFund(f);
-                          setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
-                          setOpenDonate(true);
-                        }}
-                        className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
-                      >
-                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
-                      </Button>
+                      {f.status === "active" && f.bank_account_id ? (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setDonatingFund(f);
+                            setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+                            setOpenDonate(true);
+                          }}
+                          className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
+                        >
+                          <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => setBankOpen(true)}
+                          variant="outline"
+                          className="mt-4 w-full rounded-lg border-amber-300 text-amber-800 hover:bg-amber-50"
+                        >
+                          <Banknote className="h-4 w-4 mr-1.5" /> Add payout account to activate
+                        </Button>
+                      )}
                     </div>
                   );
                 })}
               </div>
+
 
               {/* Donor list */}
               <div className="rounded-2xl border border-border bg-card p-6">
