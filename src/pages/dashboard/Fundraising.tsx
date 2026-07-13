@@ -189,7 +189,19 @@ const Fundraising = () => {
 
   const create = async () => {
     if (!form.title || !memorialId) return;
-    const { data, error } = await supabase.from("fundraisers").insert({ ...form, memorial_id: memorialId, goal_amount: Number(form.goal_amount) }).select().maybeSingle();
+    if (!bankAccount) {
+      toast.error("Add a payout bank account first");
+      setOpenCreate(false);
+      setBankOpen(true);
+      return;
+    }
+    const { data, error } = await supabase.from("fundraisers").insert({
+      ...form,
+      memorial_id: memorialId,
+      goal_amount: Number(form.goal_amount),
+      bank_account_id: bankAccount.id,
+      status: "active",
+    }).select().maybeSingle();
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
     setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
