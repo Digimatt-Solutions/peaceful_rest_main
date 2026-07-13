@@ -328,8 +328,10 @@ export type Database = {
           id: string
           is_anonymous: boolean
           message: string | null
+          platform_fee_amount: number | null
           status: string
           stripe_session_id: string | null
+          subaccount_amount: number | null
           user_id: string | null
         }
         Insert: {
@@ -342,8 +344,10 @@ export type Database = {
           id?: string
           is_anonymous?: boolean
           message?: string | null
+          platform_fee_amount?: number | null
           status?: string
           stripe_session_id?: string | null
+          subaccount_amount?: number | null
           user_id?: string | null
         }
         Update: {
@@ -356,8 +360,10 @@ export type Database = {
           id?: string
           is_anonymous?: boolean
           message?: string | null
+          platform_fee_amount?: number | null
           status?: string
           stripe_session_id?: string | null
+          subaccount_amount?: number | null
           user_id?: string | null
         }
         Relationships: [
@@ -413,6 +419,7 @@ export type Database = {
       }
       fundraisers: {
         Row: {
+          bank_account_id: string | null
           category: string
           created_at: string
           currency: string
@@ -422,9 +429,11 @@ export type Database = {
           is_active: boolean
           memorial_id: string
           raised_amount: number
+          status: string
           title: string
         }
         Insert: {
+          bank_account_id?: string | null
           category?: string
           created_at?: string
           currency?: string
@@ -434,9 +443,11 @@ export type Database = {
           is_active?: boolean
           memorial_id: string
           raised_amount?: number
+          status?: string
           title: string
         }
         Update: {
+          bank_account_id?: string | null
           category?: string
           created_at?: string
           currency?: string
@@ -446,9 +457,17 @@ export type Database = {
           is_active?: boolean
           memorial_id?: string
           raised_amount?: number
+          status?: string
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fundraisers_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_bank_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fundraisers_memorial_id_fkey"
             columns: ["memorial_id"]
@@ -504,6 +523,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "memorial_admins_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_bank_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          bank_code: string
+          bank_name: string
+          country: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          memorial_id: string
+          paystack_subaccount_code: string | null
+          paystack_subaccount_id: string | null
+          resolved_account_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          bank_code: string
+          bank_name: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          memorial_id: string
+          paystack_subaccount_code?: string | null
+          paystack_subaccount_id?: string | null
+          resolved_account_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          bank_code?: string
+          bank_name?: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          memorial_id?: string
+          paystack_subaccount_code?: string | null
+          paystack_subaccount_id?: string | null
+          resolved_account_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_bank_accounts_memorial_id_fkey"
             columns: ["memorial_id"]
             isOneToOne: false
             referencedRelation: "memorials"
@@ -623,6 +701,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_settings: {
+        Row: {
+          created_at: string
+          id: string
+          platform_fee_percent: number
+          singleton: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform_fee_percent?: number
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform_fee_percent?: number
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
