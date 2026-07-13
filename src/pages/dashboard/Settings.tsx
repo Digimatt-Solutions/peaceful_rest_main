@@ -22,6 +22,30 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [notifs, setNotifs] = useState(true);
   const [privacy, setPrivacy] = useState(true);
+  const [feePct, setFeePct] = useState<string>("5");
+  const [feeRowId, setFeeRowId] = useState<string | null>(null);
+  const [savingFee, setSavingFee] = useState(false);
+
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    supabase.from("platform_settings").select("id,platform_fee_percent").limit(1).maybeSingle()
+      .then(({ data }) => {
+        if (data) { setFeeRowId(data.id); setFeePct(String(data.platform_fee_percent)); }
+      });
+  }, [isSuperAdmin]);
+
+  const savePlatformFee = async () => {
+    const v = Number(feePct);
+    if (isNaN(v) || v < 0 || v > 100) return toast.error("Fee must be between 0 and 100");
+    setSavingFee(true);
+    const payload = { platform_fee_percent: v, updated_by: user?.id };
+    const { error } = feeRowId
+      ? await supabase.from("platform_settings").update(payload).eq("id", feeRowId)
+      : await supabase.from("platform_settings").insert(payload);
+    setSavingFee(false);
+    if (error) return toast.error(error.message);
+    toast.success("Platform fee updated");
+  };
 
   const changePassword = async () => {
     if (newPassword.length < 8) return toast.error("At least 8 characters");
