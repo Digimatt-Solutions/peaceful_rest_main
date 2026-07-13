@@ -626,6 +626,18 @@ const Fundraising = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <BankAccountDialog
+        open={bankOpen}
+        onOpenChange={setBankOpen}
+        memorialId={memorialId}
+        memorialName={selectedMemorial?.full_name}
+        onSaved={async (ba) => {
+          setBankAccount(ba);
+          const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
+          setFunds(fs || []);
+        }}
+      />
     </>
   );
 };
