@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt } from "lucide-react";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt, Banknote, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
+import { BankAccountDialog } from "@/components/fundraising/BankAccountDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -49,6 +50,9 @@ const Fundraising = () => {
   const [donatingFund, setDonatingFund] = useState<any>(null);
   const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
+  const [bankAccount, setBankAccount] = useState<any>(null);
+  const [bankOpen, setBankOpen] = useState(false);
+  const [platformFeePct, setPlatformFeePct] = useState<number>(5);
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
@@ -159,8 +163,20 @@ const Fundraising = () => {
 
 
   useEffect(() => {
-    if (!memorialId) { setFunds([]); setDonations([]); return; }
+    supabase.from("platform_settings").select("platform_fee_percent").limit(1).maybeSingle()
+      .then(({ data }) => { if (data?.platform_fee_percent != null) setPlatformFeePct(Number(data.platform_fee_percent)); });
+  }, []);
+
+  useEffect(() => {
+    if (!memorialId) { setFunds([]); setDonations([]); setBankAccount(null); return; }
     (async () => {
+      const { data: ba } = await supabase
+        .from("memorial_bank_accounts")
+        .select("*")
+        .eq("memorial_id", memorialId)
+        .eq("is_active", true)
+        .maybeSingle();
+      setBankAccount(ba);
       const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
       setFunds(fs || []);
       const ids = (fs || []).map(f => f.id);
@@ -173,7 +189,19 @@ const Fundraising = () => {
 
   const create = async () => {
     if (!form.title || !memorialId) return;
-    const { data, error } = await supabase.from("fundraisers").insert({ ...form, memorial_id: memorialId, goal_amount: Number(form.goal_amount) }).select().maybeSingle();
+    if (!bankAccount) {
+      toast.error("Add a payout bank account first");
+      setOpenCreate(false);
+      setBankOpen(true);
+      return;
+    }
+    const { data, error } = await supabase.from("fundraisers").insert({
+      ...form,
+      memorial_id: memorialId,
+      goal_amount: Number(form.goal_amount),
+      bank_account_id: bankAccount.id,
+      status: "active",
+    }).select().maybeSingle();
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
     setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
@@ -312,6 +340,40 @@ const Fundraising = () => {
             )}
           </div>
 
+          {/* Payout bank account panel */}
+          <div className={`mb-6 rounded-2xl border p-5 flex items-start gap-4 flex-wrap ${bankAccount ? "border-border bg-card" : "border-amber-300 bg-amber-50"}`}>
+            <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${bankAccount ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+              {bankAccount ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+            </div>
+            <div className="flex-1 min-w-[240px]">
+              {bankAccount ? (
+                <>
+                  <p className="font-serif text-lg">Payouts go to {bankAccount.resolved_account_name || bankAccount.account_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {bankAccount.bank_name} · •••• {String(bankAccount.account_number).slice(-4)} · Platform fee {platformFeePct}% per donation
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-serif text-lg text-amber-900">Add a payout bank account to publish fundraisers</p>
+                  <p className="text-sm text-amber-800/80">
+                    All contributions for {selectedMemorial?.full_name || "this memorial"} settle directly to the bank account you register with Paystack. A {platformFeePct}% platform fee is deducted per donation.
+                  </p>
+                </>
+              )}
+            </div>
+            <Button
+              onClick={() => setBankOpen(true)}
+              variant={bankAccount ? "outline" : "default"}
+              className={bankAccount ? "rounded-full" : "rounded-full bg-brand-orange text-white hover:bg-brand-orange/90"}
+            >
+              <Banknote className="h-4 w-4 mr-1.5" />
+              {bankAccount ? "Change account" : "Add bank account"}
+            </Button>
+          </div>
+
+
+
           {/* Summary cards */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard icon={Wallet} label="Total raised" value={`KSh ${totals.raised.toLocaleString()}`} tint={ORANGE[0]} />
@@ -381,9 +443,16 @@ const Fundraising = () => {
                     <div key={f.id} className="rounded-2xl border border-border bg-card p-5 hover:shadow-elegant transition-shadow">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
-                            {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
-                          </Badge>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
+                              {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
+                            </Badge>
+                            {f.status !== "active" && (
+                              <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-amber-300 text-amber-700 bg-amber-50">
+                                {f.status || "draft"}
+                              </Badge>
+                            )}
+                          </div>
                           <h4 className="mt-2 font-serif text-lg">{f.title}</h4>
                         </div>
                       </div>
@@ -395,21 +464,33 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setDonatingFund(f);
-                          setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
-                          setOpenDonate(true);
-                        }}
-                        className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
-                      >
-                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
-                      </Button>
+                      {f.status === "active" && f.bank_account_id ? (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setDonatingFund(f);
+                            setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+                            setOpenDonate(true);
+                          }}
+                          className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
+                        >
+                          <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => setBankOpen(true)}
+                          variant="outline"
+                          className="mt-4 w-full rounded-lg border-amber-300 text-amber-800 hover:bg-amber-50"
+                        >
+                          <Banknote className="h-4 w-4 mr-1.5" /> Add payout account to activate
+                        </Button>
+                      )}
                     </div>
                   );
                 })}
               </div>
+
 
               {/* Donor list */}
               <div className="rounded-2xl border border-border bg-card p-6">
@@ -545,6 +626,18 @@ const Fundraising = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <BankAccountDialog
+        open={bankOpen}
+        onOpenChange={setBankOpen}
+        memorialId={memorialId}
+        memorialName={selectedMemorial?.full_name}
+        onSaved={async (ba) => {
+          setBankAccount(ba);
+          const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
+          setFunds(fs || []);
+        }}
+      />
     </>
   );
 };
