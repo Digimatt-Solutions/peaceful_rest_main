@@ -50,6 +50,9 @@ const Fundraising = () => {
   const [donatingFund, setDonatingFund] = useState<any>(null);
   const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
+  const [bankAccount, setBankAccount] = useState<any>(null);
+  const [bankOpen, setBankOpen] = useState(false);
+  const [platformFeePct, setPlatformFeePct] = useState<number>(5);
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
