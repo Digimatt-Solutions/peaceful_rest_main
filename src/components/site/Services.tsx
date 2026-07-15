@@ -1,5 +1,4 @@
 import {
-  Megaphone,
   HeartHandshake,
   ScrollText,
   MessageCircle,
@@ -17,11 +16,6 @@ const features = [
     icon: ScrollText,
     name: "Eulogy & Obituary Design",
     desc: "Beautifully crafted obituary pages with biography, photos, dates and a lasting tribute.",
-  },
-  {
-    icon: Megaphone,
-    name: "Announcements",
-    desc: "Share funeral notices, service schedules and family updates with everyone, instantly.",
   },
   {
     icon: HeartHandshake,
@@ -117,7 +111,7 @@ export const Services = () => {
                   className="rounded-[2rem] bg-white p-7 lg:p-8 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_-15px_rgba(249,115,22,0.25)] hover:-translate-y-1 transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]"
                 >
                   <div className="h-12 w-12 rounded-xl bg-brand-orange flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-brand-white" />
+                    <Icon className="h-5 w-5 text-black" strokeWidth={2.25} />
                   </div>
                   <div className="mt-6">
                     <h3 className="font-serif text-2xl font-medium">{s.name}</h3>
@@ -140,7 +134,7 @@ export const Services = () => {
                 className="group relative p-7 rounded-2xl bg-white shadow-[0_10px_30px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_45px_-15px_rgba(249,115,22,0.28)] hover:-translate-y-1 transition-all duration-500"
               >
                 <div className="h-11 w-11 rounded-xl bg-brand-orange flex items-center justify-center group-hover:bg-brand-orange/80 transition-colors duration-500">
-                  <Icon className="h-5 w-5 text-brand-white" />
+                  <Icon className="h-5 w-5 text-black" strokeWidth={2.25} />
                 </div>
                 <h3 className="mt-5 font-serif text-xl font-semibold">{s.name}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">

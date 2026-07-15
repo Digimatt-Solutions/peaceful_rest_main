@@ -243,10 +243,10 @@ const MemorialDetail = () => {
                 </div>
               )}
 
-              <div className="mt-10 flex-wrap gap-3 hidden lg:flex">
+              <div className="mt-8 lg:mt-10 flex flex-wrap gap-2 sm:gap-3">
                 <Button
                   onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
-                  className="rounded-xl bg-orange-400 text-black hover:bg-orange-500 h-12 px-6 border-orange-400"
+                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 h-11 sm:h-12 px-4 sm:px-6 shadow-lg font-semibold"
                 >
                   <Flame className="h-4 w-4 mr-2" />
                   {candleLit ? "Candle lit" : "Light a candle"}
@@ -255,7 +255,7 @@ const MemorialDetail = () => {
                 <Button
                   onClick={share}
                   variant="outline"
-                  className="rounded-xl h-12 px-6 bg-white/5 border-white/30 text-white hover:bg-white hover:text-black"
+                  className="rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-white/15 border-2 border-white/60 text-white backdrop-blur-md hover:bg-white hover:text-black font-semibold"
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share memorial
@@ -263,7 +263,7 @@ const MemorialDetail = () => {
 
                 <a
                   href="#condolence"
-                  className="inline-flex items-center gap-2 rounded-xl h-12 px-6 border border-white/30 bg-white/5 text-white hover:bg-white hover:text-black transition-colors text-sm font-medium"
+                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-6 border-2 border-white/60 bg-white/15 backdrop-blur-md text-white hover:bg-white hover:text-black transition-colors text-sm font-semibold"
                 >
                   <Heart className="h-4 w-4" />
                   Send condolences
@@ -392,23 +392,7 @@ const MemorialDetail = () => {
             </section>
           )}
 
-          {/* Announcements */}
-          {announcements.length > 0 && (
-            <section>
-              <SectionTitle icon={Megaphone} eyebrow="Announcements" title="Notices from the family" />
-              <div className="mt-8 space-y-3">
-                {announcements.slice(0, 6).map(a => (
-                  <div key={a.id} className="rounded-2xl border border-border bg-card p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <h5 className="font-medium">{a.title}</h5>
-                      <span className="text-xs text-muted-foreground shrink-0">{format(new Date(a.created_at), "MMM d")}</span>
-                    </div>
-                    <p className="mt-2 text-sm text-foreground/80 whitespace-pre-line">{a.body}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          {/* Announcements module removed */}
 
           {/* Fundraising */}
           {fundraisers.length > 0 && (

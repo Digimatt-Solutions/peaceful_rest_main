@@ -11,9 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt, Banknote, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt } from "lucide-react";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
-import { BankAccountDialog } from "@/components/fundraising/BankAccountDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -28,7 +27,6 @@ const CATEGORIES = [
   { value: "other", label: "Other" },
 ];
 
-// Orange palette variants
 const ORANGE = ["#f97316", "#fb923c", "#fdba74", "#fed7aa", "#c2410c", "#9a3412", "#ea580c", "#7c2d12"];
 
 const Fundraising = () => {
@@ -50,21 +48,14 @@ const Fundraising = () => {
   const [donatingFund, setDonatingFund] = useState<any>(null);
   const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
-  const [bankAccount, setBankAccount] = useState<any>(null);
-  const [bankOpen, setBankOpen] = useState(false);
-  const [platformFeePct, setPlatformFeePct] = useState<number>(5);
+
+  const selectedMemorialRef = () => memorials.find(m => m.id === memorialId)?.full_name;
 
   const openReceipt = (d: any) => {
     const fund = funds.find(f => f.id === d.fundraiser_id);
-    setReceiptDonation({
-      ...d,
-      fundraiser_title: fund?.title,
-      memorial_name: selectedMemorialRef(),
-    });
+    setReceiptDonation({ ...d, fundraiser_title: fund?.title, memorial_name: selectedMemorialRef() });
     setReceiptOpen(true);
   };
-
-  const selectedMemorialRef = () => memorials.find(m => m.id === memorialId)?.full_name;
 
   const downloadContributorsCSV = () => {
     if (!donations.length) return;
@@ -74,12 +65,9 @@ const Fundraising = () => {
         const fund = funds.find(f => f.id === d.fundraiser_id);
         const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
         return [
-          `MKW-${d.id.slice(0,8).toUpperCase()}`,
-          name,
+          `MKW-${d.id.slice(0,8).toUpperCase()}`, name,
           d.is_anonymous ? "" : (d.donor_phone || ""),
-          fund?.title || "",
-          Number(d.amount).toString(),
-          d.status || "",
+          fund?.title || "", Number(d.amount).toString(), d.status || "",
           format(new Date(d.created_at), "yyyy-MM-dd HH:mm"),
         ];
       }),
@@ -90,8 +78,7 @@ const Fundraising = () => {
     const a = document.createElement("a");
     a.href = url;
     a.download = `contributors-${selectedMemorialRef() || "memorial"}-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.click(); URL.revokeObjectURL(url);
     toast.success("Contributors list downloaded");
   };
 
@@ -143,14 +130,9 @@ const Fundraising = () => {
     const callback_url = `${window.location.origin}${window.location.pathname}`;
     const { data, error } = await supabase.functions.invoke("paystack-initialize", {
       body: {
-        fundraiser_id: donatingFund.id,
-        amount: amt,
-        email: donateForm.email.trim(),
-        donor_name: donateForm.donor_name,
-        donor_phone: donateForm.donor_phone,
-        message: donateForm.message,
-        is_anonymous: donateForm.is_anonymous,
-        callback_url,
+        fundraiser_id: donatingFund.id, amount: amt, email: donateForm.email.trim(),
+        donor_name: donateForm.donor_name, donor_phone: donateForm.donor_phone,
+        message: donateForm.message, is_anonymous: donateForm.is_anonymous, callback_url,
       },
     });
     setDonating(false);
@@ -161,22 +143,9 @@ const Fundraising = () => {
     window.location.href = data.authorization_url;
   };
 
-
   useEffect(() => {
-    supabase.from("platform_settings").select("platform_fee_percent").limit(1).maybeSingle()
-      .then(({ data }) => { if (data?.platform_fee_percent != null) setPlatformFeePct(Number(data.platform_fee_percent)); });
-  }, []);
-
-  useEffect(() => {
-    if (!memorialId) { setFunds([]); setDonations([]); setBankAccount(null); return; }
+    if (!memorialId) { setFunds([]); setDonations([]); return; }
     (async () => {
-      const { data: ba } = await supabase
-        .from("memorial_bank_accounts")
-        .select("*")
-        .eq("memorial_id", memorialId)
-        .eq("is_active", true)
-        .maybeSingle();
-      setBankAccount(ba);
       const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
       setFunds(fs || []);
       const ids = (fs || []).map(f => f.id);
@@ -189,18 +158,8 @@ const Fundraising = () => {
 
   const create = async () => {
     if (!form.title || !memorialId) return;
-    if (!bankAccount) {
-      toast.error("Add a payout bank account first");
-      setOpenCreate(false);
-      setBankOpen(true);
-      return;
-    }
     const { data, error } = await supabase.from("fundraisers").insert({
-      ...form,
-      memorial_id: memorialId,
-      goal_amount: Number(form.goal_amount),
-      bank_account_id: bankAccount.id,
-      status: "active",
+      ...form, memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
     }).select().maybeSingle();
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
@@ -216,12 +175,10 @@ const Fundraising = () => {
     if (!contribForm.is_anonymous && !contribForm.donor_name.trim()) return toast.error("Enter donor name");
     setSavingContrib(true);
     const { data: ins, error } = await supabase.from("donations").insert({
-      fundraiser_id: contribForm.fundraiser_id,
-      amount: amt,
+      fundraiser_id: contribForm.fundraiser_id, amount: amt,
       donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
       donor_phone: contribForm.is_anonymous ? null : (contribForm.donor_phone || null),
-      is_anonymous: contribForm.is_anonymous,
-      status: "paid",
+      is_anonymous: contribForm.is_anonymous, status: "paid",
     }).select().maybeSingle();
     if (error || !ins) { setSavingContrib(false); return toast.error(error?.message || "Failed"); }
     const fund = funds.find(f => f.id === contribForm.fundraiser_id);
@@ -231,15 +188,13 @@ const Fundraising = () => {
       setFunds(funds.map(f => f.id === fund.id ? { ...f, raised_amount: newRaised } : f));
     }
     setDonations([ins, ...donations]);
-    setSavingContrib(false);
-    setOpenAddContrib(false);
+    setSavingContrib(false); setOpenAddContrib(false);
     setContribForm({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
     toast.success("Contribution recorded");
   };
 
   const selectedMemorial = memorials.find(m => m.id === memorialId);
 
-  // Aggregates
   const totals = useMemo(() => {
     const raised = donations.reduce((s, d) => s + Number(d.amount || 0), 0);
     const goal = funds.reduce((s, f) => s + Number(f.goal_amount || 0), 0);
@@ -250,8 +205,7 @@ const Fundraising = () => {
 
   const perFundraiser = useMemo(() => funds.map(f => ({
     name: f.title.length > 18 ? f.title.slice(0, 16) + "…" : f.title,
-    raised: Number(f.raised_amount || 0),
-    goal: Number(f.goal_amount || 0),
+    raised: Number(f.raised_amount || 0), goal: Number(f.goal_amount || 0),
   })), [funds]);
 
   const trend = useMemo(() => {
@@ -274,8 +228,7 @@ const Fundraising = () => {
       const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_phone || d.donor_name || "Anonymous");
       const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
       if (!map[key]) map[key] = { name: display, total: 0, count: 0 };
-      map[key].total += Number(d.amount || 0);
-      map[key].count += 1;
+      map[key].total += Number(d.amount || 0); map[key].count += 1;
     });
     return Object.values(map).sort((a, b) => b.total - a.total).slice(0, 5);
   }, [donations]);
@@ -322,13 +275,10 @@ const Fundraising = () => {
             <div className="h-64 rounded-2xl bg-muted/40 animate-pulse lg:col-span-2" />
             <div className="h-64 rounded-2xl bg-muted/40 animate-pulse" />
           </div>
-          <div className="h-72 rounded-2xl bg-muted/40 animate-pulse" />
         </div>
       ) : memorials.length === 0 ? <EmptyState icon={HeartHandshake} title="Create a memorial first" description="Fundraisers belong to a memorial. Create one to get started." />
         : (
-
         <>
-          {/* Memorial selector */}
           <div className="mb-6 flex items-center gap-3 flex-wrap">
             <span className="text-sm text-muted-foreground">Viewing memorial:</span>
             <Select value={memorialId} onValueChange={setMemorialId}>
@@ -340,41 +290,6 @@ const Fundraising = () => {
             )}
           </div>
 
-          {/* Payout bank account panel */}
-          <div className={`mb-6 rounded-2xl border p-5 flex items-start gap-4 flex-wrap ${bankAccount ? "border-border bg-card" : "border-amber-300 bg-amber-50"}`}>
-            <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${bankAccount ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-              {bankAccount ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
-            </div>
-            <div className="flex-1 min-w-[240px]">
-              {bankAccount ? (
-                <>
-                  <p className="font-serif text-lg">Payouts go to {bankAccount.resolved_account_name || bankAccount.account_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {bankAccount.bank_name} · •••• {String(bankAccount.account_number).slice(-4)} · Platform fee {platformFeePct}% per donation
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-serif text-lg text-amber-900">Add a payout bank account to publish fundraisers</p>
-                  <p className="text-sm text-amber-800/80">
-                    All contributions for {selectedMemorial?.full_name || "this memorial"} settle directly to the bank account you register with Paystack. A {platformFeePct}% platform fee is deducted per donation.
-                  </p>
-                </>
-              )}
-            </div>
-            <Button
-              onClick={() => setBankOpen(true)}
-              variant={bankAccount ? "outline" : "default"}
-              className={bankAccount ? "rounded-full" : "rounded-full bg-brand-orange text-white hover:bg-brand-orange/90"}
-            >
-              <Banknote className="h-4 w-4 mr-1.5" />
-              {bankAccount ? "Change account" : "Add bank account"}
-            </Button>
-          </div>
-
-
-
-          {/* Summary cards */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard icon={Wallet} label="Total raised" value={`KSh ${totals.raised.toLocaleString()}`} tint={ORANGE[0]} />
             <StatCard icon={Target} label="Combined goal" value={`KSh ${totals.goal.toLocaleString()}`} tint={ORANGE[1]} />
@@ -385,17 +300,11 @@ const Fundraising = () => {
           {funds.length === 0 ? <EmptyState icon={HeartHandshake} title="No fundraisers yet" description="Click New fundraiser to start collecting contributions." />
             : (
             <>
-              {/* Charts grid */}
-              <div className="grid lg:grid-cols-3 gap-5 mb-6">
+              <div className="grid lg:grid-cols-3 gap-5 mb-6 -mx-4 sm:mx-0">
                 <Card title="14-day donation trend" icon={TrendingUp} className="lg:col-span-2">
                   <ResponsiveContainer width="100%" height={240}>
                     <AreaChart data={trend} margin={{ left: -10, right: 10, top: 5 }}>
-                      <defs>
-                        <linearGradient id="orangeGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={ORANGE[0]} stopOpacity={0.6} />
-                          <stop offset="100%" stopColor={ORANGE[0]} stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
+                      <defs><linearGradient id="orangeGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={ORANGE[0]} stopOpacity={0.6} /><stop offset="100%" stopColor={ORANGE[0]} stopOpacity={0} /></linearGradient></defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                       <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
@@ -434,7 +343,6 @@ const Fundraising = () => {
                 </Card>
               </div>
 
-              {/* Fundraiser cards */}
               <h3 className="font-serif text-xl mb-3">Fundraisers</h3>
               <div className="grid md:grid-cols-2 gap-4 mb-8">
                 {funds.map(f => {
@@ -443,16 +351,9 @@ const Fundraising = () => {
                     <div key={f.id} className="rounded-2xl border border-border bg-card p-5 hover:shadow-elegant transition-shadow">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
-                              {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
-                            </Badge>
-                            {f.status !== "active" && (
-                              <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-amber-300 text-amber-700 bg-amber-50">
-                                {f.status || "draft"}
-                              </Badge>
-                            )}
-                          </div>
+                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
+                            {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
+                          </Badge>
                           <h4 className="mt-2 font-serif text-lg">{f.title}</h4>
                         </div>
                       </div>
@@ -464,36 +365,23 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
-                      {f.status === "active" && f.bank_account_id ? (
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setDonatingFund(f);
-                            setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
-                            setOpenDonate(true);
-                          }}
-                          className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
-                        >
-                          <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => setBankOpen(true)}
-                          variant="outline"
-                          className="mt-4 w-full rounded-lg border-amber-300 text-amber-800 hover:bg-amber-50"
-                        >
-                          <Banknote className="h-4 w-4 mr-1.5" /> Add payout account to activate
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setDonatingFund(f);
+                          setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+                          setOpenDonate(true);
+                        }}
+                        className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
+                      >
+                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
+                      </Button>
                     </div>
                   );
                 })}
               </div>
 
-
-              {/* Donor list */}
-              <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
                   <div className="flex items-center gap-2.5">
                     <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Users className="h-4 w-4" /></div>
@@ -596,9 +484,7 @@ const Fundraising = () => {
 
       <Dialog open={openDonate} onOpenChange={setOpenDonate}>
         <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl">Donate via Paystack</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Donate via Paystack</DialogTitle></DialogHeader>
           {donatingFund && (
             <div className="space-y-4 mt-2">
               <div className="rounded-xl bg-brand-orange/5 border border-brand-orange/20 p-3">
@@ -621,47 +507,31 @@ const Fundraising = () => {
               <Button onClick={startPaystackDonation} disabled={donating} className="w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90 h-11">
                 {donating ? "Redirecting to Paystack…" : `Pay KSh ${Number(donateForm.amount || 0).toLocaleString()} securely`}
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center">Payments are processed securely by Paystack. You'll be redirected to complete checkout.</p>
+              <p className="text-[11px] text-muted-foreground text-center">Payments are processed securely by Paystack.</p>
             </div>
           )}
         </DialogContent>
       </Dialog>
-
-      <BankAccountDialog
-        open={bankOpen}
-        onOpenChange={setBankOpen}
-        memorialId={memorialId}
-        memorialName={selectedMemorial?.full_name}
-        onSaved={async (ba) => {
-          setBankAccount(ba);
-          const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
-          setFunds(fs || []);
-        }}
-      />
     </>
   );
 };
 
 const StatCard = ({ icon: Icon, label, value, tint }: any) => (
   <div className="rounded-2xl border border-border bg-card p-5 relative overflow-hidden">
-    <div className="absolute inset-0 opacity-[0.07]" style={{ background: `linear-gradient(135deg, ${tint}, transparent)` }} />
-    <div className="relative flex items-start justify-between">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
-        <p className="mt-2 font-serif text-2xl">{value}</p>
-      </div>
-      <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${tint}20`, color: tint }}>
-        <Icon className="h-5 w-5" />
-      </div>
+    <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: tint }} />
+    <div className="h-9 w-9 rounded-lg flex items-center justify-center mb-3" style={{ background: `${tint}22`, color: tint }}>
+      <Icon className="h-4 w-4" />
     </div>
+    <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
+    <p className="mt-1 font-serif text-2xl">{value}</p>
   </div>
 );
 
 const Card = ({ title, icon: Icon, children, className = "" }: any) => (
-  <div className={`rounded-2xl border border-border bg-card p-6 ${className}`}>
-    <div className="flex items-center gap-2.5 mb-5">
-      <div className="h-8 w-8 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Icon className="h-4 w-4" /></div>
-      <h3 className="font-serif text-lg">{title}</h3>
+  <div className={`rounded-2xl border border-border bg-card p-4 sm:p-5 ${className}`}>
+    <div className="flex items-center gap-2 mb-3">
+      <div className="h-7 w-7 rounded-lg bg-brand-orange/15 text-brand-orange flex items-center justify-center"><Icon className="h-3.5 w-3.5" /></div>
+      <h4 className="font-serif text-base">{title}</h4>
     </div>
     {children}
   </div>

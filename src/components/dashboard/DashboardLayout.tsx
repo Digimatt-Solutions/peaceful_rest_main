@@ -32,8 +32,6 @@ const allNav: NavItem[] = [
   { to: "/dashboard/fundraising", label: "Fundraising", icon: HeartHandshake, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/moments", label: "Life Moments", icon: Camera },
   { to: "/dashboard/anniversary", label: "Anniversary", icon: CalendarHeart, roles: ["super_admin", "memorial_admin"] },
-  { to: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
-  { to: "/dashboard/events", label: "Events", icon: CalendarDays },
   { to: "/dashboard/community", label: "Community", icon: MessagesSquare },
   { to: "/dashboard/oversight", label: "Memorial Oversight", icon: Globe, roles: ["super_admin"] },
   { to: "/dashboard/access", label: "User Management", icon: ShieldCheck, roles: ["super_admin"] },
@@ -262,7 +260,7 @@ export const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-6 lg:p-10 lg:py-12 max-w-7xl w-full mx-auto space-y-2">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 lg:py-12 max-w-7xl w-full mx-auto space-y-2">
           <Outlet />
         </main>
       </div>

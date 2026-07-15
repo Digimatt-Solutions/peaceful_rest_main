@@ -21,7 +21,7 @@ import Condolences from "./pages/dashboard/Condolences";
 import Fundraising from "./pages/dashboard/Fundraising";
 import LifeMoments from "./pages/dashboard/LifeMoments";
 import Anniversary from "./pages/dashboard/Anniversary";
-import AnnouncementsPage from "./pages/dashboard/AnnouncementsPage";
+
 import Community from "./pages/dashboard/Community";
 import AccessControl from "./pages/dashboard/AccessControl";
 import Oversight from "./pages/dashboard/Oversight";
@@ -63,8 +63,6 @@ const App = () => (
               <Route path="fundraising" element={<Fundraising />} />
               <Route path="moments" element={<LifeMoments />} />
               <Route path="anniversary" element={<Anniversary />} />
-              <Route path="announcements" element={<AnnouncementsPage title="Organization Announcements" subtitle="Official notices, prayer meetings, transport plans, ceremonies." category="organization" />} />
-              <Route path="events" element={<AnnouncementsPage title="Events" subtitle="Memorial services, gatherings, and fundraisers." category="event" />} />
               <Route path="community" element={<Community />} />
               <Route path="access" element={<AccessControl />} />
               <Route path="oversight" element={<Oversight />} />
