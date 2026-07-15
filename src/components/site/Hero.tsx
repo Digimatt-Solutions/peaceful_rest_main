@@ -63,7 +63,7 @@ export const Hero = () => {
               <Button
                 asChild
                 size="lg"
-                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold shadow-lg"
+                className="h-11 sm:h-12 px-4 sm:px-5 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white border-2 border-brand-orange font-semibold shadow-lg"
               >
                 <Link to="/auth">
                   <HeartHandshake className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -74,9 +74,9 @@ export const Hero = () => {
 
               <Button
                 asChild
-                variant="outline"
                 size="lg"
-                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl border-2 border-white lg:border-black/60 bg-white/15 backdrop-blur-md text-white lg:text-black font-semibold hover:bg-white hover:text-black lg:hover:bg-black lg:hover:text-white"
+                variant="outline"
+                className="h-11 sm:h-12 px-4 sm:px-5 rounded-xl border-2 border-white bg-white/10 backdrop-blur-md text-white font-semibold hover:bg-white hover:text-black lg:border-black lg:bg-black/5 lg:text-black lg:hover:bg-black lg:hover:text-white"
               >
                 <a href="#memorials">
                   <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
