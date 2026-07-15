@@ -19,11 +19,6 @@ const features = [
     desc: "Beautifully crafted obituary pages with biography, photos, dates and a lasting tribute.",
   },
   {
-    icon: Megaphone,
-    name: "Announcements",
-    desc: "Share funeral notices, service schedules and family updates with everyone, instantly.",
-  },
-  {
     icon: HeartHandshake,
     name: "Fundraising",
     desc: "Raise contributions toward funeral, burial or family support with secure Stripe checkout.",

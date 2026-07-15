@@ -76,7 +76,7 @@ export const Hero = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl borrder-white lg:border-black/55 bg-white/10 backdrop-blur-md text-white lg:text-black hover:bg-white"
+                className="h-11 sm:h-12 px-3 sm:px-4 rounded-xl border-2 border-white lg:border-black/60 bg-white/15 backdrop-blur-md text-white lg:text-black font-semibold hover:bg-white hover:text-black lg:hover:bg-black lg:hover:text-white"
               >
                 <a href="#memorials">
                   <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
