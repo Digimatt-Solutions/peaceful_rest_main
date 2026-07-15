@@ -21,7 +21,7 @@ export const WhyUs = () => {
         {/* Image collage */}
         <div className="lg:col-span-6">
           <div className="grid grid-cols-6 grid-rows-6 gap-4 lg:gap-5 h-[560px] lg:h-[640px]">
-            {/* Main portrait — spans tall */}
+            {/* Main portrait - spans tall */}
             <div className="col-span-4 row-span-6 relative rounded-[28px] overflow-hidden shadow-elegant group">
               <img
                 src={elderImg}
@@ -42,7 +42,7 @@ export const WhyUs = () => {
               </div>
             </div>
 
-            {/* Family embrace — top right */}
+            {/* Family embrace - top right */}
             <div className="col-span-2 row-span-3 rounded-[24px] overflow-hidden shadow-soft">
               <img
                 src={familyImg}
@@ -54,7 +54,7 @@ export const WhyUs = () => {
               />
             </div>
 
-            {/* Stat card — middle right */}
+            {/* Stat card - middle right */}
             <div className="col-span-2 row-span-2 rounded-[24px] bg-brand-black text-brand-white p-5 lg:p-6 shadow-elegant flex flex-col justify-between">
               <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange font-semibold">Impact</span>
               <div>
@@ -65,7 +65,7 @@ export const WhyUs = () => {
               </div>
             </div>
 
-            {/* Candle — bottom right */}
+            {/* Candle - bottom right */}
             <div className="col-span-2 row-span-1 rounded-[20px] overflow-hidden shadow-soft">
               <img
                 src={candleImg}
@@ -90,7 +90,7 @@ export const WhyUs = () => {
           </h2>
           <p className="mt-6 text-muted-foreground text-lg leading-relaxed max-w-xl">
             Built with bereavement counselors, funeral directors, and grieving
-            families across Africa and beyond — every feature has a purpose: to
+            families across Africa and beyond - every feature has a purpose: to
             make remembering easier, and grief a little less lonely.
           </p>
 

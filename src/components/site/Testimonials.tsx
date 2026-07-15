@@ -3,7 +3,7 @@ import { Quote, Star } from "lucide-react";
 const testimonials = [
   {
     quote:
-      "Makiwa gave my mother's life the tribute it deserved. Family from three continents lit candles together — it felt like we were all in the same room.",
+      "Makiwa gave my mother's life the tribute it deserved. Family from three continents lit candles together - it felt like we were all in the same room.",
     name: "Amara Johnson",
     role: "Daughter",
     avatar:

@@ -123,7 +123,7 @@ const Auth = () => {
       }
       return;
     }
-    // success — reset counter
+    // success - reset counter
     try {
       await supabase.functions.invoke("login-guard", {
         body: { action: "success", email: parsed.data.email },
@@ -159,12 +159,12 @@ const Auth = () => {
       </div>
 
       {/* Form side */}
-      <div className="flex items-center justify-center p-6 sm:p-10 lg:p-14 relative">
+      <div className="flex items-center justify-center p-4 sm:p-10 lg:p-14 relative">
         <Link to="/" className="absolute top-6 left-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" /> Back home
         </Link>
 
-        <div className="w-full max-w-md rounded-3xl border-2 border-brand-orange/80 bg-card shadow-elegant p-6 sm:p-8 lg:p-10 ring-1 ring-brand-orange/10">
+        <div className="w-full max-w-md rounded-3xl border border-brand-orange/30 bg-card shadow-elegant p-6 sm:p-8 lg:p-10  ring-brand-orange/10">
           <Link to="/" className="flex flex-col items-center gap-2 mb-4">
             <img src={logoMark} alt="" className="h-14 w-14 object-contain rounded-lg" />
             <img src={logoText} alt="Makiwa" className="h-7 w-auto object-contain" />
@@ -173,7 +173,7 @@ const Auth = () => {
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
           <Tabs defaultValue="login" className="mt-5">
-            <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-10">
+            <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-5">
               <TabsTrigger value="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
               <TabsTrigger value="signup" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
             </TabsList>
@@ -279,17 +279,19 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" disabled={loading} className="w-full h-12 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
+                <Button type="submit" disabled={loading} className="w-full h-12 rounded-sm bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><UserPlus className="h-4 w-4 mr-2" />Create Account</>)}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
 
-          <p className="mt-5 text-xs text-center text-muted-foreground leading-relaxed">
-            By continuing you agree to our <a className="underline hover:text-foreground" href="#">Terms</a> and <a className="underline hover:text-foreground" href="#">Privacy Policy</a>.
+          <p className="mt-3 text-[13px] text-center text-muted-foreground">
+            Dont have an account?{" "}
+            <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
+              Sign Up
+            </a>
           </p>
-
           <p className="mt-2 text-[11px] text-center text-muted-foreground">
             Powered by{" "}
             <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">

@@ -48,7 +48,7 @@ serve(async (req) => {
       });
     }
 
-    // optional auth — capture user_id if logged in (don't fail otherwise)
+    // optional auth - capture user_id if logged in (don't fail otherwise)
     let userId: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {

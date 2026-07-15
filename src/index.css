@@ -32,7 +32,7 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Very subtle borders — cards separate via shadow, not lines */
+    /* Very subtle borders - cards separate via shadow, not lines */
     --border: 214 32% 93%;
     --input: 214 32% 91%;
     --ring: 19 90% 54%;
@@ -103,7 +103,7 @@
 
 
 @layer components {
-  /* SaaS card system — white cards on light-gray page, gentle gray hairline
+  /* SaaS card system - white cards on light-gray page, gentle gray hairline
      border + soft elevation so they read as floating panels. Applies to every
      dashboard card across every user role (super admin, memorial admin,
      mourner) since they all render inside the shared <main>. */
@@ -134,7 +134,7 @@
     box-shadow: none;
   }
 
-  /* Inputs, selects, textareas — matching gray hairline for consistency */
+  /* Inputs, selects, textareas - matching gray hairline for consistency */
   main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   main select,
   main textarea {
@@ -146,7 +146,7 @@
     border-color: hsl(var(--brand-orange) / 0.5);
   }
 
-  /* Select dropdowns — gray hairline border + white panel */
+  /* Select dropdowns - gray hairline border + white panel */
   main .select-trigger {
     background-color: hsl(var(--card));
     border-color: hsl(214 32% 89%);

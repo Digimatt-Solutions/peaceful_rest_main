@@ -6,7 +6,7 @@ export const Banner = () => {
       <div className="rounded-2xl overflow-hidden shadow-elegant ring-1 ring-border">
         <img
           src={banner}
-          alt="Makiwa — Preserving life stories with care and respect."
+          alt="Makiwa - Preserving life stories with care and respect."
           className="w-full h-auto object-cover"
           loading="lazy"
         />

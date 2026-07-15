@@ -30,7 +30,7 @@ export const CtaBanner = () => {
           </h2>
 
           <p className="mt-7 text-brand-white/75 text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto font-light">
-            Create a beautiful, lasting memorial in just a few minutes —
+            Create a beautiful, lasting memorial in just a few minutes -
             no credit card, no ads, no pressure. Just space to remember.
           </p>
 

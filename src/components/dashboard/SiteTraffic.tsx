@@ -185,7 +185,7 @@ export const SiteTraffic = () => {
           { label: "Total visits", value: totalVisits.toLocaleString() },
           { label: "Countries", value: uniqueCountries },
           { label: "Mobile share", value: `${mobileShare}%` },
-          { label: "Top page", value: (topPages[0]?.name || "—").slice(0, 18) },
+          { label: "Top page", value: (topPages[0]?.name || "-").slice(0, 18) },
         ].map(s => (
           <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-gradient-to-br from-brand-orange/10 to-transparent p-4">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">{s.label}</p>

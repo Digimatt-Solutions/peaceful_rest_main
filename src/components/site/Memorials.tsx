@@ -42,7 +42,7 @@ type Memorial = {
 const PAGE_SIZE = 3;
 
 const formatDate = (d: string | null) => {
-  if (!d) return "—";
+  if (!d) return "-";
   const date = new Date(d);
 
   return date.toLocaleDateString("en-US", {
@@ -334,7 +334,7 @@ export const Memorials = () => {
                               {formatDate(m.date_of_birth)}
                             </span>
 
-                            <span>—</span>
+                            <span>-</span>
 
                             <span>
                               {formatDate(m.date_of_death)}

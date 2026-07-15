@@ -66,8 +66,8 @@ export const Services = () => {
           <div className="lg:col-span-5">
             <p className="text-muted-foreground text-lg leading-relaxed">
               From the first announcement to the lasting memorial, Makiwa brings
-              everything together — eulogies, condolences, fundraising and
-              shareable QR codes — in one calm, dignified place.
+              everything together - eulogies, condolences, fundraising and
+              shareable QR codes - in one calm, dignified place.
             </p>
           </div>
         </div>
