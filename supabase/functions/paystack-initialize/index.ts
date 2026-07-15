@@ -1,4 +1,5 @@
-// Initialize a Paystack transaction with subaccount split and create a pending donation row.
+// Initialize a Paystack transaction and create a pending donation row.
+// Funds settle to the single Paystack account tied to PAYSTACK_SECRET_KEY.
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -30,31 +31,11 @@ Deno.serve(async (req) => {
 
     const { data: fund, error: fErr } = await admin
       .from("fundraisers")
-      .select("id,title,memorial_id,bank_account_id,status")
+      .select("id,title,memorial_id,is_active")
       .eq("id", fundraiser_id)
       .maybeSingle();
     if (fErr || !fund) return json({ error: "Fundraiser not found" }, 404);
-    if (fund.status !== "active") return json({ error: "This fundraiser is not currently accepting donations." }, 400);
-    if (!fund.bank_account_id) return json({ error: "This fundraiser has no payout account configured yet." }, 400);
-
-    const { data: bank } = await admin
-      .from("memorial_bank_accounts")
-      .select("paystack_subaccount_code,is_active")
-      .eq("id", fund.bank_account_id)
-      .maybeSingle();
-    if (!bank?.paystack_subaccount_code || !bank.is_active) {
-      return json({ error: "Payout account is not active." }, 400);
-    }
-
-    // Platform fee
-    const { data: settings } = await admin
-      .from("platform_settings")
-      .select("platform_fee_percent")
-      .limit(1)
-      .maybeSingle();
-    const feePct = Number(settings?.platform_fee_percent ?? 5);
-    const platformFee = Math.round(amt * feePct) / 100; // in KES
-    const transactionChargeKobo = Math.round(platformFee * 100); // in cents/kobo
+    if (!fund.is_active) return json({ error: "This fundraiser is not currently accepting donations." }, 400);
 
     // capture user if signed in
     let userId: string | null = null;
@@ -85,16 +66,12 @@ Deno.serve(async (req) => {
         currency: "KES",
         reference,
         callback_url: callback_url || undefined,
-        subaccount: bank.paystack_subaccount_code,
-        bearer: "account",
-        transaction_charge: transactionChargeKobo,
         metadata: {
           fundraiser_id, memorial_id: fund.memorial_id,
           donor_name: is_anonymous ? "" : (donor_name || ""),
           is_anonymous: !!is_anonymous,
           message: message || "",
           user_id: userId || "",
-          platform_fee: platformFee,
         },
       }),
     });
@@ -112,8 +89,6 @@ Deno.serve(async (req) => {
       is_anonymous: !!is_anonymous,
       status: "pending",
       stripe_session_id: reference,
-      platform_fee_amount: platformFee,
-      subaccount_amount: amt - platformFee,
     });
 
     return json({
