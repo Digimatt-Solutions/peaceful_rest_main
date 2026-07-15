@@ -246,7 +246,7 @@ const MemorialDetail = () => {
               <div className="mt-8 lg:mt-10 flex flex-wrap gap-2 sm:gap-3">
                 <Button
                   onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
-                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 h-11 sm:h-12 px-4 sm:px-6 shadow-lg font-semibold"
+                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 sm:px-6 shadow-lg font-semibold"
                 >
                   <Flame className="h-4 w-4 mr-2" />
                   {candleLit ? "Candle lit" : "Light a candle"}
@@ -255,7 +255,7 @@ const MemorialDetail = () => {
                 <Button
                   onClick={share}
                   variant="outline"
-                  className="rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-white/15 border-2 border-white/60 text-white backdrop-blur-md hover:bg-white hover:text-black font-semibold"
+                  className="rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-white/10 border-2 border-white text-white backdrop-blur-md hover:bg-white hover:text-black font-semibold"
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share memorial
@@ -263,7 +263,7 @@ const MemorialDetail = () => {
 
                 <a
                   href="#condolence"
-                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-6 border-2 border-white/60 bg-white/15 backdrop-blur-md text-white hover:bg-white hover:text-black transition-colors text-sm font-semibold"
+                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-black/40 border-2 border-brand-orange text-white backdrop-blur-md hover:bg-brand-orange hover:text-white transition-colors text-sm font-semibold"
                 >
                   <Heart className="h-4 w-4" />
                   Send condolences
