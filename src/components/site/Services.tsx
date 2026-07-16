@@ -83,16 +83,20 @@ export const Services = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-black/90 via-brand-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 text-brand-white">
+              <div className="hidden lg:block">
               <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange flex items-center gap-2">
                 <Flame className="h-3 w-3" /> Featured
               </span>
+
               <h3 className="mt-3 font-serif text-3xl lg:text-4xl font-medium max-w-md leading-tight">
                 A complete digital memorial, designed with grace.
               </h3>
+
               <p className="mt-3 max-w-md text-brand-white/75 text-sm leading-relaxed">
                 Build a private or public tribute, invite the community, and
                 keep their story alive across generations.
               </p>
+            </div>
               <a
                 href="#memorials"
                 className="mt-5 inline-flex items-center gap-2 text-sm font-semibold tracking-wide hover:gap-3 transition-all"

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -319,7 +320,7 @@ export const Memorials = () => {
                           </div>
                         )}
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
                         {/* Name Overlay */}
                         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -328,7 +329,7 @@ export const Memorials = () => {
                             {m.full_name}
                           </h3>
 
-                          <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/90">
+                          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/90">
                             <CalendarDays className="h-4 w-4" />
                             <span>
                               {formatDate(m.date_of_birth)}
@@ -352,10 +353,10 @@ export const Memorials = () => {
                       </div>
 
                       {/* Content */}
-                      <div className="p-7">
+                      <div className="p-5">
 
                         {m.location && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                             <MapPin className="h-4 w-4 text-brand-orange" />
                             <span>{m.location}</span>
                           </div>
@@ -371,7 +372,7 @@ export const Memorials = () => {
                             </span>
                           </div>
 
-                          <p className="italic text-[16px] leading-7 text-neutral-600 line-clamp-2 min-h-[3.5rem] overflow-hidden text-ellipsis">
+                          <p className="italic text-[14px] leading-5 text-neutral-600 line-clamp-2 min-h-[3 rem] overflow-hidden text-foreground">
                             {m.short_tribute ||
                               "A life remembered with love, gratitude and cherished memories."}
                           </p>
@@ -381,13 +382,13 @@ export const Memorials = () => {
                         <div className="mt-3 flex items-center justify-between gap-3">
 
                           <div className="flex items-center gap-3 text-xs text-neutral-600">
-                            <span className="inline-flex items-center gap-1.5" title="Views">
-                              <Eye className="h-4 w-4 text-brand-orange" />
-                              <span className="font-medium">{(m.visitor_count || 0).toLocaleString()}</span>
-                            </span>
                             <span className="inline-flex items-center gap-1.5" title="Condolences">
                               <MessageCircle className="h-4 w-4 text-brand-orange" />
                               <span className="font-medium">{condCounts[m.id] || 0}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1.5" title="Views">
+                              <Eye className="h-4 w-4 text-brand-orange" />
+                              <span className="font-medium">{(m.visitor_count || 0).toLocaleString()}</span>
                             </span>
                             <button
                               type="button"
@@ -400,9 +401,8 @@ export const Memorials = () => {
                             </button>
                           </div>
 
-                          <div className="flex items-center gap-2 border-2 rounded-lg px-3 py-1.5 border-brand-orange/50 group-hover:bg-brand-orange group-hover:text-white transition-colors font-medium text-sm">
+<div className="flex items-center gap-2 rounded-sm px-3 py-1.5 border-2 border-brand-orange bg-brand-orange text-white font-semibold text-sm transition-all duration-300 group-hover:bg-white group-hover:text-brand-orange group-hover:border-brand-orange">                            <BookOpen className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
                             <span>View</span>
-                            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                           </div>
 
                         </div>
