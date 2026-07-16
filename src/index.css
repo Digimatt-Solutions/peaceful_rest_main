@@ -106,32 +106,31 @@
   /* SaaS card system - white cards on light-gray page, gentle gray hairline
      border + soft elevation so they read as floating panels. Applies to every
      dashboard card across every user role (super admin, memorial admin,
-     mourner) since they all render inside the shared <main>. */
-  main .rounded-2xl,
-  main .rounded-xl {
+     mourner) since they all render inside the shared <main>.
+     Scoped to <div>/<section>/<article>/<aside> so it never hijacks buttons,
+     anchors, images, avatars, tabs, or form controls — those manage their own
+     background/border/shadow. */
+  main div.rounded-2xl:not(.no-card),
+  main div.rounded-xl:not(.no-card),
+  main section.rounded-2xl:not(.no-card),
+  main section.rounded-xl:not(.no-card),
+  main article.rounded-2xl:not(.no-card),
+  main article.rounded-xl:not(.no-card),
+  main aside.rounded-2xl:not(.no-card),
+  main aside.rounded-xl:not(.no-card) {
     @apply bg-card shadow-sm transition-all duration-200;
     border: 1px solid hsl(214 32% 91%);
   }
-  main .rounded-2xl:hover,
-  main .rounded-xl:hover {
+  main div.rounded-2xl:not(.no-card):hover,
+  main div.rounded-xl:not(.no-card):hover,
+  main section.rounded-2xl:not(.no-card):hover,
+  main section.rounded-xl:not(.no-card):hover,
+  main article.rounded-2xl:not(.no-card):hover,
+  main article.rounded-xl:not(.no-card):hover,
+  main aside.rounded-2xl:not(.no-card):hover,
+  main aside.rounded-xl:not(.no-card):hover {
     @apply shadow-md;
     border-color: hsl(214 32% 86%);
-  }
-  /* Exceptions: elements that should NOT read as floating cards */
-  main .rounded-2xl.no-card,
-  main .rounded-xl.no-card,
-  main button.rounded-2xl:not(.select-trigger),
-  main button.rounded-xl:not(.select-trigger),
-  main a.rounded-2xl,
-  main a.rounded-xl,
-  main img.rounded-2xl,
-  main img.rounded-xl,
-  main .avatar .rounded-2xl,
-  main [role="tablist"] .rounded-2xl,
-  main [role="tablist"] .rounded-xl {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
   }
 
   /* Inputs, selects, textareas - matching gray hairline for consistency */
