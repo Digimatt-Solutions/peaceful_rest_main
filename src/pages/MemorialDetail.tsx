@@ -196,9 +196,9 @@ const MemorialDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-10 overflow-hidden">
+      <section className="relative pt-6 overflow-hidden">
         {/* Layered background */}
-        <div className="absolute inset-0 z-0 h-[88vh] min-h-[640px] overflow-hidden">
+        <div className="absolute inset-0 z-0 h-[28vh] min-h-[740px] overflow-hidden">
           {cover ? (
             <img
               src={cover}
@@ -252,18 +252,9 @@ const MemorialDetail = () => {
                   {candleLit ? "Candle lit" : "Light a candle"}
                 </Button>
 
-                <Button
-                  onClick={share}
-                  variant="outline"
-                  className="rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-white/10 border-2 border-white text-white backdrop-blur-md hover:bg-white hover:text-black font-semibold"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share memorial
-                </Button>
-
                 <a
                   href="#condolence"
-                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-black/40 border-2 border-brand-orange text-white backdrop-blur-md hover:bg-brand-orange hover:text-white transition-colors text-sm font-semibold"
+                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-black/40 border border-brand-orange text-white backdrop-blur-md hover:bg-brand-orange hover:text-white transition-colors text-sm font-semibold"
                 >
                   <Heart className="h-4 w-4" />
                   Send condolences
