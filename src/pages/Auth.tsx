@@ -47,6 +47,7 @@ const Auth = () => {
   const [bioLoading, setBioLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<"mourner" | "memorial_admin">("mourner");
+  const [tab, setTab] = useState<"login" | "signup">("login");
   const [showPw, setShowPw] = useState(false);
   const [showSuPw, setShowSuPw] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
