@@ -47,6 +47,7 @@ const Auth = () => {
   const [bioLoading, setBioLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<"mourner" | "memorial_admin">("mourner");
+  const [tab, setTab] = useState<"login" | "signup">("login");
   const [showPw, setShowPw] = useState(false);
   const [showSuPw, setShowSuPw] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
@@ -172,7 +173,7 @@ const Auth = () => {
 
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
-          <Tabs defaultValue="login" className="mt-5">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")} className="mt-5">
             <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-5">
               <TabsTrigger value="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
               <TabsTrigger value="signup" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
@@ -287,10 +288,14 @@ const Auth = () => {
           </Tabs>
 
           <p className="mt-3 text-[13px] text-center text-muted-foreground">
-            Dont have an account?{" "}
-            <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
-              Sign Up
-            </a>
+            {tab === "login" ? "Don't have an account? " : "Already have an account? "}
+            <button
+              type="button"
+              onClick={() => setTab(tab === "login" ? "signup" : "login")}
+              className="text-brand-orange hover:underline font-medium"
+            >
+              {tab === "login" ? "Sign Up" : "Sign In"}
+            </button>
           </p>
           <p className="mt-2 text-[11px] text-center text-muted-foreground">
             Powered by{" "}
