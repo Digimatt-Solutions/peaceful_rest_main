@@ -64,7 +64,7 @@ const MemorialDetail = () => {
       setLoading(false);
       if (m.data) {
         document.title = `${m.data.full_name} · Makiwa`;
-        supabase.from("memorials").update({ visitor_count: (m.data.visitor_count || 0) + 1 }).eq("id", id).then(() => {});
+        supabase.rpc("increment_memorial_visitor", { _id: id }).then(() => {});
       }
     });
   }, [id]);

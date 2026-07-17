@@ -65,126 +65,148 @@ const Overview = () => {
   const [recent, setRecent] = useState<any[]>([]);
   const [anniversaries, setAnniversaries] = useState<any[]>([]);
 
+  const loadData = async () => {
+    if (!user) return;
+    // memorials scoped by role
+    let mq = supabase.from("memorials").select("id,full_name,visitor_count,created_at,profile_photo_url");
+    if (!isSuperAdmin) mq = mq.eq("created_by", user.id);
+    const { data: mems } = await mq;
+    const memIds = (mems || []).map(m => m.id);
+    const memorialVisits = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
+
+    // condolences
+    let condQ = supabase.from("condolences").select("id,memorial_id,created_at,message,name");
+    if (memIds.length && !isMourner) condQ = condQ.in("memorial_id", memIds);
+    if (isMourner) condQ = condQ.eq("user_id", user.id);
+    const { data: conds } = await condQ;
+
+    // donations (joined via fundraisers -> memorial_id)
+    let fundIdsForScope: string[] = [];
+    if (memIds.length) {
+      const { data: fs } = await supabase.from("fundraisers").select("id").in("memorial_id", memIds);
+      fundIdsForScope = (fs || []).map(f => f.id);
+    }
+    let donQ = supabase.from("donations").select("amount,fundraiser_id,created_at,user_id");
+    if (!isMourner && fundIdsForScope.length) donQ = donQ.in("fundraiser_id", fundIdsForScope);
+    if (!isMourner && !fundIdsForScope.length) donQ = donQ.eq("fundraiser_id", "00000000-0000-0000-0000-000000000000");
+    if (isMourner) donQ = donQ.eq("user_id", user.id);
+    const { data: dons } = await donQ;
+    const donTotal = (dons || []).reduce((s: number, d: any) => s + Number(d.amount || 0), 0);
+
+    // site visits for the trend + super admin visitors card
+    const since = subDays(startOfDay(new Date()), 13).toISOString();
+    let visitsQ = supabase.from("site_visits").select("created_at,path").gte("created_at", since);
+    if (!isSuperAdmin && memIds.length) {
+      visitsQ = visitsQ.in("path", memIds.map(id => `/memorial/${id}`));
+    }
+    const { data: visitRows } = await visitsQ;
+    const siteVisitsCount = isSuperAdmin
+      ? (await supabase.from("site_visits").select("id", { count: "exact", head: true })).count || 0
+      : memorialVisits;
+
+    // role-extra fetches
+    let users = 0;
+    let roleData: { name: string; value: number }[] = [];
+    let fundraisers = 0, moments = 0, anns = 0;
+
+    if (isSuperAdmin) {
+      const { count: ucount } = await supabase.from("profiles").select("id", { count: "exact", head: true });
+      users = ucount || 0;
+      const { data: rs } = await supabase.from("user_roles").select("role");
+      const tally: Record<string, number> = {};
+      (rs || []).forEach((r: any) => { tally[r.role] = (tally[r.role] || 0) + 1; });
+      roleData = Object.entries(tally).map(([name, value]) => ({ name: name.replace(/_/g, " "), value }));
+    }
+
+    if (memIds.length) {
+      const { count: fc } = await supabase.from("fundraisers").select("id", { count: "exact", head: true }).in("memorial_id", memIds);
+      fundraisers = fc || 0;
+      const { count: mc } = await supabase.from("memories").select("id", { count: "exact", head: true }).in("memorial_id", memIds);
+      moments = mc || 0;
+      const { count: ac } = await supabase.from("announcements").select("id", { count: "exact", head: true }).in("memorial_id", memIds);
+      anns = ac || 0;
+    }
+
+    setStats({
+      memorials: mems?.length || 0,
+      condolences: conds?.length || 0,
+      donations: donTotal,
+      visitors: siteVisitsCount,
+      users,
+      fundraisers,
+      moments,
+      announcements: anns,
+    });
+    setRoleBreakdown(roleData);
+
+    // 14-day trend (visitors from site_visits)
+    const days = Array.from({ length: 14 }, (_, i) => startOfDay(subDays(new Date(), 13 - i)));
+    const seriesData = days.map(d => {
+      const key = format(d, "MMM d");
+      const dayStart = d.getTime();
+      const dayEnd = dayStart + 86400000;
+      const c = (conds || []).filter(x => {
+        const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
+      }).length;
+      const dn = (dons || []).filter((x: any) => {
+        const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
+      }).reduce((s: number, x: any) => s + Number(x.amount || 0), 0);
+      const v = (visitRows || []).filter((x: any) => {
+        const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
+      }).length;
+      return { date: key, condolences: c, donations: dn, visitors: v };
+    });
+    setSeries(seriesData);
+
+    // top memorials
+    const tops = (mems || [])
+      .map(m => ({
+        name: m.full_name,
+        visitors: m.visitor_count || 0,
+        condolences: (conds || []).filter(c => c.memorial_id === m.id).length,
+      }))
+      .sort((a, b) => b.visitors - a.visitors)
+      .slice(0, 5);
+    setTopMemorials(tops);
+
+    // recent condolences (cap at 3 latest)
+    if (memIds.length || isMourner) {
+      let rq = supabase.from("condolences").select("id,message,name,created_at,memorial_id").order("created_at", { ascending: false }).limit(3);
+      if (!isMourner && memIds.length) rq = rq.in("memorial_id", memIds);
+      if (isMourner) rq = rq.eq("user_id", user.id);
+      const { data: r } = await rq;
+      setRecent(r || []);
+    }
+
+    // upcoming anniversaries
+    if (memIds.length) {
+      const { data: a } = await supabase
+        .from("anniversaries").select("id,title,remembrance_date,memorial_id")
+        .in("memorial_id", memIds)
+        .gte("remembrance_date", new Date().toISOString().slice(0, 10))
+        .order("remembrance_date").limit(5);
+      setAnniversaries(a || []);
+    }
+    setDataLoading(false);
+  };
+
   useEffect(() => {
     document.title = "Dashboard · Makiwa";
     if (!user || roleLoading) return;
     setDataLoading(true);
+    loadData();
 
+    // Realtime: refresh stats when the underlying tables change
+    const channel = supabase
+      .channel("dashboard-overview")
+      .on("postgres_changes", { event: "*", schema: "public", table: "memorials" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "condolences" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "donations" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_visits" }, () => loadData())
+      .subscribe();
 
-
-    const load = async () => {
-      // memorials scoped by role
-      let mq = supabase.from("memorials").select("id,full_name,visitor_count,created_at,profile_photo_url");
-      if (!isSuperAdmin) mq = mq.eq("created_by", user.id);
-      const { data: mems } = await mq;
-      const memIds = (mems || []).map(m => m.id);
-      const visitors = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
-
-      // condolences
-      let condQ = supabase.from("condolences").select("id,memorial_id,created_at,message,name");
-      if (memIds.length && !isMourner) condQ = condQ.in("memorial_id", memIds);
-      if (isMourner) condQ = condQ.eq("user_id", user.id);
-      const { data: conds } = await condQ;
-
-      // donations (joined via fundraisers -> memorial_id)
-      let fundIdsForScope: string[] = [];
-      if (memIds.length) {
-        const { data: fs } = await supabase.from("fundraisers").select("id").in("memorial_id", memIds);
-        fundIdsForScope = (fs || []).map(f => f.id);
-      }
-      let donQ = supabase.from("donations").select("amount,fundraiser_id,created_at,user_id");
-      if (!isMourner && fundIdsForScope.length) donQ = donQ.in("fundraiser_id", fundIdsForScope);
-      if (!isMourner && !fundIdsForScope.length) donQ = donQ.eq("fundraiser_id", "00000000-0000-0000-0000-000000000000");
-      if (isMourner) donQ = donQ.eq("user_id", user.id);
-      const { data: dons } = await donQ;
-      const donTotal = (dons || []).reduce((s: number, d: any) => s + Number(d.amount || 0), 0);
-
-      // role-extra fetches
-      let users = 0;
-      let roleData: { name: string; value: number }[] = [];
-      let fundraisers = 0, moments = 0, anns = 0;
-
-      if (isSuperAdmin) {
-        const { count: ucount } = await supabase.from("profiles").select("id", { count: "exact", head: true });
-        users = ucount || 0;
-        const { data: rs } = await supabase.from("user_roles").select("role");
-        const tally: Record<string, number> = {};
-        (rs || []).forEach((r: any) => { tally[r.role] = (tally[r.role] || 0) + 1; });
-        roleData = Object.entries(tally).map(([name, value]) => ({ name: name.replace(/_/g, " "), value }));
-      }
-
-      if (memIds.length) {
-        const { count: fc } = await supabase.from("fundraisers").select("id", { count: "exact", head: true }).in("memorial_id", memIds);
-        fundraisers = fc || 0;
-        const { count: mc } = await supabase.from("memories").select("id", { count: "exact", head: true }).in("memorial_id", memIds);
-        moments = mc || 0;
-        const { count: ac } = await supabase.from("announcements").select("id", { count: "exact", head: true }).in("memorial_id", memIds);
-        anns = ac || 0;
-      }
-
-      setStats({
-        memorials: mems?.length || 0,
-        condolences: conds?.length || 0,
-        donations: donTotal,
-        visitors,
-        users,
-        fundraisers,
-        moments,
-        announcements: anns,
-      });
-      setRoleBreakdown(roleData);
-
-      // 14-day trend
-      const days = Array.from({ length: 14 }, (_, i) => startOfDay(subDays(new Date(), 13 - i)));
-      const seriesData = days.map(d => {
-        const key = format(d, "MMM d");
-        const dayStart = d.getTime();
-        const dayEnd = dayStart + 86400000;
-        const c = (conds || []).filter(x => {
-          const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
-        }).length;
-        const dn = (dons || []).filter((x: any) => {
-          const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
-        }).reduce((s: number, x: any) => s + Number(x.amount || 0), 0);
-        const v = (mems || []).filter(x => {
-          const t = new Date(x.created_at).getTime(); return t >= dayStart && t < dayEnd;
-        }).length;
-        return { date: key, condolences: c, donations: dn, visitors: v };
-      });
-      setSeries(seriesData);
-
-      // top memorials
-      const tops = (mems || [])
-        .map(m => ({
-          name: m.full_name,
-          visitors: m.visitor_count || 0,
-          condolences: (conds || []).filter(c => c.memorial_id === m.id).length,
-        }))
-        .sort((a, b) => b.visitors - a.visitors)
-        .slice(0, 5);
-      setTopMemorials(tops);
-
-      // recent condolences (cap at 3 latest)
-      if (memIds.length || isMourner) {
-        let rq = supabase.from("condolences").select("id,message,name,created_at,memorial_id").order("created_at", { ascending: false }).limit(3);
-        if (!isMourner && memIds.length) rq = rq.in("memorial_id", memIds);
-        if (isMourner) rq = rq.eq("user_id", user.id);
-        const { data: r } = await rq;
-        setRecent(r || []);
-      }
-
-      // upcoming anniversaries
-      if (memIds.length) {
-        const { data: a } = await supabase
-          .from("anniversaries").select("id,title,event_date,memorial_id")
-          .in("memorial_id", memIds)
-          .gte("event_date", new Date().toISOString().slice(0, 10))
-          .order("event_date").limit(5);
-        setAnniversaries(a || []);
-      }
-      setDataLoading(false);
-    };
-    load();
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isSuperAdmin, isMourner, isMemorialAdmin, roleLoading]);
 
   const roleHeader = useMemo(() => {
@@ -307,7 +329,7 @@ const Overview = () => {
               {anniversaries.map(a => (
                 <li key={a.id} className="flex items-center justify-between text-sm border-b border-border/60 pb-2 last:border-0">
                   <span className="font-medium truncate">{a.title}</span>
-                  <span className="text-xs text-muted-foreground shrink-0 ml-2">{format(new Date(a.event_date), "MMM d, yyyy")}</span>
+                  <span className="text-xs text-muted-foreground shrink-0 ml-2">{format(new Date(a.remembrance_date), "MMM d, yyyy")}</span>
                 </li>
               ))}
             </ul>
