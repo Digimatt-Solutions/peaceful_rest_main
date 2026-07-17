@@ -288,10 +288,14 @@ const Auth = () => {
           </Tabs>
 
           <p className="mt-3 text-[13px] text-center text-muted-foreground">
-            Dont have an account?{" "}
-            <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
-              Sign Up
-            </a>
+            {tab === "login" ? "Don't have an account? " : "Already have an account? "}
+            <button
+              type="button"
+              onClick={() => setTab(tab === "login" ? "signup" : "login")}
+              className="text-brand-orange hover:underline font-medium"
+            >
+              {tab === "login" ? "Sign Up" : "Sign In"}
+            </button>
           </p>
           <p className="mt-2 text-[11px] text-center text-muted-foreground">
             Powered by{" "}
