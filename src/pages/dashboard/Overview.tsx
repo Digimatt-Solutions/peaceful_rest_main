@@ -329,7 +329,7 @@ const Overview = () => {
               {anniversaries.map(a => (
                 <li key={a.id} className="flex items-center justify-between text-sm border-b border-border/60 pb-2 last:border-0">
                   <span className="font-medium truncate">{a.title}</span>
-                  <span className="text-xs text-muted-foreground shrink-0 ml-2">{format(new Date(a.event_date), "MMM d, yyyy")}</span>
+                  <span className="text-xs text-muted-foreground shrink-0 ml-2">{format(new Date(a.remembrance_date), "MMM d, yyyy")}</span>
                 </li>
               ))}
             </ul>
