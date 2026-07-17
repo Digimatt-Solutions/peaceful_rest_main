@@ -69,9 +69,12 @@ export const Hero = () => {
       id="home"
       className="relative min-h-screen flex items-center overflow-hidden pt-24 bg-white"
     >
-      {/* Dotted patterns – top-left & bottom-left */}
+      {/* Dotted patterns */}
       <DotPattern className="absolute top-24 left-4 sm:left-10 opacity-80" />
       <DotPattern className="absolute bottom-10 left-4 sm:left-10 opacity-80" />
+      <DotPattern className="hidden lg:block absolute top-24 left-1/2 -translate-x-1/2 opacity-70" />
+      <DotPattern className="hidden lg:block absolute top-24 right-10 opacity-70" />
+      <DotPattern className="hidden lg:block absolute bottom-10 right-10 opacity-70" />
 
       <div className="container-luxe relative z-10 w-full py-16 lg:py-24">
         <div className="grid lg:grid-cols-12 items-center gap-12">
@@ -142,7 +145,7 @@ export const Hero = () => {
 
           {/* RIGHT: circular memorial carousel */}
           <div className="lg:col-span-6 flex flex-col items-center">
-            <div className="relative w-[300px] h-[300px] sm:w-[420px] sm:h-[420px] lg:w-[520px] lg:h-[520px]">
+            <div className="relative w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[460px] lg:h-[460px]">
               <div className="absolute inset-0 rounded-full ring-8 ring-white shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35)] overflow-hidden bg-brand-black">
                 {memorials.map((m, i) => {
                   const photo = m.profile_photo_url || m.cover_photo_url;

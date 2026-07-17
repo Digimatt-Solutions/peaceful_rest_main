@@ -245,11 +245,19 @@ const MemorialDetail = () => {
 
               <div className="mt-8 lg:mt-10 flex flex-wrap gap-2 sm:gap-3">
                 <Button
-                  onClick={() => { setCandleLit(true); toast.success("A candle has been lit."); }}
+                  onClick={async () => {
+                    const url = window.location.href;
+                    if (navigator.share) {
+                      try { await navigator.share({ title: memorial.full_name, url }); } catch {}
+                    } else {
+                      await navigator.clipboard.writeText(url);
+                      toast.success("Link copied to clipboard");
+                    }
+                  }}
                   className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 sm:px-6 shadow-lg font-semibold"
                 >
-                  <Flame className="h-4 w-4 mr-2" />
-                  {candleLit ? "Candle lit" : "Light a candle"}
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share memorial
                 </Button>
 
                 <a
