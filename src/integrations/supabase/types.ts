@@ -798,6 +798,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_memorial_visitor: { Args: { _id: string }; Returns: undefined }
       is_memorial_admin: {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
