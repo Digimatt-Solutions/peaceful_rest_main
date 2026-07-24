@@ -136,6 +136,10 @@ const ObituaryManagement = () => {
           <h3 className="font-serif text-xl">Basic information</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2 sm:col-span-2"><Label>Full name *</Label><Input value={form.full_name} onChange={handle("full_name")} required /></div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label>National ID number <span className="text-muted-foreground font-normal">(required for adults — prevents duplicate obituaries)</span></Label>
+              <Input value={form.national_id} onChange={handle("national_id")} placeholder="e.g. 12345678" />
+            </div>
             <div className="space-y-2"><Label>Gender</Label><Input value={form.gender} onChange={handle("gender")} placeholder="e.g. Male / Female" /></div>
             <div className="space-y-2"><Label>Location</Label><Input value={form.location} onChange={handle("location")} placeholder="City, Country" /></div>
             <div className="space-y-2"><Label>Date of birth</Label><Input type="date" value={form.date_of_birth} onChange={handle("date_of_birth")} /></div>
