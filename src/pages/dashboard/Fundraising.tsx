@@ -158,12 +158,15 @@ const Fundraising = () => {
 
   const create = async () => {
     if (!form.title || !memorialId) return;
+    if (!form.death_certificate_number.trim()) return toast.error("Death certificate number is required");
     const { data, error } = await supabase.from("fundraisers").insert({
-      ...form, memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
+      ...form,
+      death_certificate_number: form.death_certificate_number.trim(),
+      memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
     }).select().maybeSingle();
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
-    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
     setOpenCreate(false);
     toast.success("Fundraiser created");
   };
