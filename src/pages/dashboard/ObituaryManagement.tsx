@@ -57,9 +57,21 @@ const ObituaryManagement = () => {
     e.preventDefault();
     if (!user) return;
     if (!form.full_name) { toast.error("Full name is required"); return; }
+    // Duplicate ID check (only when an ID is provided and it's an adult record)
+    const nid = (form.national_id || "").trim();
+    if (nid) {
+      let q = supabase.from("memorials").select("id,full_name").ilike("national_id", nid);
+      if (id) q = q.neq("id", id);
+      const { data: dup } = await q.maybeSingle();
+      if (dup) {
+        toast.error(`An obituary with this ID already exists for ${dup.full_name}`);
+        return;
+      }
+    }
     setLoading(true);
     const payload = {
       ...form,
+      national_id: nid || null,
       created_by: user.id,
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
@@ -68,7 +80,11 @@ const ObituaryManagement = () => {
       ? await supabase.from("memorials").update(payload).eq("id", id).select().maybeSingle()
       : await supabase.from("memorials").insert(payload).select().maybeSingle();
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      if ((error as any).code === "23505") toast.error("This National ID is already registered for another memorial.");
+      else toast.error(error.message);
+      return;
+    }
     logActivity(id ? "memorial_update" : "memorial_create", {
       entity_type: "memorial", entity_id: (data?.id || id) as string,
       description: `${id ? "Updated" : "Created"} memorial for ${form.full_name}`,
