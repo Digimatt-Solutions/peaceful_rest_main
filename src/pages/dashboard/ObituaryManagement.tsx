@@ -14,7 +14,7 @@ import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
 
 const empty = {
-  full_name: "", gender: "", date_of_birth: "", date_of_death: "",
+  full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
   cover_photo_url: "", profile_photo_url: "", biography: "",
   burial_details: "", service_schedule: "", venue: "", location: "",
   map_url: "", program_pdf_url: "", short_tribute: "", is_public: true,
