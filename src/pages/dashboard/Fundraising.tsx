@@ -36,7 +36,7 @@ const Fundraising = () => {
   const [memorialId, setMemorialId] = useState("");
   const [funds, setFunds] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
-  const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+  const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -158,12 +158,15 @@ const Fundraising = () => {
 
   const create = async () => {
     if (!form.title || !memorialId) return;
+    if (!form.death_certificate_number.trim()) return toast.error("Death certificate number is required");
     const { data, error } = await supabase.from("fundraisers").insert({
-      ...form, memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
+      ...form,
+      death_certificate_number: form.death_certificate_number.trim(),
+      memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
     }).select().maybeSingle();
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
-    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
     setOpenCreate(false);
     toast.success("Fundraiser created");
   };
@@ -258,6 +261,15 @@ const Fundraising = () => {
                     </Select>
                   </div>
                   <div className="space-y-2"><Label>Goal (KSh)</Label><Input type="number" value={form.goal_amount} onChange={(e) => setForm({ ...form, goal_amount: Number(e.target.value) })} /></div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Death certificate number *</Label>
+                  <Input
+                    value={form.death_certificate_number}
+                    onChange={(e) => setForm({ ...form, death_certificate_number: e.target.value })}
+                    placeholder="Required for verification"
+                  />
+                  <p className="text-xs text-muted-foreground">Kept private. Used to verify the fundraiser before it goes live.</p>
                 </div>
                 <Button onClick={create} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">Create fundraiser</Button>
               </div>

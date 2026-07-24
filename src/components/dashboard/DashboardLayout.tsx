@@ -104,8 +104,8 @@ export const DashboardLayout = () => {
         "w-64",
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-slate-100 dark:bg-slate-900", collapsed ? "lg:justify-center lg:px-2" : "")}>
-          <Link to="/" className="flex items-center gap-2 min-w-0 w-full justify-center">
+        <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-slate-100 dark:bg-slate-900", collapsed ? "lg:justify-center lg:px-2" : "justify-start")}>
+          <Link to="/" className="flex items-center gap-2 min-w-0">
             <img src={logoMark} alt="" className={cn("object-contain rounded-md", collapsed ? "h-8 w-8" : "h-9 w-9")} />
             {!collapsed && <img src={logoText} alt="Makiwa" className="h-7 w-auto object-contain" />}
           </Link>
@@ -260,10 +260,45 @@ export const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-10 lg:py-12 max-w-7xl w-full mx-auto space-y-2">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 lg:py-12 max-w-7xl w-full mx-auto space-y-2 pb-24 lg:pb-12">
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile bottom navigation - 5 most important role-based links */}
+      {role && (
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-700 h-16 flex items-stretch justify-around px-1">
+          {visibleNav
+            .filter(item => {
+              // Curated top-5 per role
+              if (role === "super_admin" || role === "admin") {
+                return ["/dashboard", "/dashboard/memorials", "/dashboard/community", "/dashboard/access", "/dashboard/profile"].includes(item.to);
+              }
+              if (role === "memorial_admin") {
+                return ["/dashboard", "/dashboard/memorials", "/dashboard/fundraising", "/dashboard/condolences", "/dashboard/profile"].includes(item.to);
+              }
+              return ["/dashboard", "/dashboard/condolences", "/dashboard/community", "/dashboard/moments", "/dashboard/profile"].includes(item.to);
+            })
+            .slice(0, 5)
+            .map(item => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) => cn(
+                    "flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
+                    isActive ? "text-brand-orange" : "text-slate-500 dark:text-slate-400"
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="truncate max-w-full px-1">{item.label.split(" ")[0]}</span>
+                </NavLink>
+              );
+            })}
+        </nav>
+      )}
     </div>
   );
 };

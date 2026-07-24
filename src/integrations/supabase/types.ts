@@ -416,6 +416,7 @@ export type Database = {
           category: string
           created_at: string
           currency: string
+          death_certificate_number: string | null
           description: string | null
           goal_amount: number
           id: string
@@ -428,6 +429,7 @@ export type Database = {
           category?: string
           created_at?: string
           currency?: string
+          death_certificate_number?: string | null
           description?: string | null
           goal_amount?: number
           id?: string
@@ -440,6 +442,7 @@ export type Database = {
           category?: string
           created_at?: string
           currency?: string
+          death_certificate_number?: string | null
           description?: string | null
           goal_amount?: number
           id?: string
@@ -526,6 +529,7 @@ export type Database = {
           is_public: boolean
           location: string | null
           map_url: string | null
+          national_id: string | null
           profile_photo_url: string | null
           program_pdf_url: string | null
           service_schedule: string | null
@@ -548,6 +552,7 @@ export type Database = {
           is_public?: boolean
           location?: string | null
           map_url?: string | null
+          national_id?: string | null
           profile_photo_url?: string | null
           program_pdf_url?: string | null
           service_schedule?: string | null
@@ -570,6 +575,7 @@ export type Database = {
           is_public?: boolean
           location?: string | null
           map_url?: string | null
+          national_id?: string | null
           profile_photo_url?: string | null
           program_pdf_url?: string | null
           service_schedule?: string | null
