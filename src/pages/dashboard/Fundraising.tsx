@@ -262,6 +262,15 @@ const Fundraising = () => {
                   </div>
                   <div className="space-y-2"><Label>Goal (KSh)</Label><Input type="number" value={form.goal_amount} onChange={(e) => setForm({ ...form, goal_amount: Number(e.target.value) })} /></div>
                 </div>
+                <div className="space-y-2">
+                  <Label>Death certificate number *</Label>
+                  <Input
+                    value={form.death_certificate_number}
+                    onChange={(e) => setForm({ ...form, death_certificate_number: e.target.value })}
+                    placeholder="Required for verification"
+                  />
+                  <p className="text-xs text-muted-foreground">Kept private. Used to verify the fundraiser before it goes live.</p>
+                </div>
                 <Button onClick={create} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">Create fundraiser</Button>
               </div>
             </DialogContent>
