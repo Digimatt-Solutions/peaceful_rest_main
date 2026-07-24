@@ -36,7 +36,7 @@ const Fundraising = () => {
   const [memorialId, setMemorialId] = useState("");
   const [funds, setFunds] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
-  const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0 });
+  const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(false);
