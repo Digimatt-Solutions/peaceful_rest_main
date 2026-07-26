@@ -39,7 +39,9 @@ const MemorialDetail = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [fundraisers, setFundraisers] = useState<any[]>([]);
   const [donateOpen, setDonateOpen] = useState<string | null>(null);
-  const [donateForm, setDonateForm] = useState({ donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+  const [donateForm, setDonateForm] = useState({ donor_name: "", donor_phone: "", email: "", amount: "", is_anonymous: false });
+  const [payMethod, setPayMethod] = useState<"mpesa" | "paystack">("mpesa");
+  const [stkStatus, setStkStatus] = useState("");
   const [donating, setDonating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
