@@ -17,3 +17,12 @@ verify_jwt = false
 
 [functions.paystack-verify]
 verify_jwt = false
+
+[functions.mpesa-initiate]
+verify_jwt = false
+
+[functions.mpesa-callback]
+verify_jwt = false
+
+[functions.mpesa-status]
+verify_jwt = false

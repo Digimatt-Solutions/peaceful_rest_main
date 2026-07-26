@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
       message: message || null,
       is_anonymous: !!is_anonymous,
       status: "pending",
+      payment_method: "paystack",
       stripe_session_id: reference,
     });
 

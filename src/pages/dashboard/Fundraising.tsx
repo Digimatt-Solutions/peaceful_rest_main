@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt } from "lucide-react";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt, Smartphone, CreditCard, Loader2 } from "lucide-react";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
+import mpesaLogo from "@/assets/mpesa-logo.png";
+import paystackLogo from "@/assets/paystack-logo.png";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -46,8 +48,10 @@ const Fundraising = () => {
   const [contribForm, setContribForm] = useState({ fundraiser_id: "", donor_name: "", donor_phone: "", amount: "", is_anonymous: false });
   const [openDonate, setOpenDonate] = useState(false);
   const [donatingFund, setDonatingFund] = useState<any>(null);
+  const [payMethod, setPayMethod] = useState<"mpesa" | "paystack">("mpesa");
   const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
+  const [stkStatus, setStkStatus] = useState<string>("");
 
   const selectedMemorialRef = () => memorials.find(m => m.id === memorialId)?.full_name;
 
@@ -120,6 +124,17 @@ const Fundraising = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memorialId]);
 
+  const refreshFundsAndDonations = async () => {
+    if (!memorialId) return;
+    const { data: fs } = await supabase.from("fundraisers").select("*").eq("memorial_id", memorialId).order("created_at", { ascending: false });
+    setFunds(fs || []);
+    const ids = (fs || []).map(f => f.id);
+    if (ids.length) {
+      const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+      setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+    }
+  };
+
   const startPaystackDonation = async () => {
     if (!donatingFund) return;
     const amt = Number(donateForm.amount);
@@ -141,6 +156,53 @@ const Fundraising = () => {
       return;
     }
     window.location.href = data.authorization_url;
+  };
+
+  const startMpesaDonation = async () => {
+    if (!donatingFund) return;
+    const amt = Number(donateForm.amount);
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!donateForm.donor_phone.trim()) return toast.error("Enter your M-Pesa phone number");
+    if (!donateForm.is_anonymous && !donateForm.donor_name.trim()) return toast.error("Enter your name");
+    setDonating(true);
+    setStkStatus("Sending STK push to your phone…");
+    const { data, error } = await supabase.functions.invoke("mpesa-initiate", {
+      body: {
+        fundraiser_id: donatingFund.id, amount: amt, phone: donateForm.donor_phone.trim(),
+        donor_name: donateForm.donor_name, message: donateForm.message, is_anonymous: donateForm.is_anonymous,
+      },
+    });
+    if (error || !data?.checkout_request_id) {
+      setDonating(false); setStkStatus("");
+      return toast.error(data?.error || error?.message || "Could not start M-Pesa payment");
+    }
+    setStkStatus("Enter your M-Pesa PIN on your phone to complete the payment.");
+    toast.success("Check your phone for the M-Pesa prompt");
+    const checkoutId = data.checkout_request_id;
+
+    // Poll up to ~90s
+    let attempts = 0;
+    const poll = async () => {
+      attempts++;
+      const { data: s } = await supabase.functions.invoke("mpesa-status", { body: { checkout_request_id: checkoutId } });
+      if (s?.paid) {
+        setStkStatus("Payment confirmed. Thank you!");
+        toast.success("Payment received");
+        setDonating(false); setOpenDonate(false); setStkStatus("");
+        await refreshFundsAndDonations();
+        return;
+      }
+      if (s && !s.pending && s.result_code) {
+        setStkStatus(""); setDonating(false);
+        return toast.error(s.result_desc || "Payment was not completed");
+      }
+      if (attempts >= 30) {
+        setStkStatus(""); setDonating(false);
+        return toast.message("Still waiting on M-Pesa. It will update once confirmed.");
+      }
+      setTimeout(poll, 3000);
+    };
+    setTimeout(poll, 4000);
   };
 
   useEffect(() => {
@@ -181,7 +243,7 @@ const Fundraising = () => {
       fundraiser_id: contribForm.fundraiser_id, amount: amt,
       donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
       donor_phone: contribForm.is_anonymous ? null : (contribForm.donor_phone || null),
-      is_anonymous: contribForm.is_anonymous, status: "paid",
+      is_anonymous: contribForm.is_anonymous, status: "paid", payment_method: "manual",
     }).select().maybeSingle();
     if (error || !ins) { setSavingContrib(false); return toast.error(error?.message || "Failed"); }
     const fund = funds.find(f => f.id === contribForm.fundraiser_id);
@@ -381,12 +443,14 @@ const Fundraising = () => {
                         size="sm"
                         onClick={() => {
                           setDonatingFund(f);
+                          setPayMethod("mpesa");
+                          setStkStatus("");
                           setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
                           setOpenDonate(true);
                         }}
                         className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
                       >
-                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate via Paystack
+                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate
                       </Button>
                     </div>
                   );
@@ -494,21 +558,53 @@ const Fundraising = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={openDonate} onOpenChange={setOpenDonate}>
+      <Dialog open={openDonate} onOpenChange={(o) => { if (!donating) { setOpenDonate(o); if (!o) setStkStatus(""); } }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle className="font-serif text-2xl">Donate via Paystack</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Make a contribution</DialogTitle></DialogHeader>
           {donatingFund && (
             <div className="space-y-4 mt-2">
               <div className="rounded-xl bg-brand-orange/5 border border-brand-orange/20 p-3">
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">Contributing to</p>
                 <p className="font-serif text-lg">{donatingFund.title}</p>
               </div>
+
+              <div>
+                <Label className="text-xs uppercase tracking-widest text-muted-foreground">Pay with</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  {[
+                    { id: "mpesa", label: "M-PESA", logo: mpesaLogo, icon: Smartphone },
+                    { id: "paystack", label: "Paystack", logo: paystackLogo, icon: CreditCard },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPayMethod(m.id as any)}
+                      className={`flex items-center gap-3 rounded-xl border-2 p-3 transition ${payMethod === m.id ? "border-brand-orange bg-brand-orange/5" : "border-border hover:border-brand-orange/40"}`}
+                    >
+                      <div className="h-10 w-14 flex items-center justify-center bg-white rounded-md border border-border overflow-hidden">
+                        <img src={m.logo} alt={m.label} className="max-h-8 max-w-full object-contain" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-medium leading-tight">{m.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{m.id === "mpesa" ? "STK Push to phone" : "Card / bank"}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} /></div>
-                <div className="space-y-2"><Label>Email</Label><Input type="email" value={donateForm.email} onChange={(e) => setDonateForm({ ...donateForm, email: e.target.value })} required /></div>
+                {payMethod === "paystack" ? (
+                  <div className="space-y-2"><Label>Email</Label><Input type="email" value={donateForm.email} onChange={(e) => setDonateForm({ ...donateForm, email: e.target.value })} required /></div>
+                ) : (
+                  <div className="space-y-2"><Label>M-Pesa phone</Label><Input type="tel" placeholder="07XXXXXXXX" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} /></div>
+                )}
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
-                <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} disabled={donateForm.is_anonymous} /></div>
+                {payMethod === "paystack" && (
+                  <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} disabled={donateForm.is_anonymous} /></div>
+                )}
                 <div className="space-y-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} /></div>
               </div>
               <div className="space-y-2"><Label>Message <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label><Textarea rows={2} value={donateForm.message} onChange={(e) => setDonateForm({ ...donateForm, message: e.target.value })} /></div>
@@ -516,10 +612,25 @@ const Fundraising = () => {
                 <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
                 Donate anonymously
               </label>
-              <Button onClick={startPaystackDonation} disabled={donating} className="w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90 h-11">
-                {donating ? "Redirecting to Paystack…" : `Pay KSh ${Number(donateForm.amount || 0).toLocaleString()} securely`}
+
+              {stkStatus && (
+                <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-sm text-emerald-900 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" /> {stkStatus}
+                </div>
+              )}
+
+              <Button
+                onClick={payMethod === "mpesa" ? startMpesaDonation : startPaystackDonation}
+                disabled={donating}
+                className="w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90 h-11"
+              >
+                {donating
+                  ? (payMethod === "mpesa" ? "Waiting for M-Pesa…" : "Redirecting to Paystack…")
+                  : `Pay KSh ${Number(donateForm.amount || 0).toLocaleString()} via ${payMethod === "mpesa" ? "M-PESA" : "Paystack"}`}
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center">Payments are processed securely by Paystack.</p>
+              <p className="text-[11px] text-muted-foreground text-center">
+                Payments are processed securely by {payMethod === "mpesa" ? "Safaricom M-PESA" : "Paystack"}.
+              </p>
             </div>
           )}
         </DialogContent>
