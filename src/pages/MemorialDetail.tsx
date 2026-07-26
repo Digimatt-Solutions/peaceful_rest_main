@@ -18,6 +18,8 @@ import { format } from "date-fns";
 import { z } from "zod";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import { MemorialQR } from "@/components/MemorialQR";
+import mpesaLogo from "@/assets/mpesa-logo.png";
+import paystackLogo from "@/assets/paystack-logo.png";
 
 const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "-";
 
