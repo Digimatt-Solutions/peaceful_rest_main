@@ -2,6 +2,8 @@ import { format } from "date-fns";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, Printer, CheckCircle2 } from "lucide-react";
+import mpesaLogo from "@/assets/mpesa-logo.png";
+import paystackLogo from "@/assets/paystack-logo.png";
 
 interface ReceiptData {
   id: string;
@@ -14,63 +16,120 @@ interface ReceiptData {
   fundraiser_title?: string;
   memorial_name?: string;
   status?: string;
+  payment_method?: string | null;
 }
+
+const absUrl = (p: string) => (typeof window !== "undefined" ? `${window.location.origin}${p}` : p);
+
+const methodMeta = (m?: string | null) => {
+  const k = (m || "").toLowerCase();
+  if (k === "mpesa") return { label: "M-PESA", logo: absUrl(mpesaLogo) };
+  if (k === "paystack") return { label: "Paystack", logo: absUrl(paystackLogo) };
+  return { label: "Cash / Manual", logo: "" };
+};
 
 export const buildReceiptHTML = (d: ReceiptData) => {
   const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
   const refNo = `MKW-${d.id.slice(0, 8).toUpperCase()}`;
-  const date = format(new Date(d.created_at), "MMMM d, yyyy 'at' h:mm a");
+  const dateStr = format(new Date(d.created_at), "dd/MM/yyyy");
+  const timeStr = format(new Date(d.created_at), "HH:mm:ss");
+  const method = methodMeta(d.payment_method);
+  const amount = Number(d.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   return `<!doctype html><html><head><meta charset="utf-8"/><title>Receipt ${refNo}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Georgia','Times New Roman',serif;background:#efeae1;color:#1a1a1a;padding:48px 20px;-webkit-font-smoothing:antialiased}
-  .r{max-width:560px;margin:0 auto;background:#faf7f2;border:1px solid #e6dfd1;padding:56px 48px 44px;position:relative}
-  .top{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:28px;border-bottom:1px solid #1a1a1a}
-  .brand{font-family:Georgia,serif;font-size:22px;font-weight:400;letter-spacing:-.5px}
-  .brand small{display:block;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#8a8a8a;margin-top:6px;font-family:Arial,sans-serif}
-  .meta{text-align:right;font-family:Arial,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a8a8a;line-height:1.9}
-  .meta b{display:block;font-family:'Courier New',monospace;font-size:12px;letter-spacing:1px;color:#1a1a1a;font-weight:600;text-transform:none;margin-top:4px}
-  .title{margin-top:36px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#8a8a8a}
-  .amt{margin-top:10px;font-size:52px;font-weight:400;letter-spacing:-1.5px;line-height:1}
-  .amt span{color:#8a8a8a;font-size:22px;margin-right:6px;letter-spacing:0}
-  .rows{margin-top:44px;border-top:1px solid #e6dfd1}
-  .row{display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid #e6dfd1;gap:20px}
-  .row .k{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a8a8a;padding-top:2px}
-  .row .v{font-size:15px;text-align:right;max-width:65%}
-  .msg{margin-top:32px;padding:20px 22px;background:#f2ede3;border-left:2px solid #c9a86a;font-style:italic;font-size:14px;color:#4a4a4a;line-height:1.6}
-  .foot{margin-top:44px;padding-top:24px;border-top:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center;font-family:Arial,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a8a8a}
-  .seal{display:inline-flex;align-items:center;gap:6px;color:#1a1a1a}
-  .seal:before{content:"";width:6px;height:6px;background:#c9a86a;border-radius:50%}
-  .thanks{margin-top:22px;text-align:center;font-family:Georgia,serif;font-style:italic;font-size:13px;color:#6a6a6a}
-  @media print{body{background:#fff;padding:0}.r{border:none;padding:40px}}
+  html,body{background:#e9e9e9}
+  body{font-family:'Courier New','Courier',monospace;color:#111;padding:32px 12px;-webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+  .r{width:340px;background:#fff;padding:22px 20px 26px;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  /* jagged top + bottom edges like a POS slip */
+  .r:before,.r:after{content:"";position:absolute;left:0;right:0;height:10px;background:
+    linear-gradient(-45deg, transparent 33%, #fff 33% 66%, transparent 66%) 0 0/12px 12px,
+    linear-gradient(45deg, transparent 33%, #fff 33% 66%, transparent 66%) 0 0/12px 12px;}
+  .r:before{top:-10px}
+  .r:after{bottom:-10px;transform:rotate(180deg)}
+  .brand{text-align:center;padding-bottom:12px;border-bottom:1px dashed #999}
+  .brand h1{font-family:Georgia,serif;font-size:22px;font-weight:700;letter-spacing:1px}
+  .brand p{font-size:10px;color:#555;margin-top:3px;letter-spacing:1px}
+  .head{margin-top:12px;font-size:11px;text-align:center;line-height:1.6}
+  .head b{display:block;font-size:13px;letter-spacing:1px;margin-top:2px}
+  .sep{border-top:1px dashed #999;margin:10px 0}
+  .row{display:flex;justify-content:space-between;font-size:12px;line-height:1.7}
+  .row .k{color:#333}
+  .row .v{color:#000;font-weight:600;text-align:right;max-width:60%;word-break:break-word}
+  .item{display:flex;justify-content:space-between;font-size:12px;margin-top:6px}
+  .item .desc{max-width:65%}
+  .item .amt{font-weight:700}
+  .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:10px;border-top:2px dashed #111}
+  .total .lbl{font-size:12px;letter-spacing:2px}
+  .total .val{font-family:Georgia,serif;font-size:22px;font-weight:700}
+  .method{margin-top:14px;padding:10px 12px;background:#f6f6f6;border:1px dashed #bbb;text-align:center}
+  .method img{max-height:28px;max-width:110px;display:inline-block;vertical-align:middle;margin-bottom:4px}
+  .method .lbl{display:block;font-size:10px;letter-spacing:2px;color:#666;margin-top:4px}
+  .msg{margin-top:12px;font-size:11px;font-style:italic;text-align:center;color:#444;line-height:1.5}
+  .status{margin-top:14px;text-align:center;font-size:11px;letter-spacing:2px;font-weight:700}
+  .status.paid{color:#059669}
+  .status.pending{color:#b45309}
+  .foot{margin-top:16px;text-align:center;font-size:10px;color:#666;line-height:1.6}
+  .foot .thanks{font-family:Georgia,serif;font-style:italic;font-size:12px;color:#111;margin-top:6px}
+  .bar{margin-top:12px;height:32px;background:repeating-linear-gradient(90deg,#111 0 1px,transparent 1px 3px,#111 3px 5px,transparent 5px 8px)}
+  .barno{text-align:center;font-size:10px;letter-spacing:3px;margin-top:4px}
+  @media print{body{background:#fff;padding:0}.r{box-shadow:none}}
 </style></head>
 <body><div class="r">
-  <div class="top">
-    <div class="brand">Makiwa<small>Memorial</small></div>
-    <div class="meta">
-      Receipt<b>${refNo}</b>
-    </div>
+  <div class="brand">
+    <h1>MAKIWA</h1>
+    <p>MEMORIAL &middot; NAIROBI, KENYA</p>
   </div>
 
-  <div class="title">Amount received</div>
-  <div class="amt"><span>KSh</span>${Number(d.amount).toLocaleString()}</div>
+  <div class="head">
+    OFFICIAL RECEIPT
+    <b>${refNo}</b>
+  </div>
 
-  <div class="rows">
-    <div class="row"><div class="k">Donor</div><div class="v">${name}</div></div>
-    <div class="row"><div class="k">Date</div><div class="v">${date}</div></div>
-    ${d.donor_phone && !d.is_anonymous ? `<div class="row"><div class="k">Phone</div><div class="v">${d.donor_phone}</div></div>` : ""}
-    ${d.memorial_name ? `<div class="row"><div class="k">In memory of</div><div class="v">${d.memorial_name}</div></div>` : ""}
-    ${d.fundraiser_title ? `<div class="row"><div class="k">Fundraiser</div><div class="v">${d.fundraiser_title}</div></div>` : ""}
-    <div class="row"><div class="k">Status</div><div class="v">${d.status === "paid" ? "Confirmed" : "Recorded"}</div></div>
+  <div class="sep"></div>
+
+  <div class="row"><span class="k">Date</span><span class="v">${dateStr}</span></div>
+  <div class="row"><span class="k">Time</span><span class="v">${timeStr}</span></div>
+  <div class="row"><span class="k">Cashier</span><span class="v">MAKIWA-BOT</span></div>
+
+  <div class="sep"></div>
+
+  <div class="row"><span class="k">Donor</span><span class="v">${name}</span></div>
+  ${d.donor_phone && !d.is_anonymous ? `<div class="row"><span class="k">Phone</span><span class="v">${d.donor_phone}</span></div>` : ""}
+  ${d.memorial_name ? `<div class="row"><span class="k">In memory of</span><span class="v">${d.memorial_name}</span></div>` : ""}
+
+  <div class="sep"></div>
+
+  <div class="item">
+    <span class="desc">${d.fundraiser_title || "Contribution"}</span>
+    <span class="amt">${amount}</span>
+  </div>
+
+  <div class="total">
+    <span class="lbl">TOTAL KSH</span>
+    <span class="val">${amount}</span>
+  </div>
+
+  <div class="method">
+    ${method.logo ? `<img src="${method.logo}" alt="${method.label}"/>` : `<div style="font-weight:700;font-size:14px">${method.label}</div>`}
+    <span class="lbl">PAID VIA ${method.label}</span>
   </div>
 
   ${d.message ? `<div class="msg">"${d.message}"</div>` : ""}
 
-  <div class="foot">
-    <span class="seal">Verified receipt</span>
-    <span>Makiwa · Nairobi, Kenya</span>
+  <div class="status ${d.status === "paid" ? "paid" : "pending"}">
+    ${d.status === "paid" ? "*** CONFIRMED ***" : "*** RECORDED ***"}
   </div>
-  <p class="thanks">Thank you for honouring a life remembered.</p>
+
+  <div class="bar"></div>
+  <div class="barno">${refNo}</div>
+
+  <div class="foot">
+    Keep this receipt as proof of contribution.<br/>
+    makiwa.co.ke &middot; support@makiwa.co.ke
+    <div class="thanks">Thank you for honouring a life.</div>
+  </div>
 </div></body></html>`;
 };
 
@@ -100,13 +159,13 @@ export const DonationReceipt = ({ open, onOpenChange, donation }: Props) => {
     if (!w) return;
     w.document.write(html);
     w.document.close();
-    setTimeout(() => w.print(), 250);
+    setTimeout(() => w.print(), 300);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden">
-        <div className="bg-[#efeae1] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-md p-0 overflow-hidden">
+        <div className="bg-[#e9e9e9] max-h-[80vh] overflow-y-auto">
           <iframe srcDoc={html} className="w-full h-[70vh] border-0" title="Receipt preview" />
         </div>
         <div className="flex justify-end gap-2 p-4 border-t bg-background">

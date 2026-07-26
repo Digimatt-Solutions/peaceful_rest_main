@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt } from "lucide-react";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt, Smartphone, CreditCard, Loader2 } from "lucide-react";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
+import mpesaLogo from "@/assets/mpesa-logo.png";
+import paystackLogo from "@/assets/paystack-logo.png";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
