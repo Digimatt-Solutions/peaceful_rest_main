@@ -328,6 +328,7 @@ export type Database = {
           id: string
           is_anonymous: boolean
           message: string | null
+          payment_method: string | null
           status: string
           stripe_session_id: string | null
           user_id: string | null
@@ -342,6 +343,7 @@ export type Database = {
           id?: string
           is_anonymous?: boolean
           message?: string | null
+          payment_method?: string | null
           status?: string
           stripe_session_id?: string | null
           user_id?: string | null
@@ -356,6 +358,7 @@ export type Database = {
           id?: string
           is_anonymous?: boolean
           message?: string | null
+          payment_method?: string | null
           status?: string
           stripe_session_id?: string | null
           user_id?: string | null
