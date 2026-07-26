@@ -135,28 +135,75 @@ const MemorialDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memorial?.full_name]);
 
-  const donate = async (fundraiserId: string) => {
+  const refreshFundsAfterPayment = async () => {
+    if (!id) return;
+    const { data: fr } = await supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).order("created_at", { ascending: false });
+    setFundraisers(fr || []);
+  };
+
+  const startPaystackDonation = async (fundraiserId: string) => {
     const amt = Number(donateForm.amount);
     if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!donateForm.email.trim()) return toast.error("Enter your email");
     if (!donateForm.is_anonymous && !donateForm.donor_name.trim()) return toast.error("Please enter your name");
     setDonating(true);
-    const { data, error } = await supabase.functions.invoke("create-donation-checkout", {
+    const callback_url = `${window.location.origin}${window.location.pathname}`;
+    const { data, error } = await supabase.functions.invoke("paystack-initialize", {
       body: {
-        fundraiser_id: fundraiserId,
-        amount: amt,
-        donor_name: donateForm.donor_name,
-        donor_phone: donateForm.donor_phone,
-        message: donateForm.message,
-        is_anonymous: donateForm.is_anonymous,
+        fundraiser_id: fundraiserId, amount: amt, email: donateForm.email.trim(),
+        donor_name: donateForm.donor_name, donor_phone: donateForm.donor_phone,
+        is_anonymous: donateForm.is_anonymous, callback_url,
       },
     });
     setDonating(false);
-    if (error || !data?.url) {
-      toast.error(error?.message || "Could not start checkout. Please try again.");
+    if (error || !data?.authorization_url) {
+      toast.error(data?.error || error?.message || "Could not start payment");
       return;
     }
-    // Redirect to Stripe Checkout
-    window.location.href = data.url;
+    window.location.href = data.authorization_url;
+  };
+
+  const startMpesaDonation = async (fundraiserId: string) => {
+    const amt = Number(donateForm.amount);
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    if (!donateForm.donor_phone.trim()) return toast.error("Enter your M-Pesa phone number");
+    if (!donateForm.is_anonymous && !donateForm.donor_name.trim()) return toast.error("Please enter your name");
+    setDonating(true);
+    setStkStatus("Sending STK push to your phone…");
+    const { data, error } = await supabase.functions.invoke("mpesa-initiate", {
+      body: {
+        fundraiser_id: fundraiserId, amount: amt, phone: donateForm.donor_phone.trim(),
+        donor_name: donateForm.donor_name, is_anonymous: donateForm.is_anonymous,
+      },
+    });
+    if (error || !data?.checkout_request_id) {
+      setDonating(false); setStkStatus("");
+      return toast.error(data?.error || error?.message || "Could not start M-Pesa payment");
+    }
+    setStkStatus("Enter your M-Pesa PIN on your phone to complete the payment.");
+    toast.success("Check your phone for the M-Pesa prompt");
+    const checkoutId = data.checkout_request_id;
+    let attempts = 0;
+    const poll = async () => {
+      attempts++;
+      const { data: s } = await supabase.functions.invoke("mpesa-status", { body: { checkout_request_id: checkoutId } });
+      if (s?.paid) {
+        setStkStatus(""); setDonating(false); setDonateOpen(null);
+        toast.success("Payment received. Thank you!");
+        await refreshFundsAfterPayment();
+        return;
+      }
+      if (s && !s.pending && s.result_code) {
+        setStkStatus(""); setDonating(false);
+        return toast.error(s.result_desc || "Payment was not completed");
+      }
+      if (attempts >= 30) {
+        setStkStatus(""); setDonating(false);
+        return toast.message("Still waiting on M-Pesa. It will update once confirmed.");
+      }
+      setTimeout(poll, 3000);
+    };
+    setTimeout(poll, 4000);
   };
 
 
