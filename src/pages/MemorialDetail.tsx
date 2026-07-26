@@ -472,22 +472,66 @@ const MemorialDetail = () => {
                         <Progress value={pct} className="h-2" />
                       </div>
                       {open && (
-                        <div className="mt-6 grid sm:grid-cols-2 gap-3 pt-5 border-t border-border">
-                          <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} className="rounded-xl" /></div>
-                          <div className="space-y-2"><Label>Phone <span className="text-muted-foreground font-normal">(for receipt)</span></Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} className="rounded-xl" /></div>
-                          <div className="space-y-2 sm:col-span-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
-                          
-                          <label className="sm:col-span-2 inline-flex items-center gap-2 text-sm">
-                            <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
-                            Contribute anonymously
-                          </label>
-                          <div className="sm:col-span-2 flex flex-wrap gap-2 items-center">
-                            <Button onClick={() => donate(f.id)} disabled={donating} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
-                              {donating ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Redirecting…</> : "Continue to secure checkout"}
+                        <div className="mt-6 space-y-4 pt-5 border-t border-border">
+                          {/* Payment method selector */}
+                          <div>
+                            <Label className="text-xs uppercase tracking-widest text-muted-foreground">Payment method</Label>
+                            <div className="mt-2 grid grid-cols-2 gap-3">
+                              {[
+                                { id: "mpesa" as const, label: "M-PESA", logo: mpesaLogo, sub: "STK Push to phone" },
+                                { id: "paystack" as const, label: "Paystack", logo: paystackLogo, sub: "Card / bank" },
+                              ].map(m => (
+                                <button
+                                  key={m.id}
+                                  type="button"
+                                  onClick={() => setPayMethod(m.id)}
+                                  className={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition ${payMethod === m.id ? "border-brand-orange bg-brand-orange/5" : "border-border bg-card hover:border-brand-orange/40"}`}
+                                >
+                                  <img src={m.logo} alt={m.label} className="h-8 w-auto object-contain" />
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-semibold leading-tight">{m.label}</p>
+                                    <p className="text-[10px] text-muted-foreground">{m.sub}</p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="space-y-2"><Label>Your name</Label><Input value={donateForm.donor_name} onChange={(e) => setDonateForm({ ...donateForm, donor_name: e.target.value })} disabled={donateForm.is_anonymous} className="rounded-xl" /></div>
+                            <div className="space-y-2"><Label>{payMethod === "mpesa" ? "M-Pesa phone (07XXXXXXXX)" : "Phone"}</Label><Input type="tel" value={donateForm.donor_phone} onChange={(e) => setDonateForm({ ...donateForm, donor_phone: e.target.value })} className="rounded-xl" /></div>
+                            {payMethod === "paystack" && (
+                              <div className="space-y-2 sm:col-span-2"><Label>Email <span className="text-muted-foreground font-normal">(for receipt)</span></Label><Input type="email" value={donateForm.email} onChange={(e) => setDonateForm({ ...donateForm, email: e.target.value })} className="rounded-xl" /></div>
+                            )}
+                            <div className="space-y-2 sm:col-span-2"><Label>Amount (KSh)</Label><Input type="number" min="1" value={donateForm.amount} onChange={(e) => setDonateForm({ ...donateForm, amount: e.target.value })} className="rounded-xl" /></div>
+                            <label className="sm:col-span-2 inline-flex items-center gap-2 text-sm">
+                              <input type="checkbox" checked={donateForm.is_anonymous} onChange={(e) => setDonateForm({ ...donateForm, is_anonymous: e.target.checked })} />
+                              Contribute anonymously
+                            </label>
+                          </div>
+
+                          {stkStatus && payMethod === "mpesa" && (
+                            <div className="rounded-lg border border-brand-orange/30 bg-brand-orange/5 px-3 py-2 text-xs text-foreground/80">{stkStatus}</div>
+                          )}
+
+                          <div className="flex flex-wrap gap-2 items-center">
+                            <Button
+                              onClick={() => payMethod === "mpesa" ? startMpesaDonation(f.id) : startPaystackDonation(f.id)}
+                              disabled={donating}
+                              className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-11 px-5"
+                            >
+                              {donating ? (
+                                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {payMethod === "mpesa" ? "Waiting for M-Pesa…" : "Redirecting to Paystack…"}</>
+                              ) : (
+                                <span className="flex items-center gap-2">
+                                  <img src={payMethod === "mpesa" ? mpesaLogo : paystackLogo} alt="" className="h-5 w-auto object-contain bg-white rounded px-1" />
+                                  Pay {donateForm.amount ? `KSh ${Number(donateForm.amount).toLocaleString()}` : ""} via {payMethod === "mpesa" ? "M-PESA" : "Paystack"}
+                                </span>
+                              )}
                             </Button>
                             <Button variant="outline" onClick={() => setDonateOpen(null)} className="rounded-full">Cancel</Button>
-                            <span className="text-xs text-muted-foreground ml-1">Powered by Stripe · Cards & wallets accepted</span>
                           </div>
+                          <p className="text-xs text-muted-foreground">Payments are processed securely by {payMethod === "mpesa" ? "Safaricom M-PESA" : "Paystack"}.</p>
                         </div>
                       )}
 
