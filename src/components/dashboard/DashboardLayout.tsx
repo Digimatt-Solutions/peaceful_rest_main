@@ -5,10 +5,12 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/lib/activity";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import {
   LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HeartHandshake,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
-  UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe, Activity
+  UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe, Activity,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,7 @@ const allNav: NavItem[] = [
   { to: "/dashboard/moments", label: "Life Moments", icon: Camera },
   { to: "/dashboard/anniversary", label: "Anniversary", icon: CalendarHeart, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/community", label: "Community", icon: MessagesSquare },
+  { to: "/dashboard/messages", label: "Messages", icon: MessageSquare },
   { to: "/dashboard/oversight", label: "Memorial Oversight", icon: Globe, roles: ["super_admin"] },
   { to: "/dashboard/access", label: "User Management", icon: ShieldCheck, roles: ["super_admin"] },
   { to: "/dashboard/activity", label: "Activity Logs", icon: Activity, roles: ["super_admin"] },
@@ -52,6 +55,7 @@ export const DashboardLayout = () => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { role, loading: roleLoading } = useUserRole();
+  const unreadMessages = useUnreadMessages();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string; email?: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -122,6 +126,7 @@ export const DashboardLayout = () => {
             ))
           ) : visibleNav.map((item) => {
             const Icon = item.icon;
+            const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
             return (
               <NavLink
                 key={item.to}
@@ -130,7 +135,7 @@ export const DashboardLayout = () => {
                 onClick={() => setMobileOpen(false)}
                 title={collapsed ? item.label : undefined}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 rounded-lg text-sm transition-colors",
+                  "relative flex items-center gap-3 rounded-lg text-sm transition-colors",
                   collapsed ? "lg:justify-center lg:px-0 px-3" : "px-3",
                   "py-2.5",
                   isActive
@@ -140,9 +145,18 @@ export const DashboardLayout = () => {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 {!collapsed && <span className="truncate">{item.label}</span>}
+                {badge > 0 && (
+                  <span className={cn(
+                    "flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold text-white ring-2 ring-slate-100 dark:ring-slate-900",
+                    collapsed ? "absolute right-1 top-1 lg:right-2" : "ml-auto"
+                  )}>
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
               </NavLink>
             );
           })}
+
         </nav>
 
         {/* logout button */}
@@ -203,13 +217,20 @@ export const DashboardLayout = () => {
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            <button
+            <Link
+              to="/dashboard/messages"
               className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors relative"
-              aria-label="Notifications"
+              aria-label={unreadMessages > 0 ? `${unreadMessages} unread messages` : "Messages"}
+              title={unreadMessages > 0 ? `${unreadMessages} unread messages` : "No new messages"}
             >
               <Bell className="h-4 w-4" />
-              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-brand-orange" />
-            </button>
+              {unreadMessages > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold text-white">
+                  {unreadMessages > 99 ? "99+" : unreadMessages}
+                </span>
+              )}
+            </Link>
+
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -272,31 +293,38 @@ export const DashboardLayout = () => {
             .filter(item => {
               // Curated top-5 per role
               if (role === "super_admin" || role === "admin") {
-                return ["/dashboard", "/dashboard/memorials", "/dashboard/community", "/dashboard/access", "/dashboard/profile"].includes(item.to);
+                return ["/dashboard", "/dashboard/memorials", "/dashboard/messages", "/dashboard/access", "/dashboard/profile"].includes(item.to);
               }
               if (role === "memorial_admin") {
-                return ["/dashboard", "/dashboard/memorials", "/dashboard/fundraising", "/dashboard/condolences", "/dashboard/profile"].includes(item.to);
+                return ["/dashboard", "/dashboard/memorials", "/dashboard/fundraising", "/dashboard/messages", "/dashboard/profile"].includes(item.to);
               }
-              return ["/dashboard", "/dashboard/condolences", "/dashboard/community", "/dashboard/moments", "/dashboard/profile"].includes(item.to);
+              return ["/dashboard", "/dashboard/condolences", "/dashboard/community", "/dashboard/messages", "/dashboard/profile"].includes(item.to);
             })
             .slice(0, 5)
             .map(item => {
               const Icon = item.icon;
+              const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
               return (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) => cn(
-                    "flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
+                    "relative flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
                     isActive ? "text-brand-orange" : "text-slate-500 dark:text-slate-400"
                   )}
                 >
                   <Icon className="h-5 w-5" />
+                  {badge > 0 && (
+                    <span className="absolute top-2 right-[22%] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold text-white">
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
                   <span className="truncate max-w-full px-1">{item.label.split(" ")[0]}</span>
                 </NavLink>
               );
             })}
+
         </nav>
       )}
     </div>

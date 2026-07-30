@@ -23,6 +23,7 @@ import LifeMoments from "./pages/dashboard/LifeMoments";
 import Anniversary from "./pages/dashboard/Anniversary";
 
 import Community from "./pages/dashboard/Community";
+import Messages from "./pages/dashboard/Messages";
 import AccessControl from "./pages/dashboard/AccessControl";
 import Oversight from "./pages/dashboard/Oversight";
 import ActivityLogs from "./pages/dashboard/ActivityLogs";
@@ -64,6 +65,8 @@ const App = () => (
               <Route path="moments" element={<LifeMoments />} />
               <Route path="anniversary" element={<Anniversary />} />
               <Route path="community" element={<Community />} />
+              <Route path="messages" element={<Messages />} />
+
               <Route path="access" element={<AccessControl />} />
               <Route path="oversight" element={<Oversight />} />
               <Route path="activity" element={<ActivityLogs />} />
