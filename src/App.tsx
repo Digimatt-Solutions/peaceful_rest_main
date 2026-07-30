@@ -23,6 +23,7 @@ import LifeMoments from "./pages/dashboard/LifeMoments";
 import Anniversary from "./pages/dashboard/Anniversary";
 
 import Community from "./pages/dashboard/Community";
+import Messages from "./pages/dashboard/Messages";
 import AccessControl from "./pages/dashboard/AccessControl";
 import Oversight from "./pages/dashboard/Oversight";
 import ActivityLogs from "./pages/dashboard/ActivityLogs";
