@@ -65,6 +65,8 @@ const App = () => (
               <Route path="moments" element={<LifeMoments />} />
               <Route path="anniversary" element={<Anniversary />} />
               <Route path="community" element={<Community />} />
+              <Route path="messages" element={<Messages />} />
+
               <Route path="access" element={<AccessControl />} />
               <Route path="oversight" element={<Oversight />} />
               <Route path="activity" element={<ActivityLogs />} />
