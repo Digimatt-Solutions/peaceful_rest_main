@@ -51,10 +51,10 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
   const markIncoming = async (ids: string[], asRead: boolean) => {
     if (!ids.length || !user) return;
     const now = new Date().toISOString();
-    const patch: Record<string, string> = { delivered_at: now };
-    if (asRead) patch.read_at = now;
+    const patch = asRead ? { delivered_at: now, read_at: now } : { delivered_at: now };
     await supabase.from("messages").update(patch).in("id", ids).eq("recipient_id", user.id);
   };
+
 
   useEffect(() => {
     if (!user) return;
