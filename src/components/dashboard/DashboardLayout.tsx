@@ -126,6 +126,7 @@ export const DashboardLayout = () => {
             ))
           ) : visibleNav.map((item) => {
             const Icon = item.icon;
+            const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
             return (
               <NavLink
                 key={item.to}
@@ -134,7 +135,7 @@ export const DashboardLayout = () => {
                 onClick={() => setMobileOpen(false)}
                 title={collapsed ? item.label : undefined}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 rounded-lg text-sm transition-colors",
+                  "relative flex items-center gap-3 rounded-lg text-sm transition-colors",
                   collapsed ? "lg:justify-center lg:px-0 px-3" : "px-3",
                   "py-2.5",
                   isActive
@@ -144,9 +145,18 @@ export const DashboardLayout = () => {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 {!collapsed && <span className="truncate">{item.label}</span>}
+                {badge > 0 && (
+                  <span className={cn(
+                    "flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-orange px-1.5 text-[10px] font-bold text-white ring-2 ring-slate-100 dark:ring-slate-900",
+                    collapsed ? "absolute right-1 top-1 lg:right-2" : "ml-auto"
+                  )}>
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
               </NavLink>
             );
           })}
+
         </nav>
 
         {/* logout button */}
