@@ -217,13 +217,20 @@ export const DashboardLayout = () => {
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            <button
+            <Link
+              to="/dashboard/messages"
               className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors relative"
-              aria-label="Notifications"
+              aria-label={unreadMessages > 0 ? `${unreadMessages} unread messages` : "Messages"}
+              title={unreadMessages > 0 ? `${unreadMessages} unread messages` : "No new messages"}
             >
               <Bell className="h-4 w-4" />
-              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-brand-orange" />
-            </button>
+              {unreadMessages > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold text-white">
+                  {unreadMessages > 99 ? "99+" : unreadMessages}
+                </span>
+              )}
+            </Link>
+
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
