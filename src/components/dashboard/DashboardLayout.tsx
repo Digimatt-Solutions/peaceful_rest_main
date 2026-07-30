@@ -55,6 +55,7 @@ export const DashboardLayout = () => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { role, loading: roleLoading } = useUserRole();
+  const unreadMessages = useUnreadMessages();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string; email?: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
