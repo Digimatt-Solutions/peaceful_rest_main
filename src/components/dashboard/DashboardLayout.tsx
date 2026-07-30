@@ -293,31 +293,38 @@ export const DashboardLayout = () => {
             .filter(item => {
               // Curated top-5 per role
               if (role === "super_admin" || role === "admin") {
-                return ["/dashboard", "/dashboard/memorials", "/dashboard/community", "/dashboard/access", "/dashboard/profile"].includes(item.to);
+                return ["/dashboard", "/dashboard/memorials", "/dashboard/messages", "/dashboard/access", "/dashboard/profile"].includes(item.to);
               }
               if (role === "memorial_admin") {
-                return ["/dashboard", "/dashboard/memorials", "/dashboard/fundraising", "/dashboard/condolences", "/dashboard/profile"].includes(item.to);
+                return ["/dashboard", "/dashboard/memorials", "/dashboard/fundraising", "/dashboard/messages", "/dashboard/profile"].includes(item.to);
               }
-              return ["/dashboard", "/dashboard/condolences", "/dashboard/community", "/dashboard/moments", "/dashboard/profile"].includes(item.to);
+              return ["/dashboard", "/dashboard/condolences", "/dashboard/community", "/dashboard/messages", "/dashboard/profile"].includes(item.to);
             })
             .slice(0, 5)
             .map(item => {
               const Icon = item.icon;
+              const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
               return (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) => cn(
-                    "flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
+                    "relative flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
                     isActive ? "text-brand-orange" : "text-slate-500 dark:text-slate-400"
                   )}
                 >
                   <Icon className="h-5 w-5" />
+                  {badge > 0 && (
+                    <span className="absolute top-2 right-[22%] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-orange px-1 text-[9px] font-bold text-white">
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
                   <span className="truncate max-w-full px-1">{item.label.split(" ")[0]}</span>
                 </NavLink>
               );
             })}
+
         </nav>
       )}
     </div>
