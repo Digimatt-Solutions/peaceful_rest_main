@@ -402,6 +402,18 @@ export default function Messages() {
                 <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-brand-orange" /> Verified support</span>
                 <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5 text-brand-orange" /> Fast replies</span>
               </div>
+              <div className="mb-2 space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">What is this about?</p>
+                <Select value={contextValue} onValueChange={setContextValue}>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="General enquiry" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="general">General enquiry</SelectItem>
+                    {contextOptions.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Textarea
                 value={supportMsg}
                 onChange={(e) => setSupportMsg(e.target.value)}
@@ -409,6 +421,7 @@ export default function Messages() {
                 placeholder="Describe your issue…"
                 className="rounded-xl resize-none"
               />
+
               <Button
                 onClick={sendSupport}
                 disabled={!supportMsg.trim() || supportSending}
