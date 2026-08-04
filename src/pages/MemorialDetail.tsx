@@ -83,18 +83,17 @@ const MemorialDetail = () => {
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     setSubmitting(true);
-    const { data, error } = await supabase.from("condolences").insert({
+    const { error } = await supabase.from("condolences").insert({
       memorial_id: id,
       name: parsed.data.name,
       relationship: parsed.data.relationship,
       message: parsed.data.message,
-      status: "approved",
-    }).select().maybeSingle();
+      status: "pending",
+    });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
-    setCondolences([data, ...condolences]);
     (e.target as HTMLFormElement).reset();
-    toast.success("Your message was shared. Thank you.");
+    toast.success("Thank you. Your condolence was submitted and will appear once verified by an admin.");
   };
 
   // Receipt dialog state
