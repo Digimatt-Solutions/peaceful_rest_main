@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Send, Minus, Check, CheckCheck, Clock, Paperclip, FileText, Loader2 } from "lucide-react";
+import { X, Send, Minus, Check, CheckCheck, Clock, Paperclip, FileText, Loader2, HandHeart, Flower2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
