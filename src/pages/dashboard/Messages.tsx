@@ -327,8 +327,20 @@ export default function Messages() {
                   const fromMe = c.last_sender_id === user?.id;
                   return (
                     <button
-                      key={c.peer_id}
-                      onClick={() => setActive({ id: c.peer_id, name: c.peer_name || "User", avatar_url: c.peer_avatar })}
+                      key={c.key}
+                      onClick={() =>
+                        setActive({
+                          id: c.peer_id,
+                          name: c.peer_name || "User",
+                          avatar_url: c.peer_avatar,
+                          subtitle: c.context_label ? `About ${c.context_label}` : "Direct message",
+                          context: {
+                            memorialId: c.memorial_id,
+                            fundraiserId: c.fundraiser_id,
+                            label: c.context_label || undefined,
+                          },
+                        })
+                      }
                       className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50"
                     >
                       <Avatar className="h-12 w-12 shrink-0">
@@ -344,6 +356,13 @@ export default function Messages() {
                             {new Date(c.last_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
+                        {c.context_label && (
+                          <span className="mb-0.5 inline-flex max-w-full items-center gap-1 truncate rounded-full border border-brand-orange/30 bg-brand-orange/5 px-2 py-0.5 text-[10px] font-medium text-brand-orange">
+                            {c.fundraiser_id ? <HandHeart className="h-3 w-3" /> : <Flower2 className="h-3 w-3" />}
+                            <span className="truncate">{c.context_label}</span>
+                          </span>
+                        )}
+
                         <div className="flex items-center justify-between gap-2">
                           <p className={`truncate text-sm ${c.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
                             {fromMe ? "You: " : ""}{c.last_content}
