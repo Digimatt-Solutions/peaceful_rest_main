@@ -151,6 +151,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
       attachment_url: payload.attachment_url || null,
       attachment_type: payload.attachment_type || null,
       attachment_name: payload.attachment_name || null,
+      memorial_id: ctxMemorial,
+      fundraiser_id: ctxFundraiser,
     };
     setMessages((prev) => [...prev, optimistic]);
 
@@ -163,6 +165,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
         attachment_url: payload.attachment_url || null,
         attachment_type: payload.attachment_type || null,
         attachment_name: payload.attachment_name || null,
+        memorial_id: ctxMemorial,
+        fundraiser_id: ctxFundraiser,
       })
       .select(SELECT_COLS)
       .single();
