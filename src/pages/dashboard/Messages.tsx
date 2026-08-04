@@ -9,19 +9,31 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2 } from "lucide-react";
+import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 
 interface ConvRow {
+  key: string;
   peer_id: string;
   peer_name: string;
   peer_avatar: string | null;
+  memorial_id: string | null;
+  fundraiser_id: string | null;
+  context_label: string | null;
   last_content: string;
   last_at: string;
   last_sender_id: string;
   unread: number;
 }
+
+interface ContextOption {
+  value: string;
+  label: string;
+  memorialId: string | null;
+  fundraiserId: string | null;
+}
+
 
 interface DirectoryUser {
   id: string;
@@ -52,6 +64,10 @@ export default function Messages() {
   const [q, setQ] = useState("");
   const [active, setActive] = useState<ChatPeer | null>(null);
 
+  // memorial / fundraiser context
+  const [contextOptions, setContextOptions] = useState<ContextOption[]>([]);
+  const [contextValue, setContextValue] = useState("general");
+
   // mourner / memorial admin support box
   const [supportMsg, setSupportMsg] = useState("");
   const [supportSending, setSupportSending] = useState(false);
@@ -64,11 +80,42 @@ export default function Messages() {
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
 
+  const selectedContext = useMemo(
+    () => contextOptions.find((o) => o.value === contextValue) || null,
+    [contextOptions, contextValue]
+  );
+
+  // Load memorial + fundraiser context options
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: mems }, { data: funds }] = await Promise.all([
+        supabase.from("memorials").select("id, full_name").order("created_at", { ascending: false }).limit(200),
+        supabase.from("fundraisers").select("id, title, memorial_id").order("created_at", { ascending: false }).limit(200),
+      ]);
+      const memName = new Map((mems || []).map((m) => [m.id, m.full_name]));
+      setContextOptions([
+        ...(mems || []).map((m) => ({
+          value: `m:${m.id}`,
+          label: `Memorial · ${m.full_name}`,
+          memorialId: m.id,
+          fundraiserId: null,
+        })),
+        ...(funds || []).map((f) => ({
+          value: `f:${f.id}`,
+          label: `Fundraiser · ${f.title}${memName.get(f.memorial_id) ? ` (${memName.get(f.memorial_id)})` : ""}`,
+          memorialId: null,
+          fundraiserId: f.id,
+        })),
+      ]);
+    })();
+  }, [user]);
+
   const load = async () => {
     if (!user) return;
     const { data: msgs } = await supabase
       .from("messages")
-      .select("id, sender_id, recipient_id, content, attachment_name, created_at, read_at")
+      .select("id, sender_id, recipient_id, content, attachment_name, created_at, read_at, memorial_id, fundraiser_id")
       .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
       .order("created_at", { ascending: false })
       .limit(500);
@@ -76,12 +123,17 @@ export default function Messages() {
     const map = new Map<string, ConvRow>();
     (msgs || []).forEach((m) => {
       const peerId = m.sender_id === user.id ? m.recipient_id : m.sender_id;
-      const existing = map.get(peerId);
+      const key = `${peerId}|${m.memorial_id || ""}|${m.fundraiser_id || ""}`;
+      const existing = map.get(key);
       if (!existing) {
-        map.set(peerId, {
+        map.set(key, {
+          key,
           peer_id: peerId,
           peer_name: "",
           peer_avatar: null,
+          memorial_id: m.memorial_id ?? null,
+          fundraiser_id: m.fundraiser_id ?? null,
+          context_label: null,
           last_content: m.content || m.attachment_name || "Attachment",
           last_at: m.created_at,
           last_sender_id: m.sender_id,
@@ -92,24 +144,40 @@ export default function Messages() {
       }
     });
 
-    const peerIds = Array.from(map.keys());
+    const rows = Array.from(map.values());
+    const peerIds = Array.from(new Set(rows.map((r) => r.peer_id)));
     if (peerIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
         .select("id, full_name, email, avatar_url")
         .in("id", peerIds);
-      (profs || []).forEach((p) => {
-        const c = map.get(p.id);
-        if (c) {
-          c.peer_name = p.full_name || p.email?.split("@")[0] || "User";
-          c.peer_avatar = p.avatar_url;
+      const profMap = new Map((profs || []).map((p) => [p.id, p]));
+      rows.forEach((r) => {
+        const p = profMap.get(r.peer_id);
+        if (p) {
+          r.peer_name = p.full_name || p.email?.split("@")[0] || "User";
+          r.peer_avatar = p.avatar_url;
         }
       });
     }
 
-    setConvs(Array.from(map.values()).sort((a, b) => +new Date(b.last_at) - +new Date(a.last_at)));
+    const memIds = Array.from(new Set(rows.map((r) => r.memorial_id).filter(Boolean))) as string[];
+    const fundIds = Array.from(new Set(rows.map((r) => r.fundraiser_id).filter(Boolean))) as string[];
+    const [memRes, fundRes] = await Promise.all([
+      memIds.length ? supabase.from("memorials").select("id, full_name").in("id", memIds) : Promise.resolve({ data: [] as any[] }),
+      fundIds.length ? supabase.from("fundraisers").select("id, title").in("id", fundIds) : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const memMap = new Map((memRes.data || []).map((m: any) => [m.id, m.full_name]));
+    const fundMap = new Map((fundRes.data || []).map((f: any) => [f.id, f.title]));
+    rows.forEach((r) => {
+      if (r.fundraiser_id) r.context_label = fundMap.get(r.fundraiser_id) || "Fundraiser";
+      else if (r.memorial_id) r.context_label = memMap.get(r.memorial_id) || "Memorial";
+    });
+
+    setConvs(rows.sort((a, b) => +new Date(b.last_at) - +new Date(a.last_at)));
     setLoading(false);
   };
+
 
   useEffect(() => {
     load();
@@ -144,8 +212,14 @@ export default function Messages() {
   const filteredConvs = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return convs;
-    return convs.filter((c) => c.peer_name.toLowerCase().includes(s) || c.last_content.toLowerCase().includes(s));
+    return convs.filter(
+      (c) =>
+        c.peer_name.toLowerCase().includes(s) ||
+        c.last_content.toLowerCase().includes(s) ||
+        (c.context_label || "").toLowerCase().includes(s)
+    );
   }, [convs, q]);
+
 
   const filteredUsers = useMemo(() => {
     const s = userSearch.trim().toLowerCase();
@@ -177,6 +251,8 @@ export default function Messages() {
       sender_id: user.id,
       recipient_id: adminId as string,
       content: `[Support] ${supportMsg.trim()}`,
+      memorial_id: selectedContext?.memorialId ?? null,
+      fundraiser_id: selectedContext?.fundraiserId ?? null,
     });
     if (error) toast.error("Could not reach support");
     else {
@@ -251,8 +327,20 @@ export default function Messages() {
                   const fromMe = c.last_sender_id === user?.id;
                   return (
                     <button
-                      key={c.peer_id}
-                      onClick={() => setActive({ id: c.peer_id, name: c.peer_name || "User", avatar_url: c.peer_avatar })}
+                      key={c.key}
+                      onClick={() =>
+                        setActive({
+                          id: c.peer_id,
+                          name: c.peer_name || "User",
+                          avatar_url: c.peer_avatar,
+                          subtitle: c.context_label ? `About ${c.context_label}` : "Direct message",
+                          context: {
+                            memorialId: c.memorial_id,
+                            fundraiserId: c.fundraiser_id,
+                            label: c.context_label || undefined,
+                          },
+                        })
+                      }
                       className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50"
                     >
                       <Avatar className="h-12 w-12 shrink-0">
@@ -268,6 +356,13 @@ export default function Messages() {
                             {new Date(c.last_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
+                        {c.context_label && (
+                          <span className="mb-0.5 inline-flex max-w-full items-center gap-1 truncate rounded-full border border-brand-orange/30 bg-brand-orange/5 px-2 py-0.5 text-[10px] font-medium text-brand-orange">
+                            {c.fundraiser_id ? <HandHeart className="h-3 w-3" /> : <Flower2 className="h-3 w-3" />}
+                            <span className="truncate">{c.context_label}</span>
+                          </span>
+                        )}
+
                         <div className="flex items-center justify-between gap-2">
                           <p className={`truncate text-sm ${c.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
                             {fromMe ? "You: " : ""}{c.last_content}
@@ -307,6 +402,18 @@ export default function Messages() {
                 <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-brand-orange" /> Verified support</span>
                 <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5 text-brand-orange" /> Fast replies</span>
               </div>
+              <div className="mb-2 space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">What is this about?</p>
+                <Select value={contextValue} onValueChange={setContextValue}>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="General enquiry" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="general">General enquiry</SelectItem>
+                    {contextOptions.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Textarea
                 value={supportMsg}
                 onChange={(e) => setSupportMsg(e.target.value)}
@@ -314,6 +421,7 @@ export default function Messages() {
                 placeholder="Describe your issue…"
                 className="rounded-xl resize-none"
               />
+
               <Button
                 onClick={sendSupport}
                 disabled={!supportMsg.trim() || supportSending}
@@ -373,6 +481,18 @@ export default function Messages() {
                     <p className="text-xs text-muted-foreground">Start a direct message</p>
                   </div>
                 </div>
+                <div className="mb-2 space-y-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">Chat context</p>
+                  <Select value={contextValue} onValueChange={setContextValue}>
+                    <SelectTrigger className="rounded-xl"><SelectValue placeholder="General" /></SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      <SelectItem value="general">General</SelectItem>
+                      {contextOptions.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search users…" className="pl-9 rounded-xl" />
@@ -396,9 +516,19 @@ export default function Messages() {
                                 id: u.id,
                                 name: u.full_name || u.email?.split("@")[0] || "User",
                                 avatar_url: u.avatar_url,
-                                subtitle: roleLabels[u.role] || "Mourner",
+                                subtitle: selectedContext
+                                  ? `About ${selectedContext.label.replace(/^(Memorial|Fundraiser) · /, "")}`
+                                  : roleLabels[u.role] || "Mourner",
+                                context: selectedContext
+                                  ? {
+                                      memorialId: selectedContext.memorialId,
+                                      fundraiserId: selectedContext.fundraiserId,
+                                      label: selectedContext.label.replace(/^(Memorial|Fundraiser) · /, ""),
+                                    }
+                                  : undefined,
                               })
                             }
+
                             className="flex w-full items-center gap-3 border-t border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
                           >
                             <Avatar className="h-9 w-9">

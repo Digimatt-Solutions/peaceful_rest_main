@@ -83,18 +83,17 @@ const MemorialDetail = () => {
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
     setSubmitting(true);
-    const { data, error } = await supabase.from("condolences").insert({
+    const { error } = await supabase.from("condolences").insert({
       memorial_id: id,
       name: parsed.data.name,
       relationship: parsed.data.relationship,
       message: parsed.data.message,
-      status: "approved",
-    }).select().maybeSingle();
+      status: "pending",
+    });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
-    setCondolences([data, ...condolences]);
     (e.target as HTMLFormElement).reset();
-    toast.success("Your message was shared. Thank you.");
+    toast.success("Thank you. Your condolence was submitted and will appear once verified by an admin.");
   };
 
   // Receipt dialog state
@@ -557,6 +556,7 @@ const MemorialDetail = () => {
               <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
               </Button>
+              <p className="text-xs text-muted-foreground">Official condolences are reviewed by an admin before they appear publicly.</p>
             </form>
 
             <div className="mt-8 space-y-4">

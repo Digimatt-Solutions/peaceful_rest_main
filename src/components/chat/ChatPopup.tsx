@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Send, Minus, Check, CheckCheck, Clock, Paperclip, FileText, Loader2 } from "lucide-react";
+import { X, Send, Minus, Check, CheckCheck, Clock, Paperclip, FileText, Loader2, HandHeart, Flower2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+export interface ChatContext {
+  memorialId?: string | null;
+  fundraiserId?: string | null;
+  label?: string;
+}
+
 export interface ChatPeer {
   id: string;
   name: string;
   avatar_url?: string | null;
   subtitle?: string;
+  context?: ChatContext;
 }
 
 interface ChatPopupProps {
@@ -33,10 +40,13 @@ export interface ChatMessage {
   attachment_url?: string | null;
   attachment_type?: string | null;
   attachment_name?: string | null;
+  memorial_id?: string | null;
+  fundraiser_id?: string | null;
 }
 
 const SELECT_COLS =
-  "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, is_broadcast, attachment_url, attachment_type, attachment_name";
+  "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, is_broadcast, attachment_url, attachment_type, attachment_name, memorial_id, fundraiser_id";
+
 
 export default function ChatPopup({ peer, onClose, embedded = false, initialDraft }: ChatPopupProps) {
   const { user } = useAuth();
@@ -55,20 +65,27 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
     await supabase.from("messages").update(patch).in("id", ids).eq("recipient_id", user.id);
   };
 
+  const ctxMemorial = peer.context?.memorialId ?? null;
+  const ctxFundraiser = peer.context?.fundraiserId ?? null;
+
+  const matchesContext = (m: ChatMessage) =>
+    (m.memorial_id ?? null) === ctxMemorial && (m.fundraiser_id ?? null) === ctxFundraiser;
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
 
     (async () => {
-      const { data } = await supabase
+      let query = supabase
         .from("messages")
         .select(SELECT_COLS)
         .or(
           `and(sender_id.eq.${user.id},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${user.id})`
-        )
-        .order("created_at", { ascending: true })
-        .limit(300);
+        );
+      query = ctxMemorial ? query.eq("memorial_id", ctxMemorial) : query.is("memorial_id", null);
+      query = ctxFundraiser ? query.eq("fundraiser_id", ctxFundraiser) : query.is("fundraiser_id", null);
+
+      const { data } = await query.order("created_at", { ascending: true }).limit(300);
       if (cancelled) return;
       const list = (data as ChatMessage[]) || [];
       setMessages(list);
@@ -80,13 +97,13 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
 
     const pairKey = [user.id, peer.id].sort().join("-");
     const channel = supabase
-      .channel(`makiwa-chat-${pairKey}`)
+      .channel(`makiwa-chat-${pairKey}-${ctxMemorial || ctxFundraiser || "general"}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const m = payload.new as ChatMessage;
         const involves =
           (m.sender_id === user.id && m.recipient_id === peer.id) ||
           (m.sender_id === peer.id && m.recipient_id === user.id);
-        if (!involves) return;
+        if (!involves || !matchesContext(m)) return;
         setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
         if (m.recipient_id === user.id) markIncoming([m.id], !minimized);
       })
@@ -101,7 +118,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, peer.id]);
+  }, [user, peer.id, ctxMemorial, ctxFundraiser]);
+
 
   useEffect(() => {
     if (minimized || !user) return;
@@ -133,6 +151,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
       attachment_url: payload.attachment_url || null,
       attachment_type: payload.attachment_type || null,
       attachment_name: payload.attachment_name || null,
+      memorial_id: ctxMemorial,
+      fundraiser_id: ctxFundraiser,
     };
     setMessages((prev) => [...prev, optimistic]);
 
@@ -145,6 +165,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
         attachment_url: payload.attachment_url || null,
         attachment_type: payload.attachment_type || null,
         attachment_name: payload.attachment_name || null,
+        memorial_id: ctxMemorial,
+        fundraiser_id: ctxFundraiser,
       })
       .select(SELECT_COLS)
       .single();
@@ -222,7 +244,16 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
 
       {(embedded || !minimized) && (
         <>
+          {peer.context?.label && (
+            <div className="flex items-center gap-2 border-b border-brand-orange/20 bg-brand-orange/5 px-3 py-2 text-[11px] text-muted-foreground">
+              {ctxFundraiser ? <HandHeart className="h-3.5 w-3.5 text-brand-orange" /> : <Flower2 className="h-3.5 w-3.5 text-brand-orange" />}
+              <span className="truncate">
+                About <span className="font-medium text-foreground">{peer.context.label}</span>
+              </span>
+            </div>
+          )}
           <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto bg-muted/30 p-3">
+
             {messages.length === 0 ? (
               <p className="mt-10 text-center text-xs text-muted-foreground">
                 No messages yet. Start the conversation with {peer.name.split(" ")[0]}.
