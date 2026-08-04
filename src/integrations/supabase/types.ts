@@ -641,8 +641,10 @@ export type Database = {
           content: string | null
           created_at: string
           delivered_at: string | null
+          fundraiser_id: string | null
           id: string
           is_broadcast: boolean
+          memorial_id: string | null
           read_at: string | null
           recipient_id: string
           sender_id: string
@@ -654,8 +656,10 @@ export type Database = {
           content?: string | null
           created_at?: string
           delivered_at?: string | null
+          fundraiser_id?: string | null
           id?: string
           is_broadcast?: boolean
+          memorial_id?: string | null
           read_at?: string | null
           recipient_id: string
           sender_id: string
@@ -667,13 +671,30 @@ export type Database = {
           content?: string | null
           created_at?: string
           delivered_at?: string | null
+          fundraiser_id?: string | null
           id?: string
           is_broadcast?: boolean
+          memorial_id?: string | null
           read_at?: string | null
           recipient_id?: string
           sender_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "messages_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
