@@ -174,8 +174,16 @@ const Condolences = () => {
                 <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Badge variant="outline" className="border-brand-orange/30 text-brand-orange ml-auto">{items.length} tributes</Badge>
+            <div className="ml-auto flex items-center gap-2">
+              {items.filter(i => i.status === "pending").length > 0 && (
+                <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700">
+                  {items.filter(i => i.status === "pending").length} awaiting verification
+                </Badge>
+              )}
+              <Badge variant="outline" className="border-brand-orange/30 text-brand-orange">{items.length} tributes</Badge>
+            </div>
           </div>
+
 
           {items.length === 0 ? (
             <EmptyState icon={MessageCircle} title="No condolences yet" description="Tributes from visitors will appear here." />
