@@ -244,7 +244,16 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
 
       {(embedded || !minimized) && (
         <>
+          {peer.context?.label && (
+            <div className="flex items-center gap-2 border-b border-brand-orange/20 bg-brand-orange/5 px-3 py-2 text-[11px] text-muted-foreground">
+              {ctxFundraiser ? <HandHeart className="h-3.5 w-3.5 text-brand-orange" /> : <Flower2 className="h-3.5 w-3.5 text-brand-orange" />}
+              <span className="truncate">
+                About <span className="font-medium text-foreground">{peer.context.label}</span>
+              </span>
+            </div>
+          )}
           <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto bg-muted/30 p-3">
+
             {messages.length === 0 ? (
               <p className="mt-10 text-center text-xs text-muted-foreground">
                 No messages yet. Start the conversation with {peer.name.split(" ")[0]}.
