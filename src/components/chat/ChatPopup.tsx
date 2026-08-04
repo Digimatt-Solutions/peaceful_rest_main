@@ -65,20 +65,27 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
     await supabase.from("messages").update(patch).in("id", ids).eq("recipient_id", user.id);
   };
 
+  const ctxMemorial = peer.context?.memorialId ?? null;
+  const ctxFundraiser = peer.context?.fundraiserId ?? null;
+
+  const matchesContext = (m: ChatMessage) =>
+    (m.memorial_id ?? null) === ctxMemorial && (m.fundraiser_id ?? null) === ctxFundraiser;
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
 
     (async () => {
-      const { data } = await supabase
+      let query = supabase
         .from("messages")
         .select(SELECT_COLS)
         .or(
           `and(sender_id.eq.${user.id},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${user.id})`
-        )
-        .order("created_at", { ascending: true })
-        .limit(300);
+        );
+      query = ctxMemorial ? query.eq("memorial_id", ctxMemorial) : query.is("memorial_id", null);
+      query = ctxFundraiser ? query.eq("fundraiser_id", ctxFundraiser) : query.is("fundraiser_id", null);
+
+      const { data } = await query.order("created_at", { ascending: true }).limit(300);
       if (cancelled) return;
       const list = (data as ChatMessage[]) || [];
       setMessages(list);
@@ -90,13 +97,13 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
 
     const pairKey = [user.id, peer.id].sort().join("-");
     const channel = supabase
-      .channel(`makiwa-chat-${pairKey}`)
+      .channel(`makiwa-chat-${pairKey}-${ctxMemorial || ctxFundraiser || "general"}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const m = payload.new as ChatMessage;
         const involves =
           (m.sender_id === user.id && m.recipient_id === peer.id) ||
           (m.sender_id === peer.id && m.recipient_id === user.id);
-        if (!involves) return;
+        if (!involves || !matchesContext(m)) return;
         setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
         if (m.recipient_id === user.id) markIncoming([m.id], !minimized);
       })
@@ -111,7 +118,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, peer.id]);
+  }, [user, peer.id, ctxMemorial, ctxFundraiser]);
+
 
   useEffect(() => {
     if (minimized || !user) return;
