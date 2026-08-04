@@ -64,6 +64,10 @@ export default function Messages() {
   const [q, setQ] = useState("");
   const [active, setActive] = useState<ChatPeer | null>(null);
 
+  // memorial / fundraiser context
+  const [contextOptions, setContextOptions] = useState<ContextOption[]>([]);
+  const [contextValue, setContextValue] = useState("general");
+
   // mourner / memorial admin support box
   const [supportMsg, setSupportMsg] = useState("");
   const [supportSending, setSupportSending] = useState(false);
@@ -76,11 +80,42 @@ export default function Messages() {
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
 
+  const selectedContext = useMemo(
+    () => contextOptions.find((o) => o.value === contextValue) || null,
+    [contextOptions, contextValue]
+  );
+
+  // Load memorial + fundraiser context options
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: mems }, { data: funds }] = await Promise.all([
+        supabase.from("memorials").select("id, full_name").order("created_at", { ascending: false }).limit(200),
+        supabase.from("fundraisers").select("id, title, memorial_id").order("created_at", { ascending: false }).limit(200),
+      ]);
+      const memName = new Map((mems || []).map((m) => [m.id, m.full_name]));
+      setContextOptions([
+        ...(mems || []).map((m) => ({
+          value: `m:${m.id}`,
+          label: `Memorial · ${m.full_name}`,
+          memorialId: m.id,
+          fundraiserId: null,
+        })),
+        ...(funds || []).map((f) => ({
+          value: `f:${f.id}`,
+          label: `Fundraiser · ${f.title}${memName.get(f.memorial_id) ? ` (${memName.get(f.memorial_id)})` : ""}`,
+          memorialId: null,
+          fundraiserId: f.id,
+        })),
+      ]);
+    })();
+  }, [user]);
+
   const load = async () => {
     if (!user) return;
     const { data: msgs } = await supabase
       .from("messages")
-      .select("id, sender_id, recipient_id, content, attachment_name, created_at, read_at")
+      .select("id, sender_id, recipient_id, content, attachment_name, created_at, read_at, memorial_id, fundraiser_id")
       .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
       .order("created_at", { ascending: false })
       .limit(500);
@@ -88,12 +123,17 @@ export default function Messages() {
     const map = new Map<string, ConvRow>();
     (msgs || []).forEach((m) => {
       const peerId = m.sender_id === user.id ? m.recipient_id : m.sender_id;
-      const existing = map.get(peerId);
+      const key = `${peerId}|${m.memorial_id || ""}|${m.fundraiser_id || ""}`;
+      const existing = map.get(key);
       if (!existing) {
-        map.set(peerId, {
+        map.set(key, {
+          key,
           peer_id: peerId,
           peer_name: "",
           peer_avatar: null,
+          memorial_id: m.memorial_id ?? null,
+          fundraiser_id: m.fundraiser_id ?? null,
+          context_label: null,
           last_content: m.content || m.attachment_name || "Attachment",
           last_at: m.created_at,
           last_sender_id: m.sender_id,
@@ -104,24 +144,40 @@ export default function Messages() {
       }
     });
 
-    const peerIds = Array.from(map.keys());
+    const rows = Array.from(map.values());
+    const peerIds = Array.from(new Set(rows.map((r) => r.peer_id)));
     if (peerIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
         .select("id, full_name, email, avatar_url")
         .in("id", peerIds);
-      (profs || []).forEach((p) => {
-        const c = map.get(p.id);
-        if (c) {
-          c.peer_name = p.full_name || p.email?.split("@")[0] || "User";
-          c.peer_avatar = p.avatar_url;
+      const profMap = new Map((profs || []).map((p) => [p.id, p]));
+      rows.forEach((r) => {
+        const p = profMap.get(r.peer_id);
+        if (p) {
+          r.peer_name = p.full_name || p.email?.split("@")[0] || "User";
+          r.peer_avatar = p.avatar_url;
         }
       });
     }
 
-    setConvs(Array.from(map.values()).sort((a, b) => +new Date(b.last_at) - +new Date(a.last_at)));
+    const memIds = Array.from(new Set(rows.map((r) => r.memorial_id).filter(Boolean))) as string[];
+    const fundIds = Array.from(new Set(rows.map((r) => r.fundraiser_id).filter(Boolean))) as string[];
+    const [memRes, fundRes] = await Promise.all([
+      memIds.length ? supabase.from("memorials").select("id, full_name").in("id", memIds) : Promise.resolve({ data: [] as any[] }),
+      fundIds.length ? supabase.from("fundraisers").select("id, title").in("id", fundIds) : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const memMap = new Map((memRes.data || []).map((m: any) => [m.id, m.full_name]));
+    const fundMap = new Map((fundRes.data || []).map((f: any) => [f.id, f.title]));
+    rows.forEach((r) => {
+      if (r.fundraiser_id) r.context_label = fundMap.get(r.fundraiser_id) || "Fundraiser";
+      else if (r.memorial_id) r.context_label = memMap.get(r.memorial_id) || "Memorial";
+    });
+
+    setConvs(rows.sort((a, b) => +new Date(b.last_at) - +new Date(a.last_at)));
     setLoading(false);
   };
+
 
   useEffect(() => {
     load();
