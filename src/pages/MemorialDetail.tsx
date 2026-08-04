@@ -556,6 +556,7 @@ const MemorialDetail = () => {
               <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
               </Button>
+              <p className="text-xs text-muted-foreground">Official condolences are reviewed by an admin before they appear publicly.</p>
             </form>
 
             <div className="mt-8 space-y-4">
