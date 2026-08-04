@@ -251,6 +251,8 @@ export default function Messages() {
       sender_id: user.id,
       recipient_id: adminId as string,
       content: `[Support] ${supportMsg.trim()}`,
+      memorial_id: selectedContext?.memorialId ?? null,
+      fundraiser_id: selectedContext?.fundraiserId ?? null,
     });
     if (error) toast.error("Could not reach support");
     else {
