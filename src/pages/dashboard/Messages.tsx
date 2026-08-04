@@ -212,8 +212,14 @@ export default function Messages() {
   const filteredConvs = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return convs;
-    return convs.filter((c) => c.peer_name.toLowerCase().includes(s) || c.last_content.toLowerCase().includes(s));
+    return convs.filter(
+      (c) =>
+        c.peer_name.toLowerCase().includes(s) ||
+        c.last_content.toLowerCase().includes(s) ||
+        (c.context_label || "").toLowerCase().includes(s)
+    );
   }, [convs, q]);
+
 
   const filteredUsers = useMemo(() => {
     const s = userSearch.trim().toLowerCase();
