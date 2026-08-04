@@ -14,14 +14,26 @@ import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 
 interface ConvRow {
+  key: string;
   peer_id: string;
   peer_name: string;
   peer_avatar: string | null;
+  memorial_id: string | null;
+  fundraiser_id: string | null;
+  context_label: string | null;
   last_content: string;
   last_at: string;
   last_sender_id: string;
   unread: number;
 }
+
+interface ContextOption {
+  value: string;
+  label: string;
+  memorialId: string | null;
+  fundraiserId: string | null;
+}
+
 
 interface DirectoryUser {
   id: string;
