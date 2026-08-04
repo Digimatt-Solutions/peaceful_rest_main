@@ -7,11 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+export interface ChatContext {
+  memorialId?: string | null;
+  fundraiserId?: string | null;
+  label?: string;
+}
+
 export interface ChatPeer {
   id: string;
   name: string;
   avatar_url?: string | null;
   subtitle?: string;
+  context?: ChatContext;
 }
 
 interface ChatPopupProps {
@@ -33,10 +40,13 @@ export interface ChatMessage {
   attachment_url?: string | null;
   attachment_type?: string | null;
   attachment_name?: string | null;
+  memorial_id?: string | null;
+  fundraiser_id?: string | null;
 }
 
 const SELECT_COLS =
-  "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, is_broadcast, attachment_url, attachment_type, attachment_name";
+  "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, is_broadcast, attachment_url, attachment_type, attachment_name, memorial_id, fundraiser_id";
+
 
 export default function ChatPopup({ peer, onClose, embedded = false, initialDraft }: ChatPopupProps) {
   const { user } = useAuth();
