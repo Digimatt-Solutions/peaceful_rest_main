@@ -80,6 +80,11 @@ export default function Messages() {
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
 
+  // admin SMS broadcast
+  const [smsTarget, setSmsTarget] = useState("all");
+  const [smsMsg, setSmsMsg] = useState("");
+  const [smsSending, setSmsSending] = useState(false);
+
   const selectedContext = useMemo(
     () => contextOptions.find((o) => o.value === contextValue) || null,
     [contextOptions, contextValue]
@@ -278,6 +283,26 @@ export default function Messages() {
     toast.success(`Broadcast delivered to ${data.sent} recipient${data.sent === 1 ? "" : "s"}`);
     setBroadcastMsg("");
     load();
+  };
+
+  const sendSmsBroadcast = async () => {
+    if (!smsMsg.trim()) return;
+    setSmsSending(true);
+    const { data, error } = await supabase.functions.invoke("broadcast-sms", {
+      body: { target: smsTarget, message: smsMsg.trim() },
+    });
+    setSmsSending(false);
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "SMS broadcast failed");
+      return;
+    }
+    toast.success(
+      `SMS sent to ${data.sent} number${data.sent === 1 ? "" : "s"}` +
+        (data.failed ? ` · ${data.failed} failed` : "") +
+        (data.skipped ? ` · ${data.skipped} without a phone number` : "")
+    );
+    logActivity("sms_broadcast", { description: `Sent SMS broadcast to ${smsTarget} (${data.sent} delivered)` });
+    setSmsMsg("");
   };
 
   return (
