@@ -51,7 +51,11 @@ Deno.serve(async (req) => {
           return json({ error: "Could not deliver the SMS. Please try again.", details: sent.body }, 502);
         }
       } catch (e) {
-        return json({ error: (e as Error).message }, 500);
+        console.error("phone-otp send error", e);
+        return json({
+          error: "We could not send the verification SMS right now. Please try again shortly.",
+          details: (e as Error).message,
+        }, 502);
       }
 
       return json({ ok: true, phone: msisdn });
