@@ -326,19 +326,21 @@ const MemorialDetail = () => {
               </div>
             </div>
 
-            {/* Right portrait card */}
+            {/* Right circular portrait */}
             {memorial.profile_photo_url && (
-              <div className="hidden lg:block lg:col-span-4">
-                <div className="relative ml-auto max-w-[340px] rounded-3xl overflow-hidden border border-white/15 shadow-2xl">
-                  <img
-                    src={memorial.profile_photo_url}
-                    alt={memorial.full_name}
-                    className="w-full h-[420px] object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">Cherished Always</p>
-                    <p className="mt-1 font-serif text-xl">{memorial.full_name.split(" ")[0]}</p>
+              <div className="hidden lg:flex lg:col-span-4 items-center justify-center">
+                <div className="relative">
+                  <div className="relative h-[300px] w-[300px] xl:h-[360px] xl:w-[360px] rounded-full overflow-hidden ring-8 ring-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]">
+                    <img
+                      src={memorial.profile_photo_url}
+                      alt={memorial.full_name}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6 text-center">
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">Cherished Always</p>
+                      <p className="mt-1 font-serif text-2xl">{memorial.full_name.split(" ")[0]}</p>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -58,7 +58,7 @@ export const Hero = () => {
     if (memorials.length < 2) return;
     const t = setInterval(() => {
       setIndex((i) => (i + 1) % memorials.length);
-    }, 30000);
+    }, 10000);
     return () => clearInterval(t);
   }, [memorials.length]);
 
