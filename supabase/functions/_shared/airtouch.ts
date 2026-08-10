@@ -32,15 +32,16 @@ export interface SmsResult {
 export async function sendSms(to: string, message: string): Promise<SmsResult> {
   const senderId = Deno.env.get("AIRTOUCH_SENDER_ID");
   const password = Deno.env.get("AIRTOUCH_PASSWORD");
+  const username = Deno.env.get("AIRTOUCH_USERNAME") || senderId;
 
-  if (!senderId || !password) {
+  if (!senderId || !password || !username) {
     throw new Error(
-      "Airtouch SMS is not configured (AIRTOUCH_SENDER_ID, AIRTOUCH_PASSWORD).",
+      "Airtouch SMS is not configured (AIRTOUCH_USERNAME, AIRTOUCH_SENDER_ID, AIRTOUCH_PASSWORD).",
     );
   }
 
   const payload = JSON.stringify({
-    username: senderId,
+    username,
     password,
     senderId,
     shortcode: senderId,
@@ -48,6 +49,7 @@ export async function sendSms(to: string, message: string): Promise<SmsResult> {
     msisdn: to,
     message,
   });
+
 
   const failures: string[] = [];
 
