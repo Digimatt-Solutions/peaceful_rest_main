@@ -18,7 +18,7 @@ import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
   email: z.string().trim().email("Invalid email").max(255),
-  phone: z.string().trim().max(30).optional(),
+  phone: z.string().trim().min(9, "Please enter your phone number").max(30),
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
   role: z.enum(["mourner", "memorial_admin"]),
 });
@@ -51,6 +51,42 @@ const Auth = () => {
   const [showPw, setShowPw] = useState(false);
   const [showSuPw, setShowSuPw] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
+
+  // phone verification
+  const [phone, setPhone] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpBusy, setOtpBusy] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+
+  const phoneVerified = !!verifiedPhone && verifiedPhone === phone.trim();
+
+  const sendCode = async () => {
+    if (phone.trim().length < 9) { toast.error("Enter your phone number first"); return; }
+    setOtpBusy(true);
+    const { data, error } = await supabase.functions.invoke("phone-otp", {
+      body: { action: "send", phone: phone.trim() },
+    });
+    setOtpBusy(false);
+    if (error || data?.error) { toast.error(data?.error || "Could not send the code. Please try again."); return; }
+    setOtpSent(true);
+    toast.success("A 6-digit code has been sent to your phone");
+  };
+
+  const verifyCode = async () => {
+    if (!/^\d{6}$/.test(otp.trim())) { toast.error("Enter the 6-digit code"); return; }
+    setOtpBusy(true);
+    const { data, error } = await supabase.functions.invoke("phone-otp", {
+      body: { action: "verify", phone: phone.trim(), code: otp.trim() },
+    });
+    setOtpBusy(false);
+    if (error || data?.error) { toast.error(data?.error || "Verification failed"); return; }
+    setVerifiedPhone(phone.trim());
+    setOtpSent(false);
+    setOtp("");
+    toast.success("Phone number verified");
+  };
+
 
   useEffect(() => {
     document.title = "Sign In · Makiwa";
