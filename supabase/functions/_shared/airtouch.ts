@@ -2,8 +2,11 @@
 // Uses the same gateway/format proven working in production:
 // GET https://client.airtouch.co.ke:9012/sms/api/?issn=<senderId>&msisdn=<phone>&text=<msg>&username=<u>&password=<p>
 
-const BASE_URL = Deno.env.get("AIRTOUCH_API_URL") ||
-  "https://client.airtouch.co.ke:9012/sms/api/";
+const CONFIGURED = Deno.env.get("AIRTOUCH_API_URL") || "";
+// Only honour an override that targets this gateway shape; older/broken values are ignored.
+const BASE_URL = /\/sms\/api\/?$/.test(CONFIGURED)
+  ? CONFIGURED
+  : "https://client.airtouch.co.ke:9012/sms/api/";
 
 export function normalizePhone(raw: string): string | null {
   const digits = (raw || "").replace(/[^\d+]/g, "");
