@@ -21,24 +21,31 @@ export interface SmsResult {
 }
 
 export async function sendSms(to: string, message: string): Promise<SmsResult> {
-  const apikey = Deno.env.get("AIRTOUCH_API_KEY");
-  const partnerID = Deno.env.get("AIRTOUCH_PARTNER_ID");
-  const shortcode = Deno.env.get("AIRTOUCH_SENDER_ID");
+  const senderId = Deno.env.get("AIRTOUCH_SENDER_ID");
+  const password = Deno.env.get("AIRTOUCH_PASSWORD");
 
-  if (!apikey || !partnerID || !shortcode) {
+  if (!senderId || !password) {
     throw new Error(
-      "Airtouch SMS is not configured (AIRTOUCH_API_KEY, AIRTOUCH_PARTNER_ID, AIRTOUCH_SENDER_ID).",
+      "Airtouch SMS is not configured (AIRTOUCH_SENDER_ID, AIRTOUCH_PASSWORD).",
     );
   }
 
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ apikey, partnerID, shortcode, mobile: to, message }),
+    body: JSON.stringify({
+      username: senderId,
+      password,
+      senderId,
+      shortcode: senderId,
+      mobile: to,
+      msisdn: to,
+      message,
+    }),
   });
 
   const body = await res.text();
-  // Airtouch/celcomafrica style APIs can return 200 with an error code in the body
+  // Airtouch style APIs can return 200 with an error code in the body
   const ok = res.ok && !/"?respons?e-code"?\s*:\s*(?!200)/i.test(body);
   if (!ok) console.error(`Airtouch send failed [${res.status}] ${body}`);
   return { phone: to, ok, status: res.status, body };
