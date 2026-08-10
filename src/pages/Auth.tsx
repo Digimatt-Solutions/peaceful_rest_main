@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
@@ -310,10 +310,52 @@ const Auth = () => {
                     <Input id="su-email" name="email" type="email" placeholder="you@example.com" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="su-phone">Phone <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                    <Input id="su-phone" name="phone" type="tel" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" />
+                    <Label htmlFor="su-phone">Phone</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="su-phone"
+                        name="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => { setPhone(e.target.value); setOtpSent(false); }}
+                        placeholder="07XX XXX XXX"
+                        className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40"
+                        required
+                      />
+                      {phoneVerified ? (
+                        <span className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl border border-green-500/40 bg-green-500/10 px-2.5 text-xs font-medium text-green-600">
+                          <CheckCircle2 className="h-4 w-4" /> Verified
+                        </span>
+                      ) : (
+                        <Button type="button" variant="outline" onClick={sendCode} disabled={otpBusy}
+                          className="h-10 shrink-0 rounded-xl border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-3 text-xs">
+                          {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend" : "Verify"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {otpSent && !phoneVerified && (
+                  <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-3 space-y-2">
+                    <Label htmlFor="su-otp" className="text-xs">Enter the 6-digit code sent to {phone}</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="su-otp"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        placeholder="123456"
+                        className="h-10 rounded-xl tracking-[0.4em] text-center border-brand-orange/40"
+                      />
+                      <Button type="button" onClick={verifyCode} disabled={otpBusy}
+                        className="h-10 shrink-0 rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 px-4 text-xs">
+                        {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-1">
                   <Label htmlFor="su-pw">Password</Label>
                   <div className="relative">
