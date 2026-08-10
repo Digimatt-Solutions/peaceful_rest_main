@@ -99,13 +99,14 @@ const Auth = () => {
     const parsed = signUpSchema.safeParse({
       fullName: fd.get("fullName"),
       email: fd.get("email"),
-      phone: fd.get("phone") || undefined,
+      phone: phone.trim(),
       password: fd.get("password"),
       role: selectedRole,
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (!phoneVerified) { toast.error("Please verify your phone number first"); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -117,8 +118,14 @@ const Auth = () => {
         },
       },
     });
+    if (error) { setLoading(false); toast.error(error.message); return; }
+    if (signUpData.user) {
+      await supabase
+        .from("profiles")
+        .update({ phone: parsed.data.phone, phone_verified: true })
+        .eq("id", signUpData.user.id);
+    }
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
     toast.success("Welcome to Makiwa");
     navigate("/dashboard");
   };
