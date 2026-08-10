@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2 } from "lucide-react";
+import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 
@@ -494,6 +494,51 @@ export default function Messages() {
                   Send broadcast
                 </Button>
               </div>
+
+              {/* Broadcast SMS */}
+              <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+                    <Smartphone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Broadcast SMS</h3>
+                    <p className="text-xs text-muted-foreground">Text a role group on their phones</p>
+                  </div>
+                </div>
+                <Select value={smsTarget} onValueChange={setSmsTarget}>
+                  <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Everyone</SelectItem>
+                    <SelectItem value="memorial_admins">Memorial admins</SelectItem>
+                    <SelectItem value="mourners">Mourners</SelectItem>
+                    <SelectItem value="super_admins">Super admins</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Textarea
+                  value={smsMsg}
+                  onChange={(e) => setSmsMsg(e.target.value.slice(0, 480))}
+                  rows={4}
+                  placeholder="Write the SMS text…"
+                  className="mt-2 rounded-xl resize-none"
+                />
+                <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Delivered via Airtouch SMS</span>
+                  <span>{smsMsg.length}/480</span>
+                </div>
+                <Button
+                  onClick={sendSmsBroadcast}
+                  disabled={!smsMsg.trim() || smsSending}
+                  className="mt-3 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
+                >
+                  {smsSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
+                  Send SMS broadcast
+                </Button>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Only users with a phone number on their profile receive the SMS.
+                </p>
+              </div>
+
 
               {/* Directory */}
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
