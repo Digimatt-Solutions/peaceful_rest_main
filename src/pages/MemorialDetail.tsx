@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { z } from "zod";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
+import { FormattedText } from "@/components/FormattedText";
 import { MemorialQR } from "@/components/MemorialQR";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -357,9 +358,7 @@ const MemorialDetail = () => {
             <section>
               <SectionTitle icon={Heart} eyebrow="Their Story" title="A life remembered" />
               <div className="mt-8 max-w-3xl">
-                <p className="whitespace-pre-line text-foreground/85 leading-[1.8] text-lg font-serif">
-                  {memorial.biography}
-                </p>
+                <FormattedText text={memorial.biography} className="font-serif" />
               </div>
             </section>
           )}
@@ -424,7 +423,7 @@ const MemorialDetail = () => {
                 {memorial.service_schedule && (
                   <div className="rounded-2xl border border-border bg-card p-6">
                     <h4 className="font-serif text-xl">Service Schedule</h4>
-                    <p className="mt-2 text-foreground/80 whitespace-pre-line">{memorial.service_schedule}</p>
+                    <FormattedText text={memorial.service_schedule} variant="compact" className="mt-3" />
                     {memorial.venue && <p className="mt-2 text-sm text-muted-foreground inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {memorial.venue}</p>}
                   </div>
                 )}
@@ -601,7 +600,7 @@ const MemorialDetail = () => {
           {memorial.burial_details && (
             <div className="rounded-2xl border border-border bg-card p-6">
               <h4 className="font-serif text-lg">Burial details</h4>
-              <p className="mt-2 text-sm text-foreground/80 whitespace-pre-line">{memorial.burial_details}</p>
+              <FormattedText text={memorial.burial_details} variant="compact" className="mt-3" />
             </div>
           )}
 
