@@ -1,16 +1,9 @@
 // Airtouch bulk SMS helper (shared by phone-otp and broadcast-sms)
+// Uses the same gateway/format proven working in production:
+// GET https://client.airtouch.co.ke:9012/sms/api/?issn=<senderId>&msisdn=<phone>&text=<msg>&username=<u>&password=<p>
 
-// The primary gateway host (sms.airtouch.co.ke) has repeatedly served an
-// expired/mismatched TLS certificate and 502s. Allow overriding via secret and
-// fall back through known hosts so a single bad host does not break signup.
-const CONFIGURED = Deno.env.get("AIRTOUCH_API_URL");
-
-const ENDPOINTS = CONFIGURED
-  ? [CONFIGURED]
-  : [
-    "https://sms.airtouch.co.ke/api/services/sendsms/",
-    "https://client.airtouch.co.ke/api/services/sendsms/",
-  ];
+const BASE_URL = Deno.env.get("AIRTOUCH_API_URL") ||
+  "https://client.airtouch.co.ke:9012/sms/api/";
 
 export function normalizePhone(raw: string): string | null {
   const digits = (raw || "").replace(/[^\d+]/g, "");
@@ -31,60 +24,31 @@ export interface SmsResult {
 
 export async function sendSms(to: string, message: string): Promise<SmsResult> {
   const senderId = Deno.env.get("AIRTOUCH_SENDER_ID");
+  const username = Deno.env.get("AIRTOUCH_USERNAME");
   const password = Deno.env.get("AIRTOUCH_PASSWORD");
-  const username = Deno.env.get("AIRTOUCH_USERNAME") || senderId;
 
-  if (!senderId || !password || !username) {
+  if (!username || !password) {
     throw new Error(
-      "Airtouch SMS is not configured (AIRTOUCH_USERNAME, AIRTOUCH_SENDER_ID, AIRTOUCH_PASSWORD).",
+      "Airtouch SMS is not configured (AIRTOUCH_USERNAME, AIRTOUCH_PASSWORD).",
     );
   }
 
-  const payload = JSON.stringify({
-    username,
-    password,
-    senderId,
-    shortcode: senderId,
-    mobile: to,
-    msisdn: to,
-    message,
-  });
+  const url = `${BASE_URL}?issn=${encodeURIComponent(senderId || username)}` +
+    `&msisdn=${encodeURIComponent(to)}` +
+    `&text=${encodeURIComponent(message)}` +
+    `&username=${encodeURIComponent(username)}` +
+    `&password=${encodeURIComponent(password)}`;
 
-
-  const failures: string[] = [];
-
-  for (const url of ENDPOINTS) {
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: payload,
-        signal: AbortSignal.timeout(15000),
-      });
-
-      const body = await res.text();
-      if (res.status >= 500 || res.status === 404) {
-        failures.push(`${url} -> HTTP ${res.status}`);
-        continue;
-      }
-
-      // Airtouch style APIs can return 200 with an error code in the body
-      const ok = res.ok && !/"?respons?e-code"?\s*:\s*(?!200)/i.test(body);
-      if (!ok) console.error(`Airtouch send failed [${res.status}] ${body}`);
-      return { phone: to, ok, status: res.status, body };
-    } catch (e) {
-      const msg = (e as Error).message;
-      console.error(`Airtouch request to ${url} failed: ${msg}`);
-      failures.push(`${url} -> ${msg}`);
-    }
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+    const body = await res.text();
+    if (!res.ok) console.error(`Airtouch send failed [${res.status}] ${body}`);
+    return { phone: to, ok: res.ok, status: res.status, body };
+  } catch (e) {
+    const msg = (e as Error).message;
+    console.error(`Airtouch request failed: ${msg}`);
+    throw new Error(
+      `The SMS gateway is currently unreachable. Details: ${msg}`,
+    );
   }
-
-  throw new Error(
-    "The SMS gateway is currently unreachable. " +
-      "Please confirm the Airtouch API URL/credentials. Details: " +
-      failures.join(" | "),
-  );
 }
