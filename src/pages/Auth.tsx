@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
@@ -18,7 +18,7 @@ import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
   email: z.string().trim().email("Invalid email").max(255),
-  phone: z.string().trim().max(30).optional(),
+  phone: z.string().trim().min(9, "Please enter your phone number").max(30),
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
   role: z.enum(["mourner", "memorial_admin"]),
 });
@@ -52,6 +52,42 @@ const Auth = () => {
   const [showSuPw, setShowSuPw] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
 
+  // phone verification
+  const [phone, setPhone] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpBusy, setOtpBusy] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+
+  const phoneVerified = !!verifiedPhone && verifiedPhone === phone.trim();
+
+  const sendCode = async () => {
+    if (phone.trim().length < 9) { toast.error("Enter your phone number first"); return; }
+    setOtpBusy(true);
+    const { data, error } = await supabase.functions.invoke("phone-otp", {
+      body: { action: "send", phone: phone.trim() },
+    });
+    setOtpBusy(false);
+    if (error || data?.error) { toast.error(data?.error || "Could not send the code. Please try again."); return; }
+    setOtpSent(true);
+    toast.success("A 6-digit code has been sent to your phone");
+  };
+
+  const verifyCode = async () => {
+    if (!/^\d{6}$/.test(otp.trim())) { toast.error("Enter the 6-digit code"); return; }
+    setOtpBusy(true);
+    const { data, error } = await supabase.functions.invoke("phone-otp", {
+      body: { action: "verify", phone: phone.trim(), code: otp.trim() },
+    });
+    setOtpBusy(false);
+    if (error || data?.error) { toast.error(data?.error || "Verification failed"); return; }
+    setVerifiedPhone(phone.trim());
+    setOtpSent(false);
+    setOtp("");
+    toast.success("Phone number verified");
+  };
+
+
   useEffect(() => {
     document.title = "Sign In · Makiwa";
     if (user) navigate("/dashboard", { replace: true });
@@ -63,13 +99,14 @@ const Auth = () => {
     const parsed = signUpSchema.safeParse({
       fullName: fd.get("fullName"),
       email: fd.get("email"),
-      phone: fd.get("phone") || undefined,
+      phone: phone.trim(),
       password: fd.get("password"),
       role: selectedRole,
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (!phoneVerified) { toast.error("Please verify your phone number first"); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -81,8 +118,14 @@ const Auth = () => {
         },
       },
     });
+    if (error) { setLoading(false); toast.error(error.message); return; }
+    if (signUpData.user) {
+      await supabase
+        .from("profiles")
+        .update({ phone: parsed.data.phone, phone_verified: true })
+        .eq("id", signUpData.user.id);
+    }
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
     toast.success("Welcome to Makiwa");
     navigate("/dashboard");
   };
@@ -267,10 +310,52 @@ const Auth = () => {
                     <Input id="su-email" name="email" type="email" placeholder="you@example.com" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="su-phone">Phone <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                    <Input id="su-phone" name="phone" type="tel" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" />
+                    <Label htmlFor="su-phone">Phone</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="su-phone"
+                        name="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => { setPhone(e.target.value); setOtpSent(false); }}
+                        placeholder="07XX XXX XXX"
+                        className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40"
+                        required
+                      />
+                      {phoneVerified ? (
+                        <span className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl border border-green-500/40 bg-green-500/10 px-2.5 text-xs font-medium text-green-600">
+                          <CheckCircle2 className="h-4 w-4" /> Verified
+                        </span>
+                      ) : (
+                        <Button type="button" variant="outline" onClick={sendCode} disabled={otpBusy}
+                          className="h-10 shrink-0 rounded-xl border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-3 text-xs">
+                          {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend" : "Verify"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {otpSent && !phoneVerified && (
+                  <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-3 space-y-2">
+                    <Label htmlFor="su-otp" className="text-xs">Enter the 6-digit code sent to {phone}</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="su-otp"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        placeholder="123456"
+                        className="h-10 rounded-xl tracking-[0.4em] text-center border-brand-orange/40"
+                      />
+                      <Button type="button" onClick={verifyCode} disabled={otpBusy}
+                        className="h-10 shrink-0 rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 px-4 text-xs">
+                        {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-1">
                   <Label htmlFor="su-pw">Password</Label>
                   <div className="relative">
