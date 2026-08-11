@@ -314,9 +314,10 @@ export default function Messages() {
         subtitle={isAdmin ? "Direct messages, support requests and broadcasts" : "Chat with the Makiwa support team"}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 gap-6 ${panelOpen ? "lg:grid-cols-3" : "lg:grid-cols-[1fr_3rem]"}`}>
         {/* Conversations */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className={`space-y-4 ${panelOpen ? "lg:col-span-2" : ""}`}>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search conversations…" className="pl-9 rounded-xl" />
