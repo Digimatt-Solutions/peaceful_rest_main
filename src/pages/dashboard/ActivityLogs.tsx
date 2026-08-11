@@ -75,17 +75,45 @@ const ActivityLogs = () => {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, []);
 
+  const actionTypes = useMemo(() => {
+    const set = new Set(logs.map(l => (l.action || "").split(":")[0]).filter(Boolean));
+    return Array.from(set).sort();
+  }, [logs]);
+
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
-    if (!t) return logs;
-    return logs.filter(l =>
-      (l.actor_name || "").toLowerCase().includes(t) ||
-      (l.actor_email || "").toLowerCase().includes(t) ||
-      (l.action || "").toLowerCase().includes(t) ||
-      (l.description || "").toLowerCase().includes(t) ||
-      (l.entity_type || "").toLowerCase().includes(t)
-    );
-  }, [logs, q]);
+    const cutoff =
+      dateFilter === "today" ? new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+      : dateFilter === "7d" ? Date.now() - 7 * 864e5
+      : dateFilter === "30d" ? Date.now() - 30 * 864e5
+      : 0;
+    return logs.filter(l => {
+      if (cutoff && new Date(l.created_at).getTime() < cutoff) return false;
+      if (actionFilter !== "all" && !(l.action || "").startsWith(actionFilter)) return false;
+      if (!t) return true;
+      return (
+        (l.actor_name || "").toLowerCase().includes(t) ||
+        (l.actor_email || "").toLowerCase().includes(t) ||
+        (l.action || "").toLowerCase().includes(t) ||
+        (l.description || "").toLowerCase().includes(t) ||
+        (l.entity_type || "").toLowerCase().includes(t)
+      );
+    });
+  }, [logs, q, actionFilter, dateFilter]);
+
+  const chartData = useMemo(() => {
+    const days: Record<string, number> = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days[d.toLocaleDateString("en-US", { month: "short", day: "numeric" })] = 0;
+    }
+    logs.forEach(l => {
+      const key = new Date(l.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (days[key] !== undefined) days[key]++;
+    });
+    return Object.entries(days).map(([date, count]) => ({ date, count }));
+  }, [logs]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -107,17 +135,51 @@ const ActivityLogs = () => {
         subtitle="Real-time audit trail - every action across the system with timestamps."
       />
 
-      <div className="mb-5 max-w-md relative">
-        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Filter by user, action, entity…"
-          className="pl-9"
-        />
+      <div className="mb-5 rounded-2xl border border-border bg-card p-4 sm:p-5">
+        <p className="mb-3 text-sm font-medium">Activity over the last 7 days</p>
+        <div className="h-48 -mx-6 sm:mx-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
+              <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={11} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={11} width={28} />
+              <Tooltip cursor={{ fill: "hsl(var(--muted))" }} />
+              <Bar dataKey="count" radius={[6, 6, 0, 0]} fill="hsl(var(--brand-orange, 24 95% 53%))" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1 max-w-md">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter by user, action, entity…"
+            className="pl-9 rounded-xl"
+          />
+        </div>
+        <Select value={actionFilter} onValueChange={setActionFilter}>
+          <SelectTrigger className="w-full sm:w-52 rounded-xl"><SelectValue placeholder="All actions" /></SelectTrigger>
+          <SelectContent className="max-h-72">
+            <SelectItem value="all">All actions</SelectItem>
+            {actionTypes.map(a => <SelectItem key={a} value={a}>{a.replace(/_/g, " ")}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={dateFilter} onValueChange={setDateFilter}>
+          <SelectTrigger className="w-full sm:w-40 rounded-xl"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="7d">Last 7 days</SelectItem>
+            <SelectItem value="30d">Last 30 days</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
+
         <div className="px-5 py-3 border-b border-border bg-muted/30 text-sm font-medium text-muted-foreground flex items-center justify-between">
           <span>Showing {paginated.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}–{(currentPage - 1) * PAGE_SIZE + paginated.length} of {filtered.length}</span>
           <span className="inline-flex items-center gap-1.5 text-xs"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> live</span>
