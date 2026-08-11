@@ -33,7 +33,7 @@ const loginSchema = z.object({
 const roleOptions = [
   {
     value: "mourner",
-    label: "Mourner / Participant",
+    label: "Guest",
     icon: Heart,
   },
   {
@@ -289,40 +289,59 @@ const Auth = () => {
             <TabsContent value="create-account" className="mt-5">
               <form onSubmit={handleSignUp} className="space-y-3">
                 <div className="space-y-1">
-                  <Label>I am joining as</Label>
+                  <Label>I am joining as:</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {roleOptions.map(opt => {
                       const Icon = opt.icon;
                       const active = selectedRole === opt.value;
+
                       return (
                         <button
                           key={opt.value}
                           type="button"
                           onClick={() => setSelectedRole(opt.value)}
                           className={cn(
-                            "text-left rounded-2xl border p-4 transition-all",
+                            "flex items-center gap-3 text-left rounded-xl border p-3 transition-all",
                             active
                               ? "border-brand-orange bg-brand-orange/5 ring-2 ring-brand-orange/30"
                               : "border-border hover:border-foreground/30"
                           )}
                         >
-                          <Icon className={cn("h-5 w-5 mb-2", active ? "text-brand-orange" : "text-muted-foreground")} />
+                          <Icon
+                            className={cn(
+                              "h-5 w-5 shrink-0",
+                              active ? "text-brand-orange" : "text-muted-foreground"
+                            )}
+                          />
                           <p className="text-sm font-medium leading-tight">{opt.label}</p>
                         </button>
                       );
                     })}
                   </div>
                 </div>
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="su-name">Full name</Label>
                   <Input id="su-name" name="fullName" placeholder="Your full name" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
                   <div className="space-y-1">
                     <Label htmlFor="su-email">Email</Label>
                     <Input id="su-email" name="email" type="email" placeholder="you@example.com" className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                   </div>
+              </div>
+               <div className="space-y-1">
+                  <Label htmlFor="su-pw">Password</Label>
+                  <div className="relative">
+                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8}
+                      value={suPassword} onChange={(e) => setSuPassword(e.target.value)}
+                      placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                    <button type="button" onClick={() => setShowSuPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showSuPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <PasswordStrength password={suPassword} />
+                </div>
                   <div className="space-y-1">
                     <Label htmlFor="su-phone">Phone</Label>
                     <div className="flex gap-2">
@@ -332,7 +351,7 @@ const Auth = () => {
                         type="tel"
                         value={phone}
                         onChange={(e) => { setPhone(e.target.value); setOtpSent(false); }}
-                        placeholder="07XX XXX XXX"
+                        placeholder="2547XX XXX XXX"
                         className="h-10 rounded-xl border-brand-orange/30 focus-visible:ring-brand-orange/40"
                         required
                       />
@@ -343,12 +362,12 @@ const Auth = () => {
                       ) : (
                         <Button type="button" variant="outline" onClick={sendCode} disabled={otpBusy}
                           className="h-10 shrink-0 rounded-xl border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-3 text-xs">
-                          {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend" : "Verify"}
+                          {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend" : "Send Code"}
                         </Button>
                       )}
                     </div>
                   </div>
-                </div>
+                
 
                 {otpSent && !phoneVerified && (
                   <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-3 space-y-2">
@@ -370,18 +389,6 @@ const Auth = () => {
                     </div>
                   </div>
                 )}
-                <div className="space-y-1">
-                  <Label htmlFor="su-pw">Password</Label>
-                  <div className="relative">
-                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8}
-                      value={suPassword} onChange={(e) => setSuPassword(e.target.value)}
-                      placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
-                    <button type="button" onClick={() => setShowSuPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showSuPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <PasswordStrength password={suPassword} />
-                </div>
 
                 <div className="flex items-start gap-2.5 rounded-xl border border-brand-orange/25 bg-brand-orange/5 p-3">
                   <Checkbox id="su-terms" checked={acceptedTerms} onCheckedChange={(v) => setAcceptedTerms(v === true)} className="mt-0.5" />
