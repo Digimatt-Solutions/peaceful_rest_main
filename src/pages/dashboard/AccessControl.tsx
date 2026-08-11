@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ShieldCheck, UserPlus, X, Users, Trash2 } from "lucide-react";
+import { ShieldCheck, UserPlus, X, Users, Trash2, Search } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 import { toast } from "sonner";
 
