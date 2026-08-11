@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +14,9 @@ import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
+import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
 import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
+
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
@@ -47,10 +50,17 @@ const Auth = () => {
   const [bioLoading, setBioLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<"mourner" | "memorial_admin">("mourner");
-  const [tab, setTab] = useState<"login" | "signup">("login");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: "login" | "create-account" =
+    searchParams.get("tab") === "create-account" ? "create-account" : "login";
+  const setTab = (v: "login" | "create-account") =>
+    setSearchParams({ tab: v }, { replace: true });
   const [showPw, setShowPw] = useState(false);
   const [showSuPw, setShowSuPw] = useState(false);
+  const [suPassword, setSuPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
+
 
   // phone verification
   const [phone, setPhone] = useState("");
@@ -104,7 +114,10 @@ const Auth = () => {
       role: selectedRole,
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (!acceptedTerms) { toast.error("Please accept the Terms of Use and Privacy Policy"); return; }
+    if (scorePassword(parsed.data.password) < 2) { toast.error("Please choose a stronger password"); return; }
     if (!phoneVerified) { toast.error("Please verify your phone number first"); return; }
+
     setLoading(true);
     const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
@@ -216,10 +229,11 @@ const Auth = () => {
 
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
-          <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")} className="mt-5">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "create-account")} className="mt-5">
             <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-5">
-              <TabsTrigger value="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
+              <TabsTrigger value="login" id="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
+              <TabsTrigger value="create-account" id="create-account" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Create Account</TabsTrigger>
+
             </TabsList>
 
             <TabsContent value="login" className="mt-5">
@@ -272,7 +286,7 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="mt-5">
+            <TabsContent value="create-account" className="mt-5">
               <form onSubmit={handleSignUp} className="space-y-3">
                 <div className="space-y-1">
                   <Label>I am joining as</Label>
@@ -359,13 +373,27 @@ const Auth = () => {
                 <div className="space-y-1">
                   <Label htmlFor="su-pw">Password</Label>
                   <div className="relative">
-                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8} placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8}
+                      value={suPassword} onChange={(e) => setSuPassword(e.target.value)}
+                      placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                     <button type="button" onClick={() => setShowSuPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showSuPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  <PasswordStrength password={suPassword} />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full h-12 rounded-sm bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
+
+                <div className="flex items-start gap-2.5 rounded-xl border border-brand-orange/25 bg-brand-orange/5 p-3">
+                  <Checkbox id="su-terms" checked={acceptedTerms} onCheckedChange={(v) => setAcceptedTerms(v === true)} className="mt-0.5" />
+                  <Label htmlFor="su-terms" className="text-[12px] font-normal leading-relaxed text-muted-foreground">
+                    I agree to the{" "}
+                    <span className="text-brand-orange font-medium">Terms of Use</span>{" "}
+                    and the{" "}
+                    <span className="text-brand-orange font-medium">Privacy Policy</span>, and I consent to being contacted about memorials I follow.
+                  </Label>
+                </div>
+
+                <Button type="submit" disabled={loading || !acceptedTerms} className="w-full h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40 disabled:opacity-60">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><UserPlus className="h-4 w-4 mr-2" />Create Account</>)}
                 </Button>
               </form>
@@ -376,12 +404,13 @@ const Auth = () => {
             {tab === "login" ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
-              onClick={() => setTab(tab === "login" ? "signup" : "login")}
+              onClick={() => setTab(tab === "login" ? "create-account" : "login")}
               className="text-brand-orange hover:underline font-medium"
             >
-              {tab === "login" ? "Sign Up" : "Sign In"}
+              {tab === "login" ? "Create Account" : "Sign In"}
             </button>
           </p>
+
           <p className="mt-2 text-[11px] text-center text-muted-foreground">
             Powered by{" "}
             <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">

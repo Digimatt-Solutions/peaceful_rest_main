@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2, Smartphone } from "lucide-react";
+import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2, Smartphone, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 
@@ -59,7 +59,9 @@ export default function Messages() {
   const { role } = useUserRole();
   const isAdmin = role === "super_admin" || role === "admin";
 
+  const [panelOpen, setPanelOpen] = useState(true);
   const [convs, setConvs] = useState<ConvRow[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [active, setActive] = useState<ChatPeer | null>(null);
@@ -312,9 +314,10 @@ export default function Messages() {
         subtitle={isAdmin ? "Direct messages, support requests and broadcasts" : "Chat with the Makiwa support team"}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 gap-6 ${panelOpen ? "lg:grid-cols-3" : "lg:grid-cols-[1fr_3rem]"}`}>
         {/* Conversations */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className={`space-y-4 ${panelOpen ? "lg:col-span-2" : ""}`}>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search conversations…" className="pl-9 rounded-xl" />
@@ -408,7 +411,19 @@ export default function Messages() {
         </div>
 
         {/* Right sidebar */}
-        <div className="space-y-5">
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setPanelOpen((o) => !o)}
+            aria-expanded={panelOpen}
+            aria-label={panelOpen ? "Collapse panel" : "Expand panel"}
+            title={panelOpen ? "Collapse panel" : "Expand panel"}
+            className={`flex items-center justify-center gap-1.5 rounded-xl border border-brand-orange/30 bg-card text-brand-orange shadow-sm transition-colors hover:bg-brand-orange/10 ${panelOpen ? "w-full py-2 text-xs font-medium" : "h-12 w-12"}`}
+          >
+            {panelOpen ? (<><ChevronRight className="h-4 w-4" /> Hide panel</>) : (<ChevronLeft className="h-5 w-5" />)}
+          </button>
+          <div className={panelOpen ? "space-y-5" : "hidden"}>
+
           {!isAdmin ? (
             <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
               <div className="mb-3 flex items-center gap-3">
@@ -621,7 +636,9 @@ export default function Messages() {
               </div>
             </>
           )}
+          </div>
         </div>
+
       </div>
     </div>
   );

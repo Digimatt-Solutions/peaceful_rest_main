@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ShieldCheck, UserPlus, X, Users, Trash2 } from "lucide-react";
+import { ShieldCheck, UserPlus, X, Users, Trash2, Search } from "lucide-react";
 import { logActivity } from "@/lib/activity";
 import { toast } from "sonner";
 
@@ -30,6 +30,9 @@ const AccessControl = () => {
   // Super admin: all users
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string>>({});
+  const [q, setQ] = useState("");
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
 
   useEffect(() => {
     document.title = "User Access · Makiwa";
@@ -58,9 +61,20 @@ const AccessControl = () => {
     const map: Record<string, string> = {};
     (roles || []).forEach((r: any) => { map[r.user_id] = r.role; });
     setUserRoles(map);
+    setLoadingUsers(false);
   };
 
-  useEffect(() => { if (isSuperAdmin) loadAllUsers(); }, [isSuperAdmin]);
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    loadAllUsers();
+    const channel = supabase
+      .channel("user-management-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadAllUsers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles" }, () => loadAllUsers())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isSuperAdmin]);
+
 
   const promote = async () => {
     if (!email || !memorialId) return;
@@ -129,15 +143,41 @@ const AccessControl = () => {
         </TabsList>
 
         <TabsContent value="users">
+          <div className="mb-5 relative max-w-md">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or email…" className="pl-9 rounded-xl" />
+          </div>
+          {loadingUsers ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+                  <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 w-1/4 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-1/3 rounded bg-muted/70 animate-pulse" />
+                  </div>
+                  <div className="h-9 w-40 rounded bg-muted animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className="space-y-5">
             {(() => {
+              const term = q.trim().toLowerCase();
+              const visible = term
+                ? allUsers.filter(u =>
+                    (u.full_name || "").toLowerCase().includes(term) ||
+                    (u.email || "").toLowerCase().includes(term) ||
+                    (u.phone || "").toLowerCase().includes(term))
+                : allUsers;
               const groups: { key: string; label: string; badge: string }[] = [
                 { key: "super_admin", label: "Super Admins", badge: "bg-brand-orange/15 text-brand-orange" },
                 { key: "memorial_admin", label: "Memorial Admins / Family Reps", badge: "bg-amber-500/15 text-amber-700" },
                 { key: "mourner", label: "Mourners", badge: "bg-slate-500/15 text-slate-600" },
               ];
               return groups.map(g => {
-                const list = allUsers.filter(u => (userRoles[u.id] || "mourner") === g.key);
+                const list = visible.filter(u => (userRoles[u.id] || "mourner") === g.key);
+
                 return (
                   <div key={g.key} className="rounded-2xl border border-border bg-card overflow-hidden">
                     <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
@@ -180,6 +220,8 @@ const AccessControl = () => {
             })()}
             {allUsers.length === 0 && <div className="p-12 text-center text-muted-foreground text-sm rounded-2xl border border-border bg-card">No users yet.</div>}
           </div>
+          )}
+
         </TabsContent>
 
 

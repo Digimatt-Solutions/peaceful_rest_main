@@ -12,6 +12,8 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/Auth";
+import SetupAdmin from "./pages/SetupAdmin";
+
 import MemorialDetail from "./pages/MemorialDetail";
 import Overview from "./pages/dashboard/Overview";
 import MyMemorials from "./pages/dashboard/MyMemorials";
@@ -54,6 +56,8 @@ const App = () => (
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/setup-admin" element={<SetupAdmin />} />
+
             <Route path="/memorial/:id" element={<MemorialDetail />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index element={<Overview />} />
