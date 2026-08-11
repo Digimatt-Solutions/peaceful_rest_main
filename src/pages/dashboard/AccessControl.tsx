@@ -30,6 +30,9 @@ const AccessControl = () => {
   // Super admin: all users
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string>>({});
+  const [q, setQ] = useState("");
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
 
   useEffect(() => {
     document.title = "User Access · Makiwa";
