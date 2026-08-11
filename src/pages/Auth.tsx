@@ -226,10 +226,11 @@ const Auth = () => {
 
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
-          <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")} className="mt-5">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "create-account")} className="mt-5">
             <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-5">
-              <TabsTrigger value="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
+              <TabsTrigger value="login" id="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
+              <TabsTrigger value="create-account" id="create-account" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Create Account</TabsTrigger>
+
             </TabsList>
 
             <TabsContent value="login" className="mt-5">
