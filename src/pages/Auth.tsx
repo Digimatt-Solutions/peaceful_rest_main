@@ -387,9 +387,9 @@ const Auth = () => {
                   <Checkbox id="su-terms" checked={acceptedTerms} onCheckedChange={(v) => setAcceptedTerms(v === true)} className="mt-0.5" />
                   <Label htmlFor="su-terms" className="text-[12px] font-normal leading-relaxed text-muted-foreground">
                     I agree to the{" "}
-                    <Link to="/terms" className="text-brand-orange font-medium hover:underline">Terms of Use</Link>{" "}
+                    <span className="text-brand-orange font-medium">Terms of Use</span>{" "}
                     and the{" "}
-                    <Link to="/privacy" className="text-brand-orange font-medium hover:underline">Privacy Policy</Link>, and I consent to being contacted about memorials I follow.
+                    <span className="text-brand-orange font-medium">Privacy Policy</span>, and I consent to being contacted about memorials I follow.
                   </Label>
                 </div>
 
