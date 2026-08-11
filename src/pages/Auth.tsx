@@ -114,7 +114,10 @@ const Auth = () => {
       role: selectedRole,
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (!acceptedTerms) { toast.error("Please accept the Terms of Use and Privacy Policy"); return; }
+    if (scorePassword(parsed.data.password) < 2) { toast.error("Please choose a stronger password"); return; }
     if (!phoneVerified) { toast.error("Please verify your phone number first"); return; }
+
     setLoading(true);
     const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
