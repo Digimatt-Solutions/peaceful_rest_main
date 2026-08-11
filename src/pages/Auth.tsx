@@ -50,10 +50,17 @@ const Auth = () => {
   const [bioLoading, setBioLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<"mourner" | "memorial_admin">("mourner");
-  const [tab, setTab] = useState<"login" | "signup">("login");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: "login" | "create-account" =
+    searchParams.get("tab") === "create-account" ? "create-account" : "login";
+  const setTab = (v: "login" | "create-account") =>
+    setSearchParams({ tab: v }, { replace: true });
   const [showPw, setShowPw] = useState(false);
   const [showSuPw, setShowSuPw] = useState(false);
+  const [suPassword, setSuPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
+
 
   // phone verification
   const [phone, setPhone] = useState("");
