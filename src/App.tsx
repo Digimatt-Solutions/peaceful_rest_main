@@ -12,6 +12,8 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/Auth";
+import SetupAdmin from "./pages/SetupAdmin";
+
 import MemorialDetail from "./pages/MemorialDetail";
 import Overview from "./pages/dashboard/Overview";
 import MyMemorials from "./pages/dashboard/MyMemorials";
