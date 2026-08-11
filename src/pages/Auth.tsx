@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +14,9 @@ import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
+import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
 import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
+
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Please enter your full name").max(100),
