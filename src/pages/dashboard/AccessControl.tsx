@@ -61,9 +61,20 @@ const AccessControl = () => {
     const map: Record<string, string> = {};
     (roles || []).forEach((r: any) => { map[r.user_id] = r.role; });
     setUserRoles(map);
+    setLoadingUsers(false);
   };
 
-  useEffect(() => { if (isSuperAdmin) loadAllUsers(); }, [isSuperAdmin]);
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    loadAllUsers();
+    const channel = supabase
+      .channel("user-management-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadAllUsers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles" }, () => loadAllUsers())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isSuperAdmin]);
+
 
   const promote = async () => {
     if (!email || !memorialId) return;
