@@ -59,7 +59,9 @@ export default function Messages() {
   const { role } = useUserRole();
   const isAdmin = role === "super_admin" || role === "admin";
 
+  const [panelOpen, setPanelOpen] = useState(true);
   const [convs, setConvs] = useState<ConvRow[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [active, setActive] = useState<ChatPeer | null>(null);
