@@ -909,6 +909,7 @@ export type Database = {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
       }
+      super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "super_admin" | "memorial_admin" | "mourner"
