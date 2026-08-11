@@ -46,10 +46,13 @@ const ActivityLogs = () => {
   const { isSuperAdmin } = useUserRole();
   const [logs, setLogs] = useState<Log[]>([]);
   const [q, setQ] = useState("");
+  const [actionFilter, setActionFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { setPage(1); }, [q]);
+  useEffect(() => { setPage(1); }, [q, actionFilter, dateFilter]);
+
 
   useEffect(() => {
     document.title = "Activity Logs · Makiwa";
