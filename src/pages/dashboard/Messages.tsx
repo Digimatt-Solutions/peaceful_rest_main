@@ -411,7 +411,19 @@ export default function Messages() {
         </div>
 
         {/* Right sidebar */}
-        <div className="space-y-5">
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setPanelOpen((o) => !o)}
+            aria-expanded={panelOpen}
+            aria-label={panelOpen ? "Collapse panel" : "Expand panel"}
+            title={panelOpen ? "Collapse panel" : "Expand panel"}
+            className={`flex items-center justify-center gap-1.5 rounded-xl border border-brand-orange/30 bg-card text-brand-orange shadow-sm transition-colors hover:bg-brand-orange/10 ${panelOpen ? "w-full py-2 text-xs font-medium" : "h-12 w-12"}`}
+          >
+            {panelOpen ? (<><ChevronRight className="h-4 w-4" /> Hide panel</>) : (<ChevronLeft className="h-5 w-5" />)}
+          </button>
+          <div className={panelOpen ? "space-y-5" : "hidden"}>
+
           {!isAdmin ? (
             <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
               <div className="mb-3 flex items-center gap-3">
