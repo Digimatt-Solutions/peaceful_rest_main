@@ -283,7 +283,7 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="mt-5">
+            <TabsContent value="create-account" className="mt-5">
               <form onSubmit={handleSignUp} className="space-y-3">
                 <div className="space-y-1">
                   <Label>I am joining as</Label>
