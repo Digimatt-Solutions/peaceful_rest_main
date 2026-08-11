@@ -143,15 +143,41 @@ const AccessControl = () => {
         </TabsList>
 
         <TabsContent value="users">
+          <div className="mb-5 relative max-w-md">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or email…" className="pl-9 rounded-xl" />
+          </div>
+          {loadingUsers ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+                  <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 w-1/4 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-1/3 rounded bg-muted/70 animate-pulse" />
+                  </div>
+                  <div className="h-9 w-40 rounded bg-muted animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className="space-y-5">
             {(() => {
+              const term = q.trim().toLowerCase();
+              const visible = term
+                ? allUsers.filter(u =>
+                    (u.full_name || "").toLowerCase().includes(term) ||
+                    (u.email || "").toLowerCase().includes(term) ||
+                    (u.phone || "").toLowerCase().includes(term))
+                : allUsers;
               const groups: { key: string; label: string; badge: string }[] = [
                 { key: "super_admin", label: "Super Admins", badge: "bg-brand-orange/15 text-brand-orange" },
                 { key: "memorial_admin", label: "Memorial Admins / Family Reps", badge: "bg-amber-500/15 text-amber-700" },
                 { key: "mourner", label: "Mourners", badge: "bg-slate-500/15 text-slate-600" },
               ];
               return groups.map(g => {
-                const list = allUsers.filter(u => (userRoles[u.id] || "mourner") === g.key);
+                const list = visible.filter(u => (userRoles[u.id] || "mourner") === g.key);
+
                 return (
                   <div key={g.key} className="rounded-2xl border border-border bg-card overflow-hidden">
                     <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
