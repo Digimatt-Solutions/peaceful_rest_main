@@ -370,13 +370,27 @@ const Auth = () => {
                 <div className="space-y-1">
                   <Label htmlFor="su-pw">Password</Label>
                   <div className="relative">
-                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8} placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
+                    <Input id="su-pw" name="password" type={showSuPw ? "text" : "password"} minLength={8}
+                      value={suPassword} onChange={(e) => setSuPassword(e.target.value)}
+                      placeholder="At least 8 characters" className="h-10  rounded-xl pr-11 border-brand-orange/30 focus-visible:ring-brand-orange/40" required />
                     <button type="button" onClick={() => setShowSuPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showSuPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  <PasswordStrength password={suPassword} />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full h-12 rounded-sm bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
+
+                <div className="flex items-start gap-2.5 rounded-xl border border-brand-orange/25 bg-brand-orange/5 p-3">
+                  <Checkbox id="su-terms" checked={acceptedTerms} onCheckedChange={(v) => setAcceptedTerms(v === true)} className="mt-0.5" />
+                  <Label htmlFor="su-terms" className="text-[12px] font-normal leading-relaxed text-muted-foreground">
+                    I agree to the{" "}
+                    <Link to="/terms" className="text-brand-orange font-medium hover:underline">Terms of Use</Link>{" "}
+                    and the{" "}
+                    <Link to="/privacy" className="text-brand-orange font-medium hover:underline">Privacy Policy</Link>, and I consent to being contacted about memorials I follow.
+                  </Label>
+                </div>
+
+                <Button type="submit" disabled={loading || !acceptedTerms} className="w-full h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40 disabled:opacity-60">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><UserPlus className="h-4 w-4 mr-2" />Create Account</>)}
                 </Button>
               </form>
@@ -387,12 +401,13 @@ const Auth = () => {
             {tab === "login" ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
-              onClick={() => setTab(tab === "login" ? "signup" : "login")}
+              onClick={() => setTab(tab === "login" ? "create-account" : "login")}
               className="text-brand-orange hover:underline font-medium"
             >
-              {tab === "login" ? "Sign Up" : "Sign In"}
+              {tab === "login" ? "Create Account" : "Sign In"}
             </button>
           </p>
+
           <p className="mt-2 text-[11px] text-center text-muted-foreground">
             Powered by{" "}
             <a href="https://digimatt.co.ke/" target="_blank" rel="noopener noreferrer" className="text-brand-orange hover:underline font-medium">
