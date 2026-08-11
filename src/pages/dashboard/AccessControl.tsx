@@ -220,6 +220,8 @@ const AccessControl = () => {
             })()}
             {allUsers.length === 0 && <div className="p-12 text-center text-muted-foreground text-sm rounded-2xl border border-border bg-card">No users yet.</div>}
           </div>
+          )}
+
         </TabsContent>
 
 
