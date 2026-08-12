@@ -566,7 +566,7 @@ export default function Messages() {
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   Only users with a phone number on their profile receive the SMS.
                 </p>
-              </div>
+              </SideCard>
 
 
               {/* Directory */}
@@ -586,7 +586,7 @@ export default function Messages() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search users…" className="pl-9 rounded-xl" />
-              </SideCard>
+                </div>
                 <div className="mt-3 max-h-96 overflow-y-auto rounded-xl border border-border">
                   {dirLoading ? (
                     <p className="p-4 text-center text-sm text-muted-foreground">Loading users…</p>
@@ -638,7 +638,7 @@ export default function Messages() {
                     ))
                   )}
                 </div>
-              </div>
+              </SideCard>
             </>
           )}
           </div>
