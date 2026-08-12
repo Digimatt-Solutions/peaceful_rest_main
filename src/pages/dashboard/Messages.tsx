@@ -466,16 +466,7 @@ export default function Messages() {
           <div className={panelOpen ? "space-y-5" : "hidden"}>
 
           {!isAdmin ? (
-            <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
-                  <LifeBuoy className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Need help?</h3>
-                  <p className="text-xs text-muted-foreground">Our support team is here for you</p>
-                </div>
-              </div>
+            <SideCard icon={LifeBuoy} title="Need help?" subtitle="Our support team is here for you">
               <p className="mb-3 text-sm text-muted-foreground">
                 Questions about a memorial, a contribution or your account? Send us a message and we'll respond here.
               </p>
@@ -511,20 +502,11 @@ export default function Messages() {
                 {supportSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                 Contact support
               </Button>
-            </div>
+              </SideCard>
           ) : (
             <>
               {/* Broadcast */}
-              <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
-                    <Megaphone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Broadcast message</h3>
-                    <p className="text-xs text-muted-foreground">Message a whole role at once</p>
-                  </div>
-                </div>
+              <SideCard icon={Megaphone} title="Broadcast message" subtitle="Message a whole role at once">
                 <Select value={broadcastTarget} onValueChange={setBroadcastTarget}>
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -549,19 +531,10 @@ export default function Messages() {
                   {broadcastSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Megaphone className="mr-2 h-4 w-4" />}
                   Send broadcast
                 </Button>
-              </div>
+              </SideCard>
 
               {/* Broadcast SMS */}
-              <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
-                    <Smartphone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Broadcast SMS</h3>
-                    <p className="text-xs text-muted-foreground">Text a role group on their phones</p>
-                  </div>
-                </div>
+              <SideCard icon={Smartphone} title="Broadcast SMS" subtitle="Text a role group on their phones" defaultOpen={false}>
                 <Select value={smsTarget} onValueChange={setSmsTarget}>
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -597,16 +570,7 @@ export default function Messages() {
 
 
               {/* Directory */}
-              <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">All users</h3>
-                    <p className="text-xs text-muted-foreground">Start a direct message</p>
-                  </div>
-                </div>
+              <SideCard icon={Users} title="All users" subtitle="Start a direct message">
                 <div className="mb-2 space-y-1.5">
                   <p className="text-xs font-medium text-muted-foreground">Chat context</p>
                   <Select value={contextValue} onValueChange={setContextValue}>
@@ -622,7 +586,7 @@ export default function Messages() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search users…" className="pl-9 rounded-xl" />
-                </div>
+              </SideCard>
                 <div className="mt-3 max-h-96 overflow-y-auto rounded-xl border border-border">
                   {dirLoading ? (
                     <p className="p-4 text-center text-sm text-muted-foreground">Loading users…</p>
