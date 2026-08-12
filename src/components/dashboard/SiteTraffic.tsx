@@ -166,9 +166,10 @@ export const SiteTraffic = () => {
 
   const downloadCSV = () => {
     const rows = [
-      ["Date", "Path", "Country", "Country Code", "Device", "Browser", "OS", "Referrer"],
+      ["Date", "Page", "Path", "Country", "Country Code", "Device", "Browser", "OS", "Referrer"],
       ...visits.map(v => [
         new Date(v.created_at).toISOString(),
+        pageName(v.path || "/"),
         v.path || "",
         v.country || "",
         v.country_code || "",
