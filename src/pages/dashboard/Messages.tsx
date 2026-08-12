@@ -9,9 +9,50 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2, Smartphone, ChevronRight, ChevronLeft } from "lucide-react";
+import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send, Users, Megaphone, Loader2, HandHeart, Flower2, Smartphone, ChevronRight, ChevronLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
+
+/** Collapsible sidebar card - each card has its own chevron toggle. */
+const SideCard = ({
+  icon: Icon,
+  title,
+  subtitle,
+  children,
+  defaultOpen = true,
+}: {
+  icon: any;
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="rounded-2xl border border-brand-orange/30 bg-card p-5 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+          <Icon className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold truncate">{title}</h3>
+          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-label={`${open ? "Collapse" : "Expand"} ${title}`}
+          title={`${open ? "Collapse" : "Expand"} ${title}`}
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-brand-orange/30 text-brand-orange transition-colors hover:bg-brand-orange/10"
+        >
+          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+      </div>
+      {open && <div className="mt-3">{children}</div>}
+    </div>
+  );
+};
 
 interface ConvRow {
   key: string;
