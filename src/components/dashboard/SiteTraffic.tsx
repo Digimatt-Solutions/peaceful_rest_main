@@ -146,7 +146,17 @@ export const SiteTraffic = () => {
   const countries = useMemo(() => tally("country").slice(0, 10), [visits]);
   const devices = useMemo(() => tally("device"), [visits]);
   const browsers = useMemo(() => tally("browser"), [visits]);
-  const topPages = useMemo(() => tally("path").slice(0, 5), [visits]);
+  const topPages = useMemo(() => {
+    const m: Record<string, number> = {};
+    visits.forEach(v => {
+      const name = pageName(v.path || "/");
+      m[name] = (m[name] || 0) + 1;
+    });
+    return Object.entries(m)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [visits]);
 
   const totalVisits = visits.length;
   const uniqueCountries = new Set(visits.map(v => v.country).filter(Boolean)).size;
