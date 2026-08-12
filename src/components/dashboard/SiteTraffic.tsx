@@ -231,7 +231,7 @@ export const SiteTraffic = () => {
         ].map(s => (
           <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-gradient-to-br from-brand-orange/10 to-transparent p-4">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">{s.label}</p>
-            <p className="mt-1.5 font-serif text-2xl">{s.value}</p>
+            <p className="mt-1.5 font-serif text-2xl truncate" title={String(s.value)}>{s.value}</p>
           </div>
         ))}
       </div>
