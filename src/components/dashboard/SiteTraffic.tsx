@@ -17,6 +17,37 @@ const PERIODS = [
 
 const COLORS = ["#f97316", "#fb923c", "#fdba74", "#fed7aa", "#c2410c", "#9a3412", "#ea580c", "#7c2d12"];
 
+// Human readable page names instead of raw routes.
+const PAGE_NAMES: Record<string, string> = {
+  "/": "Home (Landing page)",
+  "/auth": "Sign in / Create account",
+  "/setup-admin": "Admin setup",
+  "/dashboard": "Dashboard",
+  "/dashboard/memorials": "My Memorials",
+  "/dashboard/obituary": "Obituary Management",
+  "/dashboard/family": "Family Tree",
+  "/dashboard/condolences": "Condolences",
+  "/dashboard/fundraising": "Fundraising",
+  "/dashboard/moments": "Life Moments",
+  "/dashboard/anniversary": "Anniversary",
+  "/dashboard/community": "Community",
+  "/dashboard/messages": "Messages",
+  "/dashboard/oversight": "Memorial Oversight",
+  "/dashboard/access": "User Management",
+  "/dashboard/activity": "Activity Logs",
+  "/dashboard/profile": "Profile",
+  "/dashboard/settings": "Settings",
+};
+
+const pageName = (path: string) => {
+  if (!path) return "Home (Landing page)";
+  const clean = path.split("?")[0].replace(/\/+$/, "") || "/";
+  if (PAGE_NAMES[clean]) return PAGE_NAMES[clean];
+  if (clean.startsWith("/memorial/")) return "Memorial page";
+  const last = clean.split("/").filter(Boolean).pop() || "Home";
+  return last.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 const Card = ({ title, icon: Icon, children, className = "" }: any) => (
   <div className={`rounded-2xl border border-border bg-card p-5 ${className}`}>
     <div className="flex items-center gap-2.5 mb-4">
@@ -115,7 +146,17 @@ export const SiteTraffic = () => {
   const countries = useMemo(() => tally("country").slice(0, 10), [visits]);
   const devices = useMemo(() => tally("device"), [visits]);
   const browsers = useMemo(() => tally("browser"), [visits]);
-  const topPages = useMemo(() => tally("path").slice(0, 5), [visits]);
+  const topPages = useMemo(() => {
+    const m: Record<string, number> = {};
+    visits.forEach(v => {
+      const name = pageName(v.path || "/");
+      m[name] = (m[name] || 0) + 1;
+    });
+    return Object.entries(m)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [visits]);
 
   const totalVisits = visits.length;
   const uniqueCountries = new Set(visits.map(v => v.country).filter(Boolean)).size;
@@ -125,9 +166,10 @@ export const SiteTraffic = () => {
 
   const downloadCSV = () => {
     const rows = [
-      ["Date", "Path", "Country", "Country Code", "Device", "Browser", "OS", "Referrer"],
+      ["Date", "Page", "Path", "Country", "Country Code", "Device", "Browser", "OS", "Referrer"],
       ...visits.map(v => [
         new Date(v.created_at).toISOString(),
+        pageName(v.path || "/"),
         v.path || "",
         v.country || "",
         v.country_code || "",
@@ -185,11 +227,11 @@ export const SiteTraffic = () => {
           { label: "Total visits", value: totalVisits.toLocaleString() },
           { label: "Countries", value: uniqueCountries },
           { label: "Mobile share", value: `${mobileShare}%` },
-          { label: "Top page", value: (topPages[0]?.name || "-").slice(0, 18) },
+          { label: "Top page", value: topPages[0]?.name || "-" },
         ].map(s => (
           <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-gradient-to-br from-brand-orange/10 to-transparent p-4">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">{s.label}</p>
-            <p className="mt-1.5 font-serif text-2xl">{s.value}</p>
+            <p className="mt-1.5 font-serif text-2xl truncate" title={String(s.value)}>{s.value}</p>
           </div>
         ))}
       </div>

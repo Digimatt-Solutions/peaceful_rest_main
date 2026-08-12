@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-dark.png";
+import logoTextLight from "@/assets/makiwa-logo-light.png";
 import logo from "@/assets/makiwa-logo.png";
 
 type NavItem = { to: string; label: string; icon: any; end?: boolean; roles?: string[] };
@@ -111,7 +112,13 @@ export const DashboardLayout = () => {
         <div className={cn("h-16 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center bg-slate-100 dark:bg-slate-900", collapsed ? "lg:justify-center lg:px-2" : "justify-start")}>
           <Link to="/" className="flex items-center gap-2 min-w-0">
             <img src={logoMark} alt="" className={cn("object-contain rounded-md", collapsed ? "h-8 w-8" : "h-9 w-9")} />
-            {!collapsed && <img src={logoText} alt="Makiwa" className="h-7 w-auto object-contain" />}
+            {!collapsed && (
+              <img
+                src={theme === "dark" ? logoTextLight : logoText}
+                alt="Makiwa"
+                className="h-7 w-auto object-contain"
+              />
+            )}
           </Link>
         </div>
 
