@@ -17,6 +17,37 @@ const PERIODS = [
 
 const COLORS = ["#f97316", "#fb923c", "#fdba74", "#fed7aa", "#c2410c", "#9a3412", "#ea580c", "#7c2d12"];
 
+// Human readable page names instead of raw routes.
+const PAGE_NAMES: Record<string, string> = {
+  "/": "Home (Landing page)",
+  "/auth": "Sign in / Create account",
+  "/setup-admin": "Admin setup",
+  "/dashboard": "Dashboard",
+  "/dashboard/memorials": "My Memorials",
+  "/dashboard/obituary": "Obituary Management",
+  "/dashboard/family": "Family Tree",
+  "/dashboard/condolences": "Condolences",
+  "/dashboard/fundraising": "Fundraising",
+  "/dashboard/moments": "Life Moments",
+  "/dashboard/anniversary": "Anniversary",
+  "/dashboard/community": "Community",
+  "/dashboard/messages": "Messages",
+  "/dashboard/oversight": "Memorial Oversight",
+  "/dashboard/access": "User Management",
+  "/dashboard/activity": "Activity Logs",
+  "/dashboard/profile": "Profile",
+  "/dashboard/settings": "Settings",
+};
+
+const pageName = (path: string) => {
+  if (!path) return "Home (Landing page)";
+  const clean = path.split("?")[0].replace(/\/+$/, "") || "/";
+  if (PAGE_NAMES[clean]) return PAGE_NAMES[clean];
+  if (clean.startsWith("/memorial/")) return "Memorial page";
+  const last = clean.split("/").filter(Boolean).pop() || "Home";
+  return last.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 const Card = ({ title, icon: Icon, children, className = "" }: any) => (
   <div className={`rounded-2xl border border-border bg-card p-5 ${className}`}>
     <div className="flex items-center gap-2.5 mb-4">
