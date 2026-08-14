@@ -22,11 +22,12 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [form, setForm] = useState({
-    full_name: "", date_of_birth: "", date_of_death: "",
+    full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
     location: "", short_tribute: "",
     profile_photo_url: "", cover_photo_url: "",
     is_public: true,
   });
+
 
   const upload = async (file: File, field: "profile_photo_url" | "cover_photo_url") => {
     if (!user) return;
@@ -42,26 +43,37 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!form.full_name.trim()) { toast.error("Full name is required"); return; }
+    if (!form.full_name.trim()) { toast.error("Full ID name is required"); return; }
+    const nid = form.national_id.trim();
+    if (nid) {
+      const { data: dup } = await supabase.from("memorials").select("id,full_name").ilike("national_id", nid).maybeSingle();
+      if (dup) { toast.error(`An obituary with this ID already exists for ${dup.full_name}`); return; }
+    }
     setSaving(true);
     const payload = {
       ...form,
+      national_id: nid || null,
       created_by: user.id,
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
     };
     const { data, error } = await supabase.from("memorials").insert(payload).select().maybeSingle();
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      if ((error as any).code === "23505") toast.error("This ID number is already registered for another memorial.");
+      else toast.error(error.message);
+      return;
+    }
     logActivity("memorial_create", {
       entity_type: "memorial", entity_id: data?.id,
       description: `Created memorial for ${form.full_name}`,
     });
-    toast.success("Memorial created");
+    toast.success("Memorial created", { description: `${form.full_name}'s memorial page is ready.` });
     setOpen(false);
-    setForm({ full_name: "", date_of_birth: "", date_of_death: "", location: "", short_tribute: "", profile_photo_url: "", cover_photo_url: "", is_public: true });
+    setForm({ full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "", location: "", short_tribute: "", profile_photo_url: "", cover_photo_url: "", is_public: true });
     onCreated?.(data);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,9 +91,20 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
         </DialogHeader>
         <form onSubmit={submit} className="space-y-5 mt-2">
           <div className="space-y-2">
-            <Label>Full name *</Label>
-            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+            <Label>Full ID Name *</Label>
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="As written on the national ID" required />
           </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>ID Number <span className="text-muted-foreground font-normal">(prevents duplicate entries)</span></Label>
+              <Input value={form.national_id} onChange={(e) => setForm({ ...form, national_id: e.target.value })} placeholder="e.g. 12345678" />
+            </div>
+            <div className="space-y-2">
+              <Label>Gender</Label>
+              <Input value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} placeholder="e.g. Male / Female" />
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2"><Label>Date of birth</Label><Input type="date" value={form.date_of_birth} onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })} /></div>
             <div className="space-y-2"><Label>Date of passing</Label><Input type="date" value={form.date_of_death} onChange={(e) => setForm({ ...form, date_of_death: e.target.value })} /></div>
