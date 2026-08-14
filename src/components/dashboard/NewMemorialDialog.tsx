@@ -22,11 +22,12 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [form, setForm] = useState({
-    full_name: "", date_of_birth: "", date_of_death: "",
+    full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
     location: "", short_tribute: "",
     profile_photo_url: "", cover_photo_url: "",
     is_public: true,
   });
+
 
   const upload = async (file: File, field: "profile_photo_url" | "cover_photo_url") => {
     if (!user) return;
