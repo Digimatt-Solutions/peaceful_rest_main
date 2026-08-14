@@ -91,9 +91,20 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
         </DialogHeader>
         <form onSubmit={submit} className="space-y-5 mt-2">
           <div className="space-y-2">
-            <Label>Full name *</Label>
-            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+            <Label>Full ID Name *</Label>
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="As written on the national ID" required />
           </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>ID Number <span className="text-muted-foreground font-normal">(prevents duplicate entries)</span></Label>
+              <Input value={form.national_id} onChange={(e) => setForm({ ...form, national_id: e.target.value })} placeholder="e.g. 12345678" />
+            </div>
+            <div className="space-y-2">
+              <Label>Gender</Label>
+              <Input value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} placeholder="e.g. Male / Female" />
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2"><Label>Date of birth</Label><Input type="date" value={form.date_of_birth} onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })} /></div>
             <div className="space-y-2"><Label>Date of passing</Label><Input type="date" value={form.date_of_death} onChange={(e) => setForm({ ...form, date_of_death: e.target.value })} /></div>
