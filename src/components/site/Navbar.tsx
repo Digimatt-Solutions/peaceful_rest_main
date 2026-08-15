@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, LogIn, UserPlus, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,9 +14,32 @@ const links = [
   { label: "Contact", href: "#contact" },
 ];
 
+const scrollToSection = (href: string) => {
+  const id = href.replace("#", "");
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
 export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setOpen(false);
+
+    if (location.pathname === "/") {
+      scrollToSection(href);
+    } else {
+      navigate(`/${href}`);
+      // After navigation, wait for the landing page to mount then scroll.
+      setTimeout(() => scrollToSection(href), 100);
+    }
+  };
 
   return (
     <header className="fixed -top-1 inset-x-0 z-50 bg-brand-black/90 border-b border-brand-white/10">
@@ -30,6 +53,7 @@ export const Navbar = () => {
             <li key={l.label}>
               <a
                 href={l.href}
+                onClick={(e) => handleNavClick(e, l.href)}
                 className="text-sm font-medium tracking-wide text-brand-white/85 transition-colors hover:text-brand-orange"
               >
                 {l.label}
@@ -71,7 +95,7 @@ export const Navbar = () => {
               <li key={l.label}>
                 <a
                   href={l.href}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => handleNavClick(e, l.href)}
                   className="block py-2 text-base font-medium text-brand-white/85 hover:text-brand-orange"
                 >
                   {l.label}
