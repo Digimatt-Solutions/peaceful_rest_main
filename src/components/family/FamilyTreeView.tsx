@@ -77,7 +77,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
 
   return (
     <div className={cn("rounded-3xl border border-border bg-gradient-to-b from-muted/30 to-card p-6 sm:p-10 overflow-x-auto", className)}>
-      <div className="min-w-[640px] flex flex-col items-center gap-2">
+      <div className="min-w-[50px] flex flex-col items-center gap-2">
         {/* Parents row */}
         {(father || mother) && (
           <>
@@ -141,11 +141,6 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
           </>
         )}
 
-        {members.length === 0 && (
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            Add parents, spouse, siblings, and children to build the family tree.
-          </div>
-        )}
       </div>
     </div>
   );

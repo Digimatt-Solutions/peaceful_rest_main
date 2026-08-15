@@ -7,6 +7,8 @@ import {
   Heart,
   Users,
   ShieldCheck,
+  Plus,
+  Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -99,12 +101,11 @@ export const Hero = () => {
               <Button
                 asChild
                 size="lg"
-                className="h-12 px-5 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white border-2 border-brand-orange font-semibold shadow-lg"
+                className="h-12 px-4 rounded-2 bg-brand-orange hover:bg-brand-orange/90 text-white border-[2.1px] border-brand-orange font-bold text-[15px] shadow-lg"
               >
-                <Link to="/auth">
-                  <HeartHandshake className="mr-2 h-5 w-5" />
+                <Link to="/auth?tab=create-account">
+                  <Plus className="h-5 w-5 stroke-[2.5]" />
                   Create a Memorial
-                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
 
@@ -112,10 +113,10 @@ export const Hero = () => {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 px-5 rounded-xl border-2 border-brand-black bg-white text-brand-black font-semibold hover:bg-brand-black hover:text-white"
+                className="h-12 px-4 rounded-xl border-[2.1px] border-brand-orange bg-white text-brand-orange font-bold text-[15px] hover:bg-brand-orange hover:text-white"
               >
                 <a href="#memorials">
-                  <Users className="mr-2 h-5 w-5" />
+                  <Clock className="h-5 w-5 stroke-[2.5]" />
                   Browse Memorials
                 </a>
               </Button>
@@ -127,17 +128,17 @@ export const Hero = () => {
                 <div>
                   <Heart className="h-6 w-6 text-brand-orange mb-2" />
                   <h3 className="font-semibold text-brand-black">Honor</h3>
-                  <p className="text-sm text-brand-black/60">with love</p>
+                  <p className="text-sm text-brand-black/60">With love</p>
                 </div>
                 <div>
                   <Users className="h-6 w-6 text-brand-orange mb-2" />
                   <h3 className="font-semibold text-brand-black">Share</h3>
-                  <p className="text-sm text-brand-black/60">memories</p>
+                  <p className="text-sm text-brand-black/60">Memories</p>
                 </div>
                 <div>
                   <ShieldCheck className="h-6 w-6 text-brand-orange mb-2" />
                   <h3 className="font-semibold text-brand-black">Forever</h3>
-                  <p className="text-sm text-brand-black/60">remembered</p>
+                  <p className="text-sm text-brand-black/60">Remembered</p>
                 </div>
               </div>
             </div>

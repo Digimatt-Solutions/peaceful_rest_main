@@ -300,7 +300,7 @@ export const Memorials = () => {
                     to={`/memorial/${m.id}`}
                     className="group block"
                   >
-                    <article className="overflow-hidden rounded-[24px] bg-white border border-black/[0.06] shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]">
+                    <article className="overflow-hidden rounded-[16px] bg-white border border-black/[0.06] shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]">
 
                       {/* Image */}
                       <div className="relative h-[355px] overflow-hidden">
@@ -379,33 +379,68 @@ export const Memorials = () => {
 
                         </div>
 
-                        <div className="mt-3 flex items-center justify-between gap-3">
+                        <div className="mt-4 pt-3 border-t border-neutral-200/80 flex items-center justify-between gap-3">
 
-                          <div className="flex items-center gap-3 text-xs text-neutral-600">
-                            <span className="inline-flex items-center gap-1.5" title="Condolences">
-                              <MessageCircle className="h-4 w-4 text-brand-orange" />
-                              <span className="font-medium">{condCounts[m.id] || 0}</span>
+                        {/* Engagement actions */}
+                        <div className="flex items-center gap-4 text-xs text-neutral-600">
+
+                          {/* Condolences / Comments */}
+                          <span
+                            className="inline-flex items-center gap-1.5"
+                            title="Condolences"
+                          >
+                            <MessageCircle className="h-4 w-4 stroke-[2] text-brand-orange" />
+                            <span className="font-medium">
+                              {condCounts[m.id] || 0}
                             </span>
-                            <span className="inline-flex items-center gap-1.5" title="Views">
-                              <Eye className="h-4 w-4 text-brand-orange" />
-                              <span className="font-medium">{(m.visitor_count || 0).toLocaleString()}</span>
-                            </span>
-                            <button
-                              type="button"
-                              onClick={(e) => shareMemorial(e, m)}
-                              className="inline-flex items-center gap-1.5 hover:text-brand-orange transition-colors"
-                              aria-label="Share memorial"
+
+                          </span>
+
+                          {/* Views */}
+                            <span
+                              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[6px] border border-neutral-200 bg-neutral-50/50"
+                              title="Views"
                             >
-                              <Share2 className="h-4 w-4" />
-                              <span className="hidden sm:inline">Share</span>
-                            </button>
-                          </div>
+                              <Eye className="h-4 w-4 stroke-[2] text-brand-orange" />
+                              <span className="font-medium">
+                                {(m.visitor_count || 0).toLocaleString()}
+                              </span>
+                            </span>
 
-<div className="flex items-center gap-2 rounded-sm px-3 py-1.5 border-2 border-brand-orange bg-brand-orange text-white font-semibold text-sm transition-all duration-300 group-hover:bg-white group-hover:text-brand-orange group-hover:border-brand-orange">                            <BookOpen className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-                            <span>View</span>
-                          </div>
+                          {/* Share */}
+                          <button
+                            type="button"
+                            onClick={(e) => shareMemorial(e, m)}
+                            className="inline-flex items-center gap-1.5 text-neutral-600 hover:text-brand-orange transition-colors"
+                            aria-label="Share memorial"
+                          >
+                            <Share2 className="h-4 w-4 stroke-[2]" />
+                          </button>
 
                         </div>
+
+                        {/* View Memorial */}
+                        <div
+                          className="inline-flex items-center gap-2 rounded-[8px] px-3.5 py-2
+                                    border-2 border-brand-orange
+                                    bg-brand-orange text-white
+                                    font-bold text-sm
+                                    shadow-sm
+                                    transition-all duration-300
+                                    group-hover:bg-white
+                                    group-hover:text-brand-orange"
+                        >
+                          <span>View Memorial</span>
+
+                          <ArrowUpRight
+                            className="h-4 w-4 stroke-[2.5]
+                                      transition-transform duration-300
+                                      group-hover:translate-x-0.5
+                                      group-hover:-translate-y-0.5"
+                          />
+                        </div>
+
+                      </div>
 
                       </div>
 

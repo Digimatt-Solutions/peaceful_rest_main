@@ -20,7 +20,7 @@ const features = [
   {
     icon: HeartHandshake,
     name: "Fundraising",
-    desc: "Raise contributions toward funeral, burial or family support with secure Stripe checkout.",
+    desc: "Raise contributions toward funeral, burial or family support with secure Mpesa checkout.",
   },
   {
     icon: MessageCircle,

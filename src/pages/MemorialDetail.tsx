@@ -249,7 +249,7 @@ const MemorialDetail = () => {
       {/* Hero */}
       <section className="relative pt-6 overflow-hidden">
         {/* Layered background */}
-        <div className="absolute inset-0 z-0 h-[28vh] min-h-[740px] overflow-hidden">
+        <div className="absolute inset-0 z-0 h-[28vh] min-h-[800px] overflow-hidden">
           {cover ? (
             <img
               src={cover}
@@ -305,15 +305,15 @@ const MemorialDetail = () => {
                       toast.success("Link copied to clipboard");
                     }
                   }}
-                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 sm:px-6 shadow-lg font-semibold"
+                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 sm:px-4 shadow-lg font-bold"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Share2 className="h-4 w-4" />
                   Share memorial
                 </Button>
 
                 <a
                   href="#condolence"
-                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-6 bg-black/40 border border-brand-orange text-white backdrop-blur-md hover:bg-brand-orange hover:text-white transition-colors text-sm font-semibold"
+                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-4  border border-brand-orange text-brand-orange backdrop-blur-md hover:bg-brand-orange hover:text-white transition-colors text-sm font-bold"
                 >
                   <Heart className="h-4 w-4" />
                   Send condolences
@@ -329,19 +329,28 @@ const MemorialDetail = () => {
 
             {/* Right circular portrait */}
             {memorial.profile_photo_url && (
-              <div className="hidden lg:flex lg:col-span-4 items-center justify-center">
-                <div className="relative">
+              <div className="hidden lg:flex lg:col-span-4 h-full items-center justify-center">
+                <div className="relative flex items-center justify-center">
                   <div className="relative h-[300px] w-[300px] xl:h-[360px] xl:w-[360px] rounded-full overflow-hidden ring-8 ring-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]">
+                    
                     <img
                       src={memorial.profile_photo_url}
                       alt={memorial.full_name}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="absolute inset-0 h-full w-full object-cover object-center"
                     />
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
                     <div className="absolute inset-x-0 bottom-0 p-6 text-center">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">Cherished Always</p>
-                      <p className="mt-1 font-serif text-2xl">{memorial.full_name.split(" ")[0]}</p>
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">
+                        Cherished Always
+                      </p>
+
+                      <p className="mt-1 font-serif text-2xl">
+                        {memorial.full_name.split(" ")[0]}
+                      </p>
                     </div>
+
                   </div>
                 </div>
               </div>
@@ -557,7 +566,7 @@ const MemorialDetail = () => {
               <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
               </Button>
-              <p className="text-xs text-muted-foreground">Official condolences are reviewed by an admin before they appear publicly.</p>
+              <p className="text-xs text-muted-foreground">Official condolences are reviewed before they appear publicly.</p>
             </form>
 
             <div className="mt-8 space-y-4">
