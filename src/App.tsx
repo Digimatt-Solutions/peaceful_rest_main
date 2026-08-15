@@ -15,6 +15,8 @@ import Auth from "./pages/Auth";
 import SetupAdmin from "./pages/SetupAdmin";
 
 import MemorialDetail from "./pages/MemorialDetail";
+import AllMemorials from "./pages/AllMemorials";
+
 import Overview from "./pages/dashboard/Overview";
 import MyMemorials from "./pages/dashboard/MyMemorials";
 import ObituaryManagement from "./pages/dashboard/ObituaryManagement";
