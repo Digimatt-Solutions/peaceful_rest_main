@@ -60,7 +60,9 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/setup-admin" element={<SetupAdmin />} />
 
+            <Route path="/memorials" element={<AllMemorials />} />
             <Route path="/memorial/:id" element={<MemorialDetail />} />
+
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index element={<Overview />} />
               <Route path="memorials" element={<MyMemorials />} />
