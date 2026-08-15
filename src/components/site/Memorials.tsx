@@ -231,7 +231,8 @@ export const Memorials = () => {
             variant="outline"
             className="h-12 px-6 rounded-xl border-black/10 bg-white hover:bg-black hover:text-white shrink-0"
           >
-            <Link to="/auth">
+            <Link to="/memorials">
+
               View All Memorials
               <ArrowUpRight className="ml-2 h-4 w-4" />
             </Link>
