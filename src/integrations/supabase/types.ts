@@ -696,6 +696,30 @@ export type Database = {
           },
         ]
       }
+      otp_blocks: {
+        Row: {
+          blocked_until: string
+          created_at: string
+          id: string
+          identifier: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_until: string
+          created_at?: string
+          id?: string
+          identifier: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_until?: string
+          created_at?: string
+          id?: string
+          identifier?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       phone_otps: {
         Row: {
           attempts: number
@@ -703,6 +727,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          ip: string | null
           phone: string
           verified: boolean
         }
@@ -712,6 +737,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          ip?: string | null
           phone: string
           verified?: boolean
         }
@@ -721,6 +747,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          ip?: string | null
           phone?: string
           verified?: boolean
         }
