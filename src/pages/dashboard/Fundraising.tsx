@@ -224,6 +224,10 @@ const Fundraising = () => {
         const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
         setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
       } else setDonations([]);
+      const { data: ps } = ids.length
+        ? await supabase.from("payouts").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false })
+        : { data: [] as any[] };
+      setPayouts(ps || []);
     })();
   }, [memorialId]);
 
