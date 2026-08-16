@@ -38,7 +38,16 @@ const Fundraising = () => {
   const [memorialId, setMemorialId] = useState("");
   const [funds, setFunds] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
-  const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
+  const [form, setForm] = useState({
+    title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "",
+    organiser_name: "", organiser_id_number: "", payout_phone: "", organiser_relationship: "",
+  });
+  const [idPhoto, setIdPhoto] = useState<File | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [payouts, setPayouts] = useState<any[]>([]);
+  const [payingOut, setPayingOut] = useState<string | null>(null);
+  const [reviewFund, setReviewFund] = useState<any>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(false);
