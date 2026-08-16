@@ -394,7 +394,7 @@ const Fundraising = () => {
                 <Plus className="h-4 w-4 mr-1.5" /> New fundraiser
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[88vh] overflow-y-auto">
               <DialogHeader><DialogTitle className="font-serif text-2xl">New fundraiser</DialogTitle></DialogHeader>
               <div className="space-y-4 mt-2">
                 <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
@@ -417,7 +417,34 @@ const Fundraising = () => {
                   />
                   <p className="text-xs text-muted-foreground">Kept private. Used to verify the fundraiser before it goes live.</p>
                 </div>
-                <Button onClick={create} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">Create fundraiser</Button>
+
+                <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-brand-orange" />
+                    <p className="text-sm font-semibold">Organiser verification (payout details)</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Contributions are collected through the Makiwa M-Pesa shortcode and then released to the
+                    organiser's M-Pesa number below once verified.
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-2"><Label>Organiser full name *</Label><Input value={form.organiser_name} onChange={(e) => setForm({ ...form, organiser_name: e.target.value })} /></div>
+                    <div className="space-y-2"><Label>ID number *</Label><Input value={form.organiser_id_number} onChange={(e) => setForm({ ...form, organiser_id_number: e.target.value })} /></div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-2"><Label>M-Pesa payout phone *</Label><Input type="tel" placeholder="07XXXXXXXX" value={form.payout_phone} onChange={(e) => setForm({ ...form, payout_phone: e.target.value })} /></div>
+                    <div className="space-y-2"><Label>Relationship to deceased *</Label><Input placeholder="e.g. Son, Spouse" value={form.organiser_relationship} onChange={(e) => setForm({ ...form, organiser_relationship: e.target.value })} /></div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Photo of ID *</Label>
+                    <Input type="file" accept="image/*" onChange={(e) => setIdPhoto(e.target.files?.[0] || null)} />
+                    {idPhoto && <p className="text-xs text-muted-foreground">{idPhoto.name}</p>}
+                  </div>
+                </div>
+
+                <Button onClick={create} disabled={creating} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+                  {creating ? "Submitting…" : "Submit for approval"}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
