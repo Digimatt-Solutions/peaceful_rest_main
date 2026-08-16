@@ -30,3 +30,9 @@ verify_jwt = false
 
 [functions.mpesa-status]
 verify_jwt = false
+
+[functions.mpesa-b2c-initiate]
+verify_jwt = false
+
+[functions.mpesa-b2c-result]
+verify_jwt = false

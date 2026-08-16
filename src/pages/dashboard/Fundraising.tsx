@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt, Smartphone, CreditCard, Loader2 } from "lucide-react";
+import { HeartHandshake, Plus, Users, TrendingUp, Target, Wallet, Crown, Calendar, Download, Receipt, Smartphone, CreditCard, Loader2, ShieldCheck, CheckCircle2, XCircle, Clock, Send, BadgeCheck } from "lucide-react";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -38,7 +38,16 @@ const Fundraising = () => {
   const [memorialId, setMemorialId] = useState("");
   const [funds, setFunds] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
-  const [form, setForm] = useState({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
+  const [form, setForm] = useState({
+    title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "",
+    organiser_name: "", organiser_id_number: "", payout_phone: "", organiser_relationship: "",
+  });
+  const [idPhoto, setIdPhoto] = useState<File | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [payouts, setPayouts] = useState<any[]>([]);
+  const [payingOut, setPayingOut] = useState<string | null>(null);
+  const [reviewFund, setReviewFund] = useState<any>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [receiptOpen, setReceiptOpen] = useState(false);
@@ -215,23 +224,98 @@ const Fundraising = () => {
         const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
         setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
       } else setDonations([]);
+      const { data: ps } = ids.length
+        ? await supabase.from("payouts").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false })
+        : { data: [] as any[] };
+      setPayouts(ps || []);
     })();
   }, [memorialId]);
 
+  const emptyForm = {
+    title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "",
+    organiser_name: "", organiser_id_number: "", payout_phone: "", organiser_relationship: "",
+  };
+
   const create = async () => {
-    if (!form.title || !memorialId) return;
+    if (!form.title.trim() || !memorialId) return toast.error("Enter a fundraiser title");
     if (!form.death_certificate_number.trim()) return toast.error("Death certificate number is required");
+    if (!form.organiser_name.trim()) return toast.error("Enter the organiser's full name");
+    if (!form.organiser_id_number.trim()) return toast.error("Enter the organiser's ID number");
+    if (!form.organiser_relationship.trim()) return toast.error("State your relationship to the deceased");
+    const phoneDigits = form.payout_phone.replace(/\D/g, "");
+    if (phoneDigits.length < 9) return toast.error("Enter a valid M-Pesa payout phone number");
+    if (!idPhoto) return toast.error("Upload a photo of the organiser's ID");
+
+    setCreating(true);
+    let idPhotoUrl: string | null = null;
+    const path = `fundraiser-kyc/${memorialId}/${Date.now()}-${idPhoto.name.replace(/\s+/g, "-")}`;
+    const { error: upErr } = await supabase.storage.from("memorial-media").upload(path, idPhoto);
+    if (upErr) { setCreating(false); return toast.error("Could not upload ID photo"); }
+    idPhotoUrl = supabase.storage.from("memorial-media").getPublicUrl(path).data.publicUrl;
+
     const { data, error } = await supabase.from("fundraisers").insert({
-      ...form,
+      title: form.title.trim(),
+      description: form.description,
+      category: form.category,
       death_certificate_number: form.death_certificate_number.trim(),
+      organiser_name: form.organiser_name.trim(),
+      organiser_id_number: form.organiser_id_number.trim(),
+      organiser_relationship: form.organiser_relationship.trim(),
+      payout_phone: form.payout_phone.trim(),
+      id_photo_url: idPhotoUrl,
+      status: "pending",
       memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
     }).select().maybeSingle();
+    setCreating(false);
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
-    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
+    setForm(emptyForm);
+    setIdPhoto(null);
     setOpenCreate(false);
-    toast.success("Fundraiser created");
+    toast.success("Fundraiser submitted for approval");
   };
+
+  const loadPayouts = async (fundIds: string[]) => {
+    if (!fundIds.length) { setPayouts([]); return; }
+    const { data } = await supabase.from("payouts").select("*").in("fundraiser_id", fundIds).order("created_at", { ascending: false });
+    setPayouts(data || []);
+  };
+
+  const decideFundraiser = async (fund: any, approve: boolean) => {
+    const patch: any = approve
+      ? { status: "approved", approved_by: user?.id, approved_at: new Date().toISOString(), rejection_reason: null }
+      : { status: "rejected", rejection_reason: rejectReason || "Details could not be verified" };
+    const { error } = await supabase.from("fundraisers").update(patch).eq("id", fund.id);
+    if (error) return toast.error(error.message);
+    setFunds(funds.map(f => f.id === fund.id ? { ...f, ...patch } : f));
+    setReviewFund(null); setRejectReason("");
+    toast.success(approve ? "Fundraiser approved and live" : "Fundraiser rejected");
+  };
+
+  const releaseFunds = async (fund: any) => {
+    setPayingOut(fund.id);
+    const { data, error } = await supabase.functions.invoke("mpesa-b2c-initiate", { body: { fundraiser_id: fund.id } });
+    setPayingOut(null);
+    if (error || data?.error) return toast.error(data?.error || error?.message || "Payout failed");
+    if (data?.mode === "manual") toast.message("Payout queued for manual sending (B2C not configured yet).");
+    else toast.success("Payout sent to M-Pesa. It will confirm shortly.");
+    await loadPayouts(funds.map(f => f.id));
+  };
+
+  const markPayoutPaid = async (payout: any) => {
+    const { error } = await supabase.from("payouts")
+      .update({ status: "paid", completed_at: new Date().toISOString() }).eq("id", payout.id);
+    if (error) return toast.error(error.message);
+    const fund = funds.find(f => f.id === payout.fundraiser_id);
+    if (fund) {
+      const newPaid = Number(fund.paid_out_amount || 0) + Number(payout.amount);
+      await supabase.from("fundraisers").update({ paid_out_amount: newPaid }).eq("id", fund.id);
+      setFunds(funds.map(f => f.id === fund.id ? { ...f, paid_out_amount: newPaid } : f));
+    }
+    setPayouts(payouts.map(p => p.id === payout.id ? { ...p, status: "paid" } : p));
+    toast.success("Payout marked as paid");
+  };
+
 
   const addManualContribution = async () => {
     const amt = Number(contribForm.amount);
@@ -310,7 +394,7 @@ const Fundraising = () => {
                 <Plus className="h-4 w-4 mr-1.5" /> New fundraiser
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[88vh] overflow-y-auto">
               <DialogHeader><DialogTitle className="font-serif text-2xl">New fundraiser</DialogTitle></DialogHeader>
               <div className="space-y-4 mt-2">
                 <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
@@ -333,7 +417,34 @@ const Fundraising = () => {
                   />
                   <p className="text-xs text-muted-foreground">Kept private. Used to verify the fundraiser before it goes live.</p>
                 </div>
-                <Button onClick={create} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">Create fundraiser</Button>
+
+                <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-brand-orange" />
+                    <p className="text-sm font-semibold">Organiser verification (payout details)</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Contributions are collected through the Makiwa M-Pesa shortcode and then released to the
+                    organiser's M-Pesa number below once verified.
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-2"><Label>Organiser full name *</Label><Input value={form.organiser_name} onChange={(e) => setForm({ ...form, organiser_name: e.target.value })} /></div>
+                    <div className="space-y-2"><Label>ID number *</Label><Input value={form.organiser_id_number} onChange={(e) => setForm({ ...form, organiser_id_number: e.target.value })} /></div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-2"><Label>M-Pesa payout phone *</Label><Input type="tel" placeholder="07XXXXXXXX" value={form.payout_phone} onChange={(e) => setForm({ ...form, payout_phone: e.target.value })} /></div>
+                    <div className="space-y-2"><Label>Relationship to deceased *</Label><Input placeholder="e.g. Son, Spouse" value={form.organiser_relationship} onChange={(e) => setForm({ ...form, organiser_relationship: e.target.value })} /></div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Photo of ID *</Label>
+                    <Input type="file" accept="image/*" onChange={(e) => setIdPhoto(e.target.files?.[0] || null)} />
+                    {idPhoto && <p className="text-xs text-muted-foreground">{idPhoto.name}</p>}
+                  </div>
+                </div>
+
+                <Button onClick={create} disabled={creating} className="w-full rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+                  {creating ? "Submitting…" : "Submit for approval"}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -421,17 +532,28 @@ const Fundraising = () => {
               <div className="grid md:grid-cols-2 gap-4 mb-8">
                 {funds.map(f => {
                   const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;
+                  const status = f.status || "approved";
+                  const available = Number(f.raised_amount || 0) - Number(f.paid_out_amount || 0);
+                  const fundPayouts = payouts.filter(p => p.fundraiser_id === f.id);
                   return (
                     <div key={f.id} className="rounded-2xl border border-border bg-card p-5 hover:shadow-elegant transition-shadow">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
-                            {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
-                          </Badge>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
+                              {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
+                            </Badge>
+                            <StatusBadge status={status} />
+                          </div>
                           <h4 className="mt-2 font-serif text-lg">{f.title}</h4>
                         </div>
                       </div>
                       {f.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{f.description}</p>}
+
+                      {status === "rejected" && f.rejection_reason && (
+                        <p className="mt-2 text-xs text-red-600">Reason: {f.rejection_reason}</p>
+                      )}
+
                       <div className="mt-4">
                         <div className="flex justify-between text-sm mb-1.5">
                           <span className="font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(f.raised_amount).toLocaleString()}</span>
@@ -439,8 +561,59 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
+
+                      {(f.payout_phone || f.organiser_name) && (
+                        <div className="mt-4 rounded-xl border border-border bg-muted/30 p-3 text-xs space-y-1">
+                          <p className="font-semibold text-foreground flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-brand-orange" /> Organiser</p>
+                          <p className="text-muted-foreground">{f.organiser_name} {f.organiser_relationship ? `· ${f.organiser_relationship}` : ""}</p>
+                          {f.payout_phone && <p className="text-muted-foreground">Payout to {f.payout_phone}</p>}
+                          <p className="text-muted-foreground">
+                            Paid out KSh {Number(f.paid_out_amount || 0).toLocaleString()} · Available KSh {available.toLocaleString()}
+                          </p>
+                          {isSuperAdmin && f.id_photo_url && (
+                            <a href={f.id_photo_url} target="_blank" rel="noreferrer" className="text-brand-orange underline">View ID photo</a>
+                          )}
+                        </div>
+                      )}
+
+                      {isSuperAdmin && status === "pending" && (
+                        <div className="mt-3 flex gap-2">
+                          <Button size="sm" onClick={() => decideFundraiser(f, true)} className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <CheckCircle2 className="h-4 w-4 mr-1.5" /> Approve
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => { setReviewFund(f); setRejectReason(""); }} className="flex-1 rounded-lg border-red-300 text-red-600 hover:bg-red-50">
+                            <XCircle className="h-4 w-4 mr-1.5" /> Reject
+                          </Button>
+                        </div>
+                      )}
+
+                      {isSuperAdmin && status === "approved" && available > 0 && (
+                        <Button size="sm" onClick={() => releaseFunds(f)} disabled={payingOut === f.id}
+                          className="mt-3 w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">
+                          {payingOut === f.id ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Sending…</>
+                            : <><Send className="h-4 w-4 mr-1.5" /> Release KSh {available.toLocaleString()} to organiser</>}
+                        </Button>
+                      )}
+
+                      {fundPayouts.length > 0 && (
+                        <div className="mt-3 space-y-1.5">
+                          {fundPayouts.slice(0, 3).map(p => (
+                            <div key={p.id} className="flex items-center justify-between text-xs rounded-lg border border-border px-2.5 py-1.5">
+                              <span className="text-muted-foreground">{format(new Date(p.created_at), "MMM d")} · KSh {Number(p.amount).toLocaleString()}</span>
+                              <span className="flex items-center gap-2">
+                                <StatusBadge status={p.status} />
+                                {isSuperAdmin && (p.status === "manual" || p.status === "queued") && (
+                                  <button onClick={() => markPayoutPaid(p)} className="text-brand-orange underline">Mark paid</button>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <Button
                         size="sm"
+                        disabled={status !== "approved"}
                         onClick={() => {
                           setDonatingFund(f);
                           setPayMethod("mpesa");
@@ -450,7 +623,8 @@ const Fundraising = () => {
                         }}
                         className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
                       >
-                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate
+                        <HeartHandshake className="h-4 w-4 mr-1.5" />
+                        {status === "approved" ? "Donate" : status === "pending" ? "Awaiting approval" : "Not accepting donations"}
                       </Button>
                     </div>
                   );
@@ -530,6 +704,21 @@ const Fundraising = () => {
       )}
 
       <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
+
+      <Dialog open={!!reviewFund} onOpenChange={(o) => { if (!o) { setReviewFund(null); setRejectReason(""); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Reject fundraiser</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">
+              Let the organiser know why {reviewFund?.title} could not be verified.
+            </p>
+            <Textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Reason for rejection" />
+            <Button onClick={() => reviewFund && decideFundraiser(reviewFund, false)} className="w-full rounded-full bg-red-600 hover:bg-red-700 text-white">
+              Reject fundraiser
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={openAddContrib} onOpenChange={setOpenAddContrib}>
         <DialogContent className="max-w-lg">
@@ -636,6 +825,27 @@ const Fundraising = () => {
         </DialogContent>
       </Dialog>
     </>
+  );
+};
+
+const STATUS_STYLES: Record<string, { label: string; cls: string; icon: any }> = {
+  pending: { label: "Pending review", cls: "border-amber-300 text-amber-700 bg-amber-50", icon: Clock },
+  approved: { label: "Approved", cls: "border-emerald-300 text-emerald-700 bg-emerald-50", icon: BadgeCheck },
+  rejected: { label: "Rejected", cls: "border-red-300 text-red-600 bg-red-50", icon: XCircle },
+  queued: { label: "Queued", cls: "border-amber-300 text-amber-700 bg-amber-50", icon: Clock },
+  processing: { label: "Processing", cls: "border-sky-300 text-sky-700 bg-sky-50", icon: Loader2 },
+  manual: { label: "Manual", cls: "border-slate-300 text-slate-600 bg-slate-50", icon: Clock },
+  paid: { label: "Paid", cls: "border-emerald-300 text-emerald-700 bg-emerald-50", icon: CheckCircle2 },
+  failed: { label: "Failed", cls: "border-red-300 text-red-600 bg-red-50", icon: XCircle },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const s = STATUS_STYLES[status] || STATUS_STYLES.pending;
+  const Icon = s.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${s.cls}`}>
+      <Icon className="h-3 w-3" /> {s.label}
+    </span>
   );
 };
 
