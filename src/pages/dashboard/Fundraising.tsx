@@ -813,6 +813,27 @@ const Fundraising = () => {
   );
 };
 
+const STATUS_STYLES: Record<string, { label: string; cls: string; icon: any }> = {
+  pending: { label: "Pending review", cls: "border-amber-300 text-amber-700 bg-amber-50", icon: Clock },
+  approved: { label: "Approved", cls: "border-emerald-300 text-emerald-700 bg-emerald-50", icon: BadgeCheck },
+  rejected: { label: "Rejected", cls: "border-red-300 text-red-600 bg-red-50", icon: XCircle },
+  queued: { label: "Queued", cls: "border-amber-300 text-amber-700 bg-amber-50", icon: Clock },
+  processing: { label: "Processing", cls: "border-sky-300 text-sky-700 bg-sky-50", icon: Loader2 },
+  manual: { label: "Manual", cls: "border-slate-300 text-slate-600 bg-slate-50", icon: Clock },
+  paid: { label: "Paid", cls: "border-emerald-300 text-emerald-700 bg-emerald-50", icon: CheckCircle2 },
+  failed: { label: "Failed", cls: "border-red-300 text-red-600 bg-red-50", icon: XCircle },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const s = STATUS_STYLES[status] || STATUS_STYLES.pending;
+  const Icon = s.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${s.cls}`}>
+      <Icon className="h-3 w-3" /> {s.label}
+    </span>
+  );
+};
+
 const StatCard = ({ icon: Icon, label, value, tint }: any) => (
   <div className="rounded-2xl border border-border bg-card p-5 relative overflow-hidden">
     <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: tint }} />
