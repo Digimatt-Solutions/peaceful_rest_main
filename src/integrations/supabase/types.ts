@@ -416,6 +416,8 @@ export type Database = {
       }
       fundraisers: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           category: string
           created_at: string
           currency: string
@@ -423,12 +425,22 @@ export type Database = {
           description: string | null
           goal_amount: number
           id: string
+          id_photo_url: string | null
           is_active: boolean
           memorial_id: string
+          organiser_id_number: string | null
+          organiser_name: string | null
+          organiser_relationship: string | null
+          paid_out_amount: number
+          payout_phone: string | null
           raised_amount: number
+          rejection_reason: string | null
+          status: string
           title: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           category?: string
           created_at?: string
           currency?: string
@@ -436,12 +448,22 @@ export type Database = {
           description?: string | null
           goal_amount?: number
           id?: string
+          id_photo_url?: string | null
           is_active?: boolean
           memorial_id: string
+          organiser_id_number?: string | null
+          organiser_name?: string | null
+          organiser_relationship?: string | null
+          paid_out_amount?: number
+          payout_phone?: string | null
           raised_amount?: number
+          rejection_reason?: string | null
+          status?: string
           title: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           category?: string
           created_at?: string
           currency?: string
@@ -449,9 +471,17 @@ export type Database = {
           description?: string | null
           goal_amount?: number
           id?: string
+          id_photo_url?: string | null
           is_active?: boolean
           memorial_id?: string
+          organiser_id_number?: string | null
+          organiser_name?: string | null
+          organiser_relationship?: string | null
+          paid_out_amount?: number
+          payout_phone?: string | null
           raised_amount?: number
+          rejection_reason?: string | null
+          status?: string
           title?: string
         }
         Relationships: [
@@ -719,6 +749,65 @@ export type Database = {
           reason?: string | null
         }
         Relationships: []
+      }
+      payouts: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          conversation_id: string | null
+          created_at: string
+          error: string | null
+          fundraiser_id: string
+          id: string
+          method: string
+          mpesa_receipt: string | null
+          phone: string
+          recipient_name: string | null
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          fundraiser_id: string
+          id?: string
+          method?: string
+          mpesa_receipt?: string | null
+          phone: string
+          recipient_name?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          fundraiser_id?: string
+          id?: string
+          method?: string
+          mpesa_receipt?: string | null
+          phone?: string
+          recipient_name?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       phone_otps: {
         Row: {
