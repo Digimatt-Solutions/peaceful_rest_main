@@ -61,9 +61,10 @@ Deno.serve(async (req) => {
     );
 
     const { data: fund } = await admin.from("fundraisers")
-      .select("id,title,memorial_id,is_active").eq("id", fundraiser_id).maybeSingle();
+      .select("id,title,memorial_id,is_active,status").eq("id", fundraiser_id).maybeSingle();
     if (!fund) return json({ error: "Fundraiser not found" }, 404);
     if (!fund.is_active) return json({ error: "This fundraiser is not accepting donations." }, 400);
+    if (fund.status !== "approved") return json({ error: "This fundraiser is awaiting verification." }, 400);
 
     // OAuth token
     const tokenRes = await fetch(`${base}/oauth/v1/generate?grant_type=client_credentials`, {

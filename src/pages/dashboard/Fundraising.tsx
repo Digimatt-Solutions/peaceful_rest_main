@@ -705,6 +705,21 @@ const Fundraising = () => {
 
       <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
 
+      <Dialog open={!!reviewFund} onOpenChange={(o) => { if (!o) { setReviewFund(null); setRejectReason(""); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="font-serif text-2xl">Reject fundraiser</DialogTitle></DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">
+              Let the organiser know why {reviewFund?.title} could not be verified.
+            </p>
+            <Textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Reason for rejection" />
+            <Button onClick={() => reviewFund && decideFundraiser(reviewFund, false)} className="w-full rounded-full bg-red-600 hover:bg-red-700 text-white">
+              Reject fundraiser
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={openAddContrib} onOpenChange={setOpenAddContrib}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle className="font-serif text-2xl">Add contributor</DialogTitle></DialogHeader>
