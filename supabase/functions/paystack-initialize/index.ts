@@ -31,11 +31,12 @@ Deno.serve(async (req) => {
 
     const { data: fund, error: fErr } = await admin
       .from("fundraisers")
-      .select("id,title,memorial_id,is_active")
+      .select("id,title,memorial_id,is_active,status")
       .eq("id", fundraiser_id)
       .maybeSingle();
     if (fErr || !fund) return json({ error: "Fundraiser not found" }, 404);
     if (!fund.is_active) return json({ error: "This fundraiser is not currently accepting donations." }, 400);
+    if (fund.status !== "approved") return json({ error: "This fundraiser is awaiting verification." }, 400);
 
     // capture user if signed in
     let userId: string | null = null;
