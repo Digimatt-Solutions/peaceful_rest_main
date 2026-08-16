@@ -532,17 +532,28 @@ const Fundraising = () => {
               <div className="grid md:grid-cols-2 gap-4 mb-8">
                 {funds.map(f => {
                   const pct = f.goal_amount > 0 ? Math.min(100, (Number(f.raised_amount) / Number(f.goal_amount)) * 100) : 0;
+                  const status = f.status || "approved";
+                  const available = Number(f.raised_amount || 0) - Number(f.paid_out_amount || 0);
+                  const fundPayouts = payouts.filter(p => p.fundraiser_id === f.id);
                   return (
                     <div key={f.id} className="rounded-2xl border border-border bg-card p-5 hover:shadow-elegant transition-shadow">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
-                            {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
-                          </Badge>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] uppercase tracking-wider" style={{ borderColor: ORANGE[0], color: ORANGE[5] }}>
+                              {CATEGORIES.find(c => c.value === f.category)?.label || f.category}
+                            </Badge>
+                            <StatusBadge status={status} />
+                          </div>
                           <h4 className="mt-2 font-serif text-lg">{f.title}</h4>
                         </div>
                       </div>
                       {f.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{f.description}</p>}
+
+                      {status === "rejected" && f.rejection_reason && (
+                        <p className="mt-2 text-xs text-red-600">Reason: {f.rejection_reason}</p>
+                      )}
+
                       <div className="mt-4">
                         <div className="flex justify-between text-sm mb-1.5">
                           <span className="font-semibold" style={{ color: ORANGE[5] }}>KSh {Number(f.raised_amount).toLocaleString()}</span>
@@ -550,8 +561,59 @@ const Fundraising = () => {
                         </div>
                         <Progress value={pct} className="h-2" />
                       </div>
+
+                      {(f.payout_phone || f.organiser_name) && (
+                        <div className="mt-4 rounded-xl border border-border bg-muted/30 p-3 text-xs space-y-1">
+                          <p className="font-semibold text-foreground flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-brand-orange" /> Organiser</p>
+                          <p className="text-muted-foreground">{f.organiser_name} {f.organiser_relationship ? `· ${f.organiser_relationship}` : ""}</p>
+                          {f.payout_phone && <p className="text-muted-foreground">Payout to {f.payout_phone}</p>}
+                          <p className="text-muted-foreground">
+                            Paid out KSh {Number(f.paid_out_amount || 0).toLocaleString()} · Available KSh {available.toLocaleString()}
+                          </p>
+                          {isSuperAdmin && f.id_photo_url && (
+                            <a href={f.id_photo_url} target="_blank" rel="noreferrer" className="text-brand-orange underline">View ID photo</a>
+                          )}
+                        </div>
+                      )}
+
+                      {isSuperAdmin && status === "pending" && (
+                        <div className="mt-3 flex gap-2">
+                          <Button size="sm" onClick={() => decideFundraiser(f, true)} className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <CheckCircle2 className="h-4 w-4 mr-1.5" /> Approve
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => { setReviewFund(f); setRejectReason(""); }} className="flex-1 rounded-lg border-red-300 text-red-600 hover:bg-red-50">
+                            <XCircle className="h-4 w-4 mr-1.5" /> Reject
+                          </Button>
+                        </div>
+                      )}
+
+                      {isSuperAdmin && status === "approved" && available > 0 && (
+                        <Button size="sm" onClick={() => releaseFunds(f)} disabled={payingOut === f.id}
+                          className="mt-3 w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">
+                          {payingOut === f.id ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Sending…</>
+                            : <><Send className="h-4 w-4 mr-1.5" /> Release KSh {available.toLocaleString()} to organiser</>}
+                        </Button>
+                      )}
+
+                      {fundPayouts.length > 0 && (
+                        <div className="mt-3 space-y-1.5">
+                          {fundPayouts.slice(0, 3).map(p => (
+                            <div key={p.id} className="flex items-center justify-between text-xs rounded-lg border border-border px-2.5 py-1.5">
+                              <span className="text-muted-foreground">{format(new Date(p.created_at), "MMM d")} · KSh {Number(p.amount).toLocaleString()}</span>
+                              <span className="flex items-center gap-2">
+                                <StatusBadge status={p.status} />
+                                {isSuperAdmin && (p.status === "manual" || p.status === "queued") && (
+                                  <button onClick={() => markPayoutPaid(p)} className="text-brand-orange underline">Mark paid</button>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <Button
                         size="sm"
+                        disabled={status !== "approved"}
                         onClick={() => {
                           setDonatingFund(f);
                           setPayMethod("mpesa");
@@ -561,7 +623,8 @@ const Fundraising = () => {
                         }}
                         className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
                       >
-                        <HeartHandshake className="h-4 w-4 mr-1.5" /> Donate
+                        <HeartHandshake className="h-4 w-4 mr-1.5" />
+                        {status === "approved" ? "Donate" : status === "pending" ? "Awaiting approval" : "Not accepting donations"}
                       </Button>
                     </div>
                   );
