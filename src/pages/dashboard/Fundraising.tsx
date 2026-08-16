@@ -227,20 +227,91 @@ const Fundraising = () => {
     })();
   }, [memorialId]);
 
+  const emptyForm = {
+    title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "",
+    organiser_name: "", organiser_id_number: "", payout_phone: "", organiser_relationship: "",
+  };
+
   const create = async () => {
-    if (!form.title || !memorialId) return;
+    if (!form.title.trim() || !memorialId) return toast.error("Enter a fundraiser title");
     if (!form.death_certificate_number.trim()) return toast.error("Death certificate number is required");
+    if (!form.organiser_name.trim()) return toast.error("Enter the organiser's full name");
+    if (!form.organiser_id_number.trim()) return toast.error("Enter the organiser's ID number");
+    if (!form.organiser_relationship.trim()) return toast.error("State your relationship to the deceased");
+    const phoneDigits = form.payout_phone.replace(/\D/g, "");
+    if (phoneDigits.length < 9) return toast.error("Enter a valid M-Pesa payout phone number");
+    if (!idPhoto) return toast.error("Upload a photo of the organiser's ID");
+
+    setCreating(true);
+    let idPhotoUrl: string | null = null;
+    const path = `fundraiser-kyc/${memorialId}/${Date.now()}-${idPhoto.name.replace(/\s+/g, "-")}`;
+    const { error: upErr } = await supabase.storage.from("memorial-media").upload(path, idPhoto);
+    if (upErr) { setCreating(false); return toast.error("Could not upload ID photo"); }
+    idPhotoUrl = supabase.storage.from("memorial-media").getPublicUrl(path).data.publicUrl;
+
     const { data, error } = await supabase.from("fundraisers").insert({
-      ...form,
+      title: form.title.trim(),
+      description: form.description,
+      category: form.category,
       death_certificate_number: form.death_certificate_number.trim(),
+      organiser_name: form.organiser_name.trim(),
+      organiser_id_number: form.organiser_id_number.trim(),
+      organiser_relationship: form.organiser_relationship.trim(),
+      payout_phone: form.payout_phone.trim(),
+      id_photo_url: idPhotoUrl,
+      status: "pending",
       memorial_id: memorialId, goal_amount: Number(form.goal_amount), is_active: true,
     }).select().maybeSingle();
+    setCreating(false);
     if (error) return toast.error(error.message);
     setFunds([data, ...funds]);
-    setForm({ title: "", description: "", category: "funeral_expenses", goal_amount: 0, death_certificate_number: "" });
+    setForm(emptyForm);
+    setIdPhoto(null);
     setOpenCreate(false);
-    toast.success("Fundraiser created");
+    toast.success("Fundraiser submitted for approval");
   };
+
+  const loadPayouts = async (fundIds: string[]) => {
+    if (!fundIds.length) { setPayouts([]); return; }
+    const { data } = await supabase.from("payouts").select("*").in("fundraiser_id", fundIds).order("created_at", { ascending: false });
+    setPayouts(data || []);
+  };
+
+  const decideFundraiser = async (fund: any, approve: boolean) => {
+    const patch: any = approve
+      ? { status: "approved", approved_by: user?.id, approved_at: new Date().toISOString(), rejection_reason: null }
+      : { status: "rejected", rejection_reason: rejectReason || "Details could not be verified" };
+    const { error } = await supabase.from("fundraisers").update(patch).eq("id", fund.id);
+    if (error) return toast.error(error.message);
+    setFunds(funds.map(f => f.id === fund.id ? { ...f, ...patch } : f));
+    setReviewFund(null); setRejectReason("");
+    toast.success(approve ? "Fundraiser approved and live" : "Fundraiser rejected");
+  };
+
+  const releaseFunds = async (fund: any) => {
+    setPayingOut(fund.id);
+    const { data, error } = await supabase.functions.invoke("mpesa-b2c-initiate", { body: { fundraiser_id: fund.id } });
+    setPayingOut(null);
+    if (error || data?.error) return toast.error(data?.error || error?.message || "Payout failed");
+    if (data?.mode === "manual") toast.message("Payout queued for manual sending (B2C not configured yet).");
+    else toast.success("Payout sent to M-Pesa. It will confirm shortly.");
+    await loadPayouts(funds.map(f => f.id));
+  };
+
+  const markPayoutPaid = async (payout: any) => {
+    const { error } = await supabase.from("payouts")
+      .update({ status: "paid", completed_at: new Date().toISOString() }).eq("id", payout.id);
+    if (error) return toast.error(error.message);
+    const fund = funds.find(f => f.id === payout.fundraiser_id);
+    if (fund) {
+      const newPaid = Number(fund.paid_out_amount || 0) + Number(payout.amount);
+      await supabase.from("fundraisers").update({ paid_out_amount: newPaid }).eq("id", fund.id);
+      setFunds(funds.map(f => f.id === fund.id ? { ...f, paid_out_amount: newPaid } : f));
+    }
+    setPayouts(payouts.map(p => p.id === payout.id ? { ...p, status: "paid" } : p));
+    toast.success("Payout marked as paid");
+  };
+
 
   const addManualContribution = async () => {
     const amt = Number(contribForm.amount);
