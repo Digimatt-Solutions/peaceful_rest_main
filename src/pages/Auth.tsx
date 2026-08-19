@@ -328,11 +328,18 @@ const Auth = () => {
                         setBioLoading(true);
                         try {
                           await signInWithFingerprint(loginEmail.trim());
+                          setAttemptsLeft(null);
+                          try {
+                            await supabase.functions.invoke("login-guard", {
+                              body: { action: "success", email: loginEmail.trim() },
+                            });
+                          } catch {}
                           toast.success("Signed in with fingerprint");
                           navigate("/dashboard");
                         } catch (err: any) {
-                          toast.error(err.message || "Fingerprint sign-in failed");
+                          toast.error(err?.message ? friendlyError(err.message) : "We could not read your fingerprint. Please try again.");
                         } finally {
+
                           setBioLoading(false);
                         }
                       }}
