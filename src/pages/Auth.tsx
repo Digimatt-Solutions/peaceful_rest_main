@@ -75,7 +75,11 @@ const Auth = () => {
   const [showSuPw, setShowSuPw] = useState(false);
   const [suPassword, setSuPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState("");
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
+
 
 
   // phone verification
