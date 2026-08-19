@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2, MailCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
@@ -16,6 +17,21 @@ import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
 import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
 import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
+
+/** Turn technical auth/network errors into plain, reassuring language. */
+const friendlyError = (raw?: string | null): string => {
+  const m = (raw || "").toLowerCase();
+  if (!m) return "Something went wrong. Please try again.";
+  if (m.includes("invalid login credentials")) return "That email or password is not correct.";
+  if (m.includes("email not confirmed")) return "Please confirm your email first - check your inbox for the link.";
+  if (m.includes("user already registered") || m.includes("already been registered")) return "An account with this email already exists. Please log in instead.";
+  if (m.includes("password should be") || m.includes("weak password")) return "Please choose a stronger password (at least 8 characters).";
+  if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Please wait a moment and try again.";
+  if (m.includes("network") || m.includes("fetch")) return "We could not reach the server. Please check your connection.";
+  if (m.includes("invalid email")) return "Please enter a valid email address.";
+  return "Something went wrong. Please try again.";
+};
+
 
 
 const signUpSchema = z.object({
@@ -59,7 +75,11 @@ const Auth = () => {
   const [showSuPw, setShowSuPw] = useState(false);
   const [suPassword, setSuPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState("");
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
+
 
 
   // phone verification
@@ -146,7 +166,7 @@ const Auth = () => {
         },
       },
     });
-    if (error) { setLoading(false); toast.error(error.message); return; }
+    if (error) { setLoading(false); toast.error(friendlyError(error.message)); return; }
     if (signUpData.user) {
       await supabase
         .from("profiles")
@@ -154,6 +174,14 @@ const Auth = () => {
         .eq("id", signUpData.user.id);
     }
     setLoading(false);
+
+    // With email confirmation on, signUp returns no session - the user is NOT signed in yet.
+    if (!signUpData.session) {
+      setVerifyEmail(parsed.data.email);
+      setVerifyOpen(true);
+      return;
+    }
+    // Auto-confirm is enabled: the account is live, go straight in.
     toast.success("Welcome to Makiwa");
     navigate("/dashboard");
   };
@@ -172,7 +200,8 @@ const Auth = () => {
       if (check?.locked) {
         setLoading(false);
         const mins = check.locked_until ? Math.max(1, Math.ceil((new Date(check.locked_until).getTime() - Date.now()) / 60000)) : 60;
-        toast.error(`Account temporarily locked. Try again in ~${mins} minute${mins === 1 ? "" : "s"}.`);
+        setAttemptsLeft(0);
+        toast.error(`Account temporarily locked. Try again in about ${mins} minute${mins === 1 ? "" : "s"}.`);
         return;
       }
     } catch {}
@@ -185,17 +214,25 @@ const Auth = () => {
         });
         setLoading(false);
         if (fail?.locked) {
-          toast.error("Too many failed attempts. Account locked for 1 hour.");
+          setAttemptsLeft(0);
+          toast.error("Too many failed attempts. Your account is locked for 1 hour.");
         } else {
-          toast.error(`${error.message} · ${fail?.remaining ?? "?"} attempt${fail?.remaining === 1 ? "" : "s"} left`);
+          const left = typeof fail?.remaining === "number" ? fail.remaining : null;
+          setAttemptsLeft(left);
+          toast.error(
+            left === null
+              ? friendlyError(error.message)
+              : `${friendlyError(error.message)} ${left} attempt${left === 1 ? "" : "s"} left.`
+          );
         }
       } catch {
         setLoading(false);
-        toast.error(error.message);
+        toast.error(friendlyError(error.message));
       }
       return;
     }
-    // success - reset counter
+    // Correct credentials - clear the lockout counter and the on-screen warning.
+    setAttemptsLeft(null);
     try {
       await supabase.functions.invoke("login-guard", {
         body: { action: "success", email: parsed.data.email },
@@ -205,6 +242,7 @@ const Auth = () => {
     toast.success("Welcome back");
     navigate("/dashboard");
   };
+
 
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-background">
@@ -245,9 +283,10 @@ const Auth = () => {
           <p className="text-center text-muted-foreground">Sign in to continue, or create your free account.</p>
 
           <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "create-account")} className="mt-5">
-            <TabsList className="grid grid-cols-2 w-full h-10 p-1 bg-muted rounded-5">
-              <TabsTrigger value="login" id="login" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
-              <TabsTrigger value="create-account" id="create-account" className="rounded-20 data-[state=active]:bg-background data-[state=active]:shadow-sm">Create Account</TabsTrigger>
+            <TabsList className="grid grid-cols-2 w-full h-11 p-1 bg-muted rounded-xl">
+              <TabsTrigger value="login" id="login" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-brand-orange data-[state=active]:shadow-sm">Login</TabsTrigger>
+              <TabsTrigger value="create-account" id="create-account" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-brand-orange data-[state=active]:shadow-sm">Create Account</TabsTrigger>
+
 
             </TabsList>
 
@@ -255,7 +294,7 @@ const Auth = () => {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="li-email">Email address</Label>
-                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
+                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => { setLoginEmail(e.target.value); setAttemptsLeft(null); }} className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -269,7 +308,15 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
+                {attemptsLeft !== null && (
+                  <p className="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs font-medium text-destructive">
+                    {attemptsLeft === 0
+                      ? "Too many failed attempts. Please try again in about an hour."
+                      : `Incorrect details. ${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} left before your account is locked for an hour.`}
+                  </p>
+                )}
                 <div className="flex items-center gap-2">
+
                   <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><LogIn className="h-4 w-4 mr-2" />Sign In</>)}
                   </Button>
@@ -281,11 +328,18 @@ const Auth = () => {
                         setBioLoading(true);
                         try {
                           await signInWithFingerprint(loginEmail.trim());
+                          setAttemptsLeft(null);
+                          try {
+                            await supabase.functions.invoke("login-guard", {
+                              body: { action: "success", email: loginEmail.trim() },
+                            });
+                          } catch {}
                           toast.success("Signed in with fingerprint");
                           navigate("/dashboard");
                         } catch (err: any) {
-                          toast.error(err.message || "Fingerprint sign-in failed");
+                          toast.error(err?.message ? friendlyError(err.message) : "We could not read your fingerprint. Please try again.");
                         } finally {
+
                           setBioLoading(false);
                         }
                       }}
@@ -398,7 +452,7 @@ const Auth = () => {
                         className="h-10 rounded-xl tracking-[0.4em] text-center border-brand-orange/40"
                       />
                       <Button type="button" onClick={verifyCode} disabled={otpBusy}
-                        className="h-10 shrink-0 rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 px-4 text-xs">
+                        className="h-10 shrink-0 rounded-xl bg-brand-orange text-brand-white hover:bg-brand-orange/90 px-4 text-xs">
                         {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm"}
                       </Button>
                     </div>
@@ -441,7 +495,47 @@ const Auth = () => {
           </p>
         </div>
       </div>
+      {/* Email verification prompt shown after a successful sign-up */}
+      <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl border-brand-orange/30">
+          <DialogHeader className="items-center text-center">
+            <span className="mb-2 inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 text-brand-orange">
+              <MailCheck className="h-7 w-7" />
+            </span>
+            <DialogTitle className="text-xl">Confirm your email</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              Your account has been created. We sent a confirmation link to{" "}
+              <span className="font-medium text-foreground">{verifyEmail}</span>. Open it to activate your
+              account, then come back and log in. Remember to check your spam folder.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Button
+              className="w-full h-11 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
+              onClick={() => { setVerifyOpen(false); setTab("login"); }}
+            >
+              Got it, take me to login
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-11 rounded-lg border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10"
+              onClick={async () => {
+                const { error } = await supabase.auth.resend({
+                  type: "signup",
+                  email: verifyEmail,
+                  options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+                });
+                if (error) toast.error(friendlyError(error.message));
+                else toast.success("Confirmation email sent again");
+              }}
+            >
+              Resend the email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
+
   );
 };
 
