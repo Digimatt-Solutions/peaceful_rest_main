@@ -70,10 +70,10 @@ export const Navbar = () => {
           ) : (
             <>
               <Button asChild variant="ghost" className="rounded-lg text-brand-white border border-brand-white/60 hover:bg-brand-white/10 hover:text-brand-white">
-                <Link to="/auth"><LogIn className="mr-1.5 h-4 w-4" />Sign In</Link>
+                <Link to="/auth?tab=login"><LogIn className="mr-1.5 h-4 w-4" />Login</Link>
               </Button>
               <Button asChild className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
-                <Link to="/auth"><UserPlus className="mr-1.5 h-4 w-4" />Sign Up</Link>
+                <Link to="/auth?tab=create-account"><UserPlus className="mr-1.5 h-4 w-4" />Create Account</Link>
               </Button>
             </>
           )}
@@ -107,8 +107,8 @@ export const Navbar = () => {
                 <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/dashboard">Dashboard</Link></Button>
               ) : (
                 <>
-                  <Button asChild variant="outline" className="flex-1 rounded-full bg-transparent text-brand-white border-brand-white/30 hover:bg-brand-white/10 hover:text-brand-white"><Link to="/auth">Login</Link></Button>
-                  <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/auth">Sign Up</Link></Button>
+                  <Button asChild variant="outline" className="flex-1 rounded-full bg-transparent text-brand-white border-brand-white/30 hover:bg-brand-white/10 hover:text-brand-white"><Link to="/auth?tab=login">Login</Link></Button>
+                  <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/auth?tab=create-account">Create Account</Link></Button>
                 </>
               )}
             </li>
