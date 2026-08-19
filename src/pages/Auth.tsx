@@ -103,6 +103,21 @@ const Auth = () => {
     if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);
 
+  // If the platform has no super administrator yet, send visitors to the one-time setup form.
+  useEffect(() => {
+    let cancelled = false;
+    supabase.functions
+      .invoke("setup-admin", { body: { action: "status" } })
+      .then(({ data }) => {
+        if (!cancelled && data && data.admin_exists === false) {
+          navigate("/setup-admin", { replace: true });
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [navigate]);
+
+
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
