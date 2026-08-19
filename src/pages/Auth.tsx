@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, Fingerprint, CheckCircle2, MailCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/auth.png";
@@ -16,6 +17,21 @@ import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
 import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
 import { isWebAuthnSupported, signInWithFingerprint } from "@/lib/webauthn";
+
+/** Turn technical auth/network errors into plain, reassuring language. */
+const friendlyError = (raw?: string | null): string => {
+  const m = (raw || "").toLowerCase();
+  if (!m) return "Something went wrong. Please try again.";
+  if (m.includes("invalid login credentials")) return "That email or password is not correct.";
+  if (m.includes("email not confirmed")) return "Please confirm your email first - check your inbox for the link.";
+  if (m.includes("user already registered") || m.includes("already been registered")) return "An account with this email already exists. Please log in instead.";
+  if (m.includes("password should be") || m.includes("weak password")) return "Please choose a stronger password (at least 8 characters).";
+  if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Please wait a moment and try again.";
+  if (m.includes("network") || m.includes("fetch")) return "We could not reach the server. Please check your connection.";
+  if (m.includes("invalid email")) return "Please enter a valid email address.";
+  return "Something went wrong. Please try again.";
+};
+
 
 
 const signUpSchema = z.object({
