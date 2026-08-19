@@ -1,17 +1,54 @@
-# SPA routing for Apache / cPanel shared hosting
+# ---------------------------------------------------------------
+# SPA routing for Apache / cPanel shared hosting (Makiwa)
+# Makes deep links like /dashboard or /auth?tab=create-account work
+# on direct load and on refresh.
+# ---------------------------------------------------------------
+
+Options -MultiViews
+
+# Preferred method (Apache 2.2.16+). Ignored if unsupported.
+<IfModule mod_dir.c>
+  DirectoryIndex index.html
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Work whether the app is at the domain root or in a subfolder
   RewriteBase /
 
-  # Do not rewrite existing files or directories
+  # Never rewrite real files or directories (assets, images, etc.)
   RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME} -d [OR]
+  RewriteCond %{REQUEST_FILENAME} -l
   RewriteRule ^ - [L]
 
-  # Everything else goes to the SPA entry point
-  RewriteRule ^ index.html [L]
+  # Leave the API/well-known paths alone
+  RewriteRule ^\.well-known/ - [L]
+
+  # Everything else is handled by the SPA (query string preserved via QSA)
+  RewriteRule ^ index.html [L,QSA]
+</IfModule>
+
+# Fallback if mod_rewrite is unavailable on the host
+<IfModule !mod_rewrite.c>
+  FallbackResource /index.html
+</IfModule>
+
+# Never cache the HTML shell, so new deploys are picked up immediately
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
 </IfModule>
 
 <IfModule mod_mime.c>
   AddType application/manifest+json .webmanifest
+  AddType application/javascript .js
+  AddType text/css .css
+  AddType image/svg+xml .svg
 </IfModule>
+
+ErrorDocument 404 /index.html
