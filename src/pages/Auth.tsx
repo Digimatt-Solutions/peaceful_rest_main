@@ -294,7 +294,7 @@ const Auth = () => {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="li-email">Email address</Label>
-                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
+                  <Input id="li-email" name="email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => { setLoginEmail(e.target.value); setAttemptsLeft(null); }} className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -308,7 +308,15 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
+                {attemptsLeft !== null && (
+                  <p className="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs font-medium text-destructive">
+                    {attemptsLeft === 0
+                      ? "Too many failed attempts. Please try again in about an hour."
+                      : `Incorrect details. ${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} left before your account is locked for an hour.`}
+                  </p>
+                )}
                 <div className="flex items-center gap-2">
+
                   <Button type="submit" disabled={loading} className="flex-1 h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><LogIn className="h-4 w-4 mr-2" />Sign In</>)}
                   </Button>
