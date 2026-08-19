@@ -166,7 +166,7 @@ const Auth = () => {
         },
       },
     });
-    if (error) { setLoading(false); toast.error(error.message); return; }
+    if (error) { setLoading(false); toast.error(friendlyError(error.message)); return; }
     if (signUpData.user) {
       await supabase
         .from("profiles")
@@ -174,6 +174,14 @@ const Auth = () => {
         .eq("id", signUpData.user.id);
     }
     setLoading(false);
+
+    // With email confirmation on, signUp returns no session - the user is NOT signed in yet.
+    if (!signUpData.session) {
+      setVerifyEmail(parsed.data.email);
+      setVerifyOpen(true);
+      return;
+    }
+    // Auto-confirm is enabled: the account is live, go straight in.
     toast.success("Welcome to Makiwa");
     navigate("/dashboard");
   };
@@ -192,7 +200,8 @@ const Auth = () => {
       if (check?.locked) {
         setLoading(false);
         const mins = check.locked_until ? Math.max(1, Math.ceil((new Date(check.locked_until).getTime() - Date.now()) / 60000)) : 60;
-        toast.error(`Account temporarily locked. Try again in ~${mins} minute${mins === 1 ? "" : "s"}.`);
+        setAttemptsLeft(0);
+        toast.error(`Account temporarily locked. Try again in about ${mins} minute${mins === 1 ? "" : "s"}.`);
         return;
       }
     } catch {}
@@ -205,17 +214,25 @@ const Auth = () => {
         });
         setLoading(false);
         if (fail?.locked) {
-          toast.error("Too many failed attempts. Account locked for 1 hour.");
+          setAttemptsLeft(0);
+          toast.error("Too many failed attempts. Your account is locked for 1 hour.");
         } else {
-          toast.error(`${error.message} · ${fail?.remaining ?? "?"} attempt${fail?.remaining === 1 ? "" : "s"} left`);
+          const left = typeof fail?.remaining === "number" ? fail.remaining : null;
+          setAttemptsLeft(left);
+          toast.error(
+            left === null
+              ? friendlyError(error.message)
+              : `${friendlyError(error.message)} ${left} attempt${left === 1 ? "" : "s"} left.`
+          );
         }
       } catch {
         setLoading(false);
-        toast.error(error.message);
+        toast.error(friendlyError(error.message));
       }
       return;
     }
-    // success - reset counter
+    // Correct credentials - clear the lockout counter and the on-screen warning.
+    setAttemptsLeft(null);
     try {
       await supabase.functions.invoke("login-guard", {
         body: { action: "success", email: parsed.data.email },
@@ -225,6 +242,7 @@ const Auth = () => {
     toast.success("Welcome back");
     navigate("/dashboard");
   };
+
 
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-background">
