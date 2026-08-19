@@ -495,7 +495,47 @@ const Auth = () => {
           </p>
         </div>
       </div>
+      {/* Email verification prompt shown after a successful sign-up */}
+      <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl border-brand-orange/30">
+          <DialogHeader className="items-center text-center">
+            <span className="mb-2 inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 text-brand-orange">
+              <MailCheck className="h-7 w-7" />
+            </span>
+            <DialogTitle className="text-xl">Confirm your email</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              Your account has been created. We sent a confirmation link to{" "}
+              <span className="font-medium text-foreground">{verifyEmail}</span>. Open it to activate your
+              account, then come back and log in. Remember to check your spam folder.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Button
+              className="w-full h-11 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
+              onClick={() => { setVerifyOpen(false); setTab("login"); }}
+            >
+              Got it, take me to login
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-11 rounded-lg border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10"
+              onClick={async () => {
+                const { error } = await supabase.auth.resend({
+                  type: "signup",
+                  email: verifyEmail,
+                  options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+                });
+                if (error) toast.error(friendlyError(error.message));
+                else toast.success("Confirmation email sent again");
+              }}
+            >
+              Resend the email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
+
   );
 };
 
