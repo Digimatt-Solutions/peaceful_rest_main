@@ -452,7 +452,7 @@ const Auth = () => {
                         className="h-10 rounded-xl tracking-[0.4em] text-center border-brand-orange/40"
                       />
                       <Button type="button" onClick={verifyCode} disabled={otpBusy}
-                        className="h-10 shrink-0 rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 px-4 text-xs">
+                        className="h-10 shrink-0 rounded-xl bg-brand-orange text-brand-white hover:bg-brand-orange/90 px-4 text-xs">
                         {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm"}
                       </Button>
                     </div>
