@@ -92,15 +92,19 @@ const FamilyTree = () => {
   }, [memorialId]);
 
   const add = async () => {
-    if (!name || !memorialId) return;
+    if (!name.trim() || !memorialId) return;
+    const rel = relationship === "Other" ? tidyLabel(customRel) : relationship;
+    if (!rel) return toast.error("Please describe the relationship");
     const { data, error } = await supabase
       .from("family_members")
-      .insert({ memorial_id: memorialId, name, relationship })
+      .insert({ memorial_id: memorialId, name: tidyLabel(name), relationship: rel })
       .select()
       .maybeSingle();
     if (error) return toast.error(error.message);
     setMembers([...members, data as Member]);
     setName("");
+    setCustomRel("");
+    setRelationship("Father");
     setAddOpen(false);
     toast.success("Family member added");
   };
