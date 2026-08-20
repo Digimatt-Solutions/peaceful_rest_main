@@ -558,6 +558,50 @@ const Auth = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Forgot password - request a reset link */}
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent className="sm:max-w-md border-brand-orange/30">
+          <div className="flex flex-col items-center gap-2">
+            <img src={logoMark} alt="" className="h-12 w-12 object-contain rounded-lg" />
+            <img src={logoText} alt="Makiwa" className="h-5 w-auto object-contain" />
+          </div>
+          <DialogHeader className="items-center text-center">
+            <DialogTitle className="text-xl">Reset your password</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              {forgotSent
+                ? "If an account exists for that email, a reset link is on its way. The link opens a secure page where you can set a new password."
+                : "Enter the email you signed up with and we will send you a secure link to set a new password."}
+            </DialogDescription>
+          </DialogHeader>
+          {forgotSent ? (
+            <Button
+              className="w-full h-11 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
+              onClick={() => setForgotOpen(false)}
+            >
+              Got it
+            </Button>
+          ) : (
+            <form onSubmit={sendResetLink} className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="fp-email">Email address</Label>
+                <Input
+                  id="fp-email"
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40"
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={forgotBusy} className="w-full h-11 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 border border-brand-orange/40">
+                {forgotBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><MailCheck className="h-4 w-4 mr-2" />Send reset link</>)}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </main>
 
   );
