@@ -12,7 +12,49 @@ import { Users, Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { FamilyTreeView } from "@/components/family/FamilyTreeView";
 
-const RELATIONSHIPS = ["Father", "Mother", "Spouse", "Child", "Sibling"];
+const RELATIONSHIPS = [
+  "Father",
+  "Mother",
+  "Spouse",
+  "Son",
+  "Daughter",
+  "Child",
+  "Brother",
+  "Sister",
+  "Sibling",
+  "Grandfather",
+  "Grandmother",
+  "Grandson",
+  "Granddaughter",
+  "Step Father",
+  "Step Mother",
+  "Step Child",
+  "Uncle",
+  "Aunt",
+  "Nephew",
+  "Niece",
+  "Cousin",
+  "Father in Law",
+  "Mother in Law",
+  "Son in Law",
+  "Daughter in Law",
+  "Brother in Law",
+  "Sister in Law",
+  "Guardian",
+  "Friend",
+  "Other",
+];
+
+/** Turn free text into a tidy Title Case label, e.g. "  best FRIEND " -> "Best Friend" */
+const tidyLabel = (v: string) =>
+  v
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (["in", "of", "the", "and"].includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(" ");
 
 type Member = { id: string; name: string; relationship: string; memorial_id: string };
 
