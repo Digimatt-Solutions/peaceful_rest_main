@@ -74,6 +74,10 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
   const spouse = members.find(m => /spouse|wife|husband|partner/i.test(m.relationship));
   const siblings = members.filter(m => /sibling|brother|sister/i.test(m.relationship));
   const children = members.filter(m => /child|son|daughter/i.test(m.relationship));
+  const placed = new Set(
+    [father, mother, spouse, ...siblings, ...children].filter(Boolean).map(m => (m as FamilyMember).id)
+  );
+  const others = members.filter(m => !placed.has(m.id));
 
   return (
     <div className={cn("rounded-3xl border border-border bg-gradient-to-b from-muted/30 to-card p-6 sm:p-10 overflow-x-auto", className)}>
