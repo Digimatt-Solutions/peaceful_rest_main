@@ -145,6 +145,19 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
           </>
         )}
 
+        {/* Extended family / other relationships */}
+        {others.length > 0 && (
+          <>
+            <Connector className="h-6 mt-2" />
+            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-2">Extended Family</p>
+            <div className="flex flex-wrap items-start justify-center gap-4 mt-2">
+              {others.map(o => (
+                <NodeCard key={o.id} name={o.name} role={o.relationship} photo={o.photo_url} size="sm" />
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
     </div>
   );
