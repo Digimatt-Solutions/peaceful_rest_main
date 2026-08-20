@@ -214,10 +214,25 @@ const FamilyTree = () => {
               <Label>Relationship</Label>
               <Select value={editRel} onValueChange={setEditRel}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-64">
                   {RELATIONSHIPS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {editRel === "Other" && (
+                <div className="space-y-1.5 pt-1">
+                  <Input
+                    value={editCustomRel}
+                    onChange={(e) => setEditCustomRel(e.target.value)}
+                    placeholder="e.g. Godmother, Family Friend"
+                    className="rounded-xl"
+                  />
+                  {editCustomRel.trim() && (
+                    <p className="text-xs text-muted-foreground">
+                      Will be saved as <span className="font-medium text-brand-orange">{tidyLabel(editCustomRel)}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
