@@ -211,8 +211,9 @@ export const DashboardLayout = () => {
             </div>
           </div>
 
-          <div className="flex-1 md:hidden font-serif text-lg font-semibold flex items-center">
-            <img src={logo} alt="Makiwa" className="h-7 w-auto object-contain" />
+          <div className="flex-1 md:hidden flex items-center gap-2">
+            <img src={logoMark} alt="" className="h-7 w-7 object-contain rounded-md" />
+            <img src={theme === "dark" ? logoTextLight : logoText} alt="Makiwa" className="h-5 w-auto object-contain" />
           </div>
 
           <div className="flex items-center gap-1.5 ml-auto">
