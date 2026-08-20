@@ -195,6 +195,15 @@ const Auth = () => {
 
     // With email confirmation on, signUp returns no session - the user is NOT signed in yet.
     if (!signUpData.session) {
+      // Safety net: if the confirmation email did not go out with the sign-up
+      // (e.g. the address was used by a previously deleted account), request it again.
+      if (!signUpData.user?.identities || signUpData.user.identities.length === 0) {
+        await supabase.auth.resend({
+          type: "signup",
+          email: parsed.data.email,
+          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        });
+      }
       setVerifyEmail(parsed.data.email);
       setVerifyOpen(true);
       return;
