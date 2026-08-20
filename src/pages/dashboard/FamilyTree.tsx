@@ -66,9 +66,11 @@ const FamilyTree = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("Father");
+  const [customRel, setCustomRel] = useState("");
   const [editing, setEditing] = useState<Member | null>(null);
   const [editName, setEditName] = useState("");
   const [editRel, setEditRel] = useState("Father");
+  const [editCustomRel, setEditCustomRel] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const deceased = memorials.find(m => m.id === memorialId);
 
