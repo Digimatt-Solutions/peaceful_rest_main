@@ -12,7 +12,7 @@ import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, F
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImage from "@/assets/auth.png";
+import heroImage from "@/assets/auth.jpg";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
 import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
