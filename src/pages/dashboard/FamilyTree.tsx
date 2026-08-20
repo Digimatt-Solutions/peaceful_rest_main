@@ -120,18 +120,23 @@ const FamilyTree = () => {
   const startEdit = (m: Member) => {
     setEditing(m);
     setEditName(m.name);
-    setEditRel(m.relationship);
+    const known = RELATIONSHIPS.includes(m.relationship);
+    setEditRel(known ? m.relationship : "Other");
+    setEditCustomRel(known ? "" : m.relationship);
   };
 
   const saveEdit = async () => {
     if (!editing) return;
     if (!editName.trim()) return toast.error("Name required");
+    const rel = editRel === "Other" ? tidyLabel(editCustomRel) : editRel;
+    if (!rel) return toast.error("Please describe the relationship");
+    const nextName = tidyLabel(editName);
     const { error } = await supabase
       .from("family_members")
-      .update({ name: editName, relationship: editRel })
+      .update({ name: nextName, relationship: rel })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
-    setMembers(members.map(m => m.id === editing.id ? { ...m, name: editName, relationship: editRel } : m));
+    setMembers(members.map(m => m.id === editing.id ? { ...m, name: nextName, relationship: rel } : m));
     setEditing(null);
     toast.success("Updated");
   };
