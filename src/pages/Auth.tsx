@@ -78,6 +78,24 @@ const Auth = () => {
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState("");
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
+  const sendResetLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = forgotEmail.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error("Please enter a valid email address"); return; }
+    setForgotBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotBusy(false);
+    if (error) { toast.error(friendlyError(error.message)); return; }
+    setForgotSent(true);
+    toast.success("Reset link sent - check your inbox");
+  };
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
 
 
