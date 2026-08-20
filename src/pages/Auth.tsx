@@ -317,7 +317,13 @@ const Auth = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="li-pw">Password</Label>
-                    <button type="button" className="text-xs text-brand-orange hover:underline">Forgot Password?</button>
+                    <button
+                      type="button"
+                      onClick={() => { setForgotEmail(loginEmail); setForgotSent(false); setForgotOpen(true); }}
+                      className="text-xs text-brand-orange hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
                   </div>
                   <div className="relative">
                     <Input id="li-pw" name="password" type={showPw ? "text" : "password"} className="h-11 rounded-xl pr-11 border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
