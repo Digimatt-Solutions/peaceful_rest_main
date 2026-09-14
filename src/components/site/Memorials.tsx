@@ -304,7 +304,7 @@ export const Memorials = () => {
                     <article className="no-card overflow-hidden rounded-lg border border-brand-black/10 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30 hover:shadow-elegant">
 
                       {/* Image */}
-                      <div className="relative aspect-[4/5] overflow-hidden">
+                      <div className="relative aspect-[5/5] overflow-hidden">
 
                         {photo ? (
                           <img

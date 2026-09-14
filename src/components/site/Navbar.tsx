@@ -42,8 +42,8 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-brand-white/10 bg-brand-black/95 backdrop-blur-xl">
-      <nav className="container-luxe flex h-[4.75rem] items-center justify-between">
+    <header className="fixed -top-1 inset-x-0 z-50 bg-brand-black/90 border-b border-brand-white/10">
+      <nav className="container-luxe flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2.5 group">
           <img src={logo} alt="Makiwa" className="h-8 w-auto object-contain" />
         </Link>
@@ -54,7 +54,7 @@ export const Navbar = () => {
               <a
                 href={l.href}
                 onClick={(e) => handleNavClick(e, l.href)}
-                className="text-sm font-semibold text-brand-white/80 transition-colors hover:text-brand-orange"
+                className="text-sm font-medium tracking-wide text-brand-white/85 transition-colors hover:text-brand-orange"
               >
                 {l.label}
               </a>
@@ -64,16 +64,16 @@ export const Navbar = () => {
 
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
-            <Button asChild className="rounded-lg border border-brand-orange bg-brand-orange text-brand-white shadow-none hover:bg-brand-orange/90">
+            <Button asChild className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
               <Link to="/dashboard"><LayoutDashboard className="mr-1.5 h-4 w-4" />Dashboard</Link>
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" className="rounded-lg border border-brand-white/25 text-brand-white hover:border-brand-orange/60 hover:bg-brand-orange/10 hover:text-brand-orange">
+              <Button asChild variant="ghost" className="rounded-lg text-brand-white border border-brand-white/60 hover:bg-brand-white/10 hover:text-brand-white">
                 <Link to="/auth?tab=login"><LogIn className="mr-1.5 h-4 w-4" />Login</Link>
               </Button>
-              <Button asChild className="rounded-lg border border-brand-orange bg-brand-orange text-brand-white shadow-none hover:bg-brand-orange/90">
-                <Link to="/auth?tab=create-account"><UserPlus className="mr-1.5 h-4 w-4" />Sign Up</Link>
+              <Button asChild className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
+                <Link to="/auth?tab=create-account"><UserPlus className="mr-1.5 h-4 w-4" />Create Account</Link>
               </Button>
             </>
           )}
@@ -89,7 +89,7 @@ export const Navbar = () => {
       </nav>
 
       {open && (
-        <div className="lg:hidden border-t border-brand-white/10 bg-brand-black/98 backdrop-blur-xl animate-fade-up">
+        <div className="lg:hidden bg-brand-black/95 backdrop-blur-xl border-t border-brand-white/10 animate-fade-up">
           <ul className="container-luxe py-4 flex flex-col gap-4">
             {links.map((l) => (
               <li key={l.label}>
@@ -104,11 +104,11 @@ export const Navbar = () => {
             ))}
             <li className="flex gap-3 pt-1">
               {user ? (
-                <Button asChild className="flex-1 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/dashboard">Dashboard</Link></Button>
+                <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/dashboard">Dashboard</Link></Button>
               ) : (
                 <>
-                  <Button asChild variant="outline" className="flex-1 rounded-lg border-brand-white/25 bg-transparent text-brand-white hover:border-brand-orange/60 hover:bg-brand-orange/10 hover:text-brand-orange"><Link to="/auth?tab=login">Login</Link></Button>
-                  <Button asChild className="flex-1 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/auth?tab=create-account">Sign Up</Link></Button>
+                  <Button asChild variant="outline" className="flex-1 rounded-full bg-transparent text-brand-white border-brand-white/30 hover:bg-brand-white/10 hover:text-brand-white"><Link to="/auth?tab=login">Login</Link></Button>
+                  <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/auth?tab=create-account">Create Account</Link></Button>
                 </>
               )}
             </li>

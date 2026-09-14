@@ -58,7 +58,7 @@ export const Hero = () => {
     if (memorials.length < 2) return;
     const t = setInterval(() => {
       setIndex((i) => (i + 1) % memorials.length);
-    }, 10000);
+    }, 8000);
     return () => clearInterval(t);
   }, [memorials.length]);
 
@@ -67,11 +67,13 @@ export const Hero = () => {
   return (
     <section
       id="home"
-      className="relative flex min-h-[min(900px,100svh)] items-center overflow-hidden border-b border-brand-black/10 bg-cream pt-20"
+      className="relative flex min-h-[min(900px,100svh)] items-center overflow-hidden border-b border-brand-black/10 bg-white pt-20"
     >
       {/* Dotted patterns */}
-       <DotPattern className="absolute left-3 top-24 opacity-45 sm:left-10" />
-       <DotPattern className="absolute bottom-8 right-3 opacity-35 sm:right-10" />
+      <DotPattern className="absolute top-24 left-4 sm:left-10 opacity-80" />
+      <DotPattern className="absolute bottom-10 left-4 sm:left-10 opacity-80" />
+      <DotPattern className="hidden lg:block absolute top-24 left-1/2 -translate-x-1/2 opacity-70" />
+      <DotPattern className="hidden lg:block absolute bottom-10 right-10 opacity-70" />
        <div aria-hidden className="absolute -right-28 top-24 h-72 w-72 rounded-full border border-brand-orange/15" />
        <div aria-hidden className="absolute -right-16 top-36 h-72 w-72 rounded-full border border-brand-black/10" />
 
@@ -79,8 +81,8 @@ export const Hero = () => {
         <div className="grid items-center gap-9 sm:gap-14 lg:grid-cols-12 lg:gap-8">
           {/* LEFT CONTENT */}
           <div className="lg:col-span-6 lg:pr-8">
-            <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase text-brand-orange sm:mb-6"><span className="h-px w-10 bg-brand-orange/60" />A place for every story</p>
-            <h1 className="font-serif text-[2.65rem] font-medium leading-[0.94] text-brand-black sm:text-6xl lg:text-[5rem]">
+            <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase text-brand-orange sm:mb-6">A place for every story</p>
+            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl text-brand-black font-medium leading-[0.98] tracking-tight">
               Honoring Lives.
               <br />
               Sharing Memories.
@@ -111,7 +113,7 @@ export const Hero = () => {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-lg border border-brand-black/20 bg-transparent px-5 text-[15px] font-bold text-brand-black hover:border-brand-orange hover:bg-brand-orange/5 hover:text-brand-orange"
+                className="h-12 px-4 rounded-xl border-[2.1px] border-brand-orange bg-white text-brand-orange font-bold text-[15px] hover:bg-brand-orange hover:text-white"
               >
                 <a href="#memorials">
                   <Clock className="h-5 w-5 stroke-[2.5]" />
@@ -144,7 +146,6 @@ export const Hero = () => {
 
           {/* RIGHT: circular memorial carousel */}
           <div className="relative flex flex-col items-center lg:col-span-6">
-            <div aria-hidden className="absolute -left-4 top-10 hidden h-40 w-px bg-brand-orange/40 lg:block" />
             <div className="relative h-[235px] w-[235px] sm:h-[390px] sm:w-[390px] lg:h-[470px] lg:w-[470px]">
               <div className="absolute inset-0 overflow-hidden rounded-full border-[10px] border-card bg-brand-black shadow-elegant ring-1 ring-brand-black/10">
                 {memorials.map((m, i) => {
@@ -178,9 +179,9 @@ export const Hero = () => {
                 {/* Overlay text */}
                 {current && (
                    <div className="absolute inset-x-0 bottom-0 p-5 text-center text-brand-white sm:p-10">
-                    <p className="text-xs sm:text-sm uppercase tracking-[0.3em] text-brand-orange font-semibold">
+                    {/* <p className="text-xs sm:text-sm uppercase tracking-[0.3em] text-brand-orange font-semibold">
                       Latest Memorial
-                    </p>
+                    </p> */}
                      <h3 className="mt-1 font-serif text-2xl leading-tight sm:mt-2 sm:text-4xl lg:text-5xl">
                       {current.full_name}
                     </h3>
