@@ -4,7 +4,7 @@ import { Menu, X, LogIn, UserPlus, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/makiwa-logo-light.png";
+import logo from "@/assets/makiwa-logo-black.png";
 
 const links = [
   { label: "Home", href: "#home" },
