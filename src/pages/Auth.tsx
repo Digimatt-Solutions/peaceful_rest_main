@@ -195,19 +195,17 @@ const Auth = () => {
 
     // With email confirmation on, signUp returns no session - the user is NOT signed in yet.
     if (!signUpData.session) {
-      // Safety net: if the confirmation email did not go out with the sign-up
-      // (e.g. the address was used by a previously deleted account), request it again.
-      if (!signUpData.user?.identities || signUpData.user.identities.length === 0) {
-        await supabase.auth.resend({
-          type: "signup",
-          email: parsed.data.email,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-        });
+      // Supabase hides duplicate sign-ups by returning a user with no identities.
+      if (signUpData.user && (signUpData.user.identities?.length ?? 0) === 0) {
+        toast.error("An account with this email already exists. Please log in or reset your password.");
+        setTab("login");
+        return;
       }
       setVerifyEmail(parsed.data.email);
       setVerifyOpen(true);
       return;
     }
+
     // Auto-confirm is enabled: the account is live, go straight in.
     toast.success("Welcome to Makiwa");
     navigate("/dashboard");

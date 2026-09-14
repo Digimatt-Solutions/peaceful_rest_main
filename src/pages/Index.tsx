@@ -9,6 +9,7 @@ import { Banner } from "@/components/site/Banner";
 
 
 import { Footer } from "@/components/site/Footer";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { trackVisit } from "@/lib/trackVisit";
 
 const Index = () => {
@@ -35,6 +36,8 @@ const Index = () => {
       <WhyUs />
       <Banner />
       <Footer />
+      <ScrollToTop />
+
     </main>
   );
 };

@@ -19,6 +19,7 @@ import { z } from "zod";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import { FormattedText } from "@/components/FormattedText";
 import { MemorialQR } from "@/components/MemorialQR";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 
@@ -288,9 +289,10 @@ const MemorialDetail = () => {
 
               {memorial.short_tribute && (
                 <div className="mt-8 max-w-2xl border-l-2 border-orange-400/70 pl-5">
-                  <p className="italic text-white/90 text-xl leading-relaxed font-serif">
+                  <p className="italic text-white/90 text-xl leading-relaxed font-serif line-clamp-3">
                     "{memorial.short_tribute}"
                   </p>
+
                 </div>
               )}
 
@@ -623,6 +625,8 @@ const MemorialDetail = () => {
       </div>
 
       <Footer />
+      <ScrollToTop />
+
       <DonationReceipt open={receiptOpen} onOpenChange={setReceiptOpen} donation={receiptDonation} />
     </main>
   );
