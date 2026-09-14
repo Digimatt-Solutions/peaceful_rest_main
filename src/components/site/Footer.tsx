@@ -3,7 +3,8 @@ import logo from "@/assets/makiwa-logo-light.png";
 
 export const Footer = () => {
   return (
-    <footer id="contact" className="bg-brand-black text-brand-white/80 pt-20 pb-10">
+    <footer id="contact" className="relative overflow-hidden border-t border-brand-white/10 bg-brand-black pb-10 pt-20 text-brand-white/75">
+      <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-white/10" />
       <div className="container-luxe grid md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div>
           <img src={logo} alt="Makiwa" className="h-8 w-auto object-contain" />
@@ -15,7 +16,7 @@ export const Footer = () => {
               <a
                 key={i}
                 href="#"
-                className="h-10 w-10 rounded-full border border-brand-white/15 flex items-center justify-center hover:bg-brand-orange hover:border-brand-orange transition-colors"
+               className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-white/20 transition-colors hover:border-brand-orange hover:text-brand-orange"
                 aria-label="Social link"
               >
                 <Icon className="h-4 w-4" />

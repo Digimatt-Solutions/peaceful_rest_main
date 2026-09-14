@@ -12,10 +12,10 @@ const features = [
 
 export const WhyUs = () => {
   return (
-    <section id="about" className="relative py-24 lg:py-32 bg-cream overflow-hidden">
+    <section id="about" className="paper-section relative overflow-hidden border-b border-brand-black/10 py-24 lg:py-32">
       {/* Editorial backdrop accents */}
-      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-brand-orange/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 -left-32 h-96 w-96 rounded-full bg-brand-black/5 blur-3xl" />
+       <div className="pointer-events-none absolute -right-28 top-16 h-80 w-80 rounded-full border border-brand-orange/15" />
+       <div className="pointer-events-none absolute -right-16 top-28 h-80 w-80 rounded-full border border-brand-black/10" />
 
       <div className="container-luxe relative grid lg:grid-cols-12 gap-14 lg:gap-20 items-center">
         {/* Image collage */}
@@ -23,7 +23,7 @@ export const WhyUs = () => {
             <div className="grid grid-cols-1 lg:grid-cols-6 lg:grid-rows-6 gap-4 lg:gap-5 h-[500px] lg:h-[640px]">
 
               {/* Main portrait - visible on all screens */}
-              <div className="col-span-1 lg:col-span-4 lg:row-span-6 relative rounded-[28px] overflow-hidden shadow-elegant group">
+              <div className="no-card group relative col-span-1 overflow-hidden rounded-lg border border-brand-black/10 shadow-elegant lg:col-span-4 lg:row-span-6">
                 <img
                   src={elderImg}
                   alt="A person gazing at a warm African sunset in quiet reflection"
@@ -48,7 +48,7 @@ export const WhyUs = () => {
               </div>
 
               {/* Family embrace - hidden on small screens */}
-              <div className="hidden lg:block col-span-2 row-span-3 rounded-[24px] overflow-hidden shadow-soft">
+              <div className="no-card hidden overflow-hidden rounded-lg border border-brand-black/10 shadow-soft lg:col-span-2 lg:row-span-3 lg:block">
                 <img
                   src={familyImg}
                   alt="An African family embracing at golden hour"
@@ -60,7 +60,7 @@ export const WhyUs = () => {
               </div>
 
               {/* Stat card - hidden on small screens */}
-              <div className="hidden lg:flex col-span-2 row-span-2 rounded-[24px] bg-brand-black text-brand-white p-5 lg:p-6 shadow-elegant flex-col justify-between">
+              <div className="no-card hidden flex-col justify-between rounded-lg border border-brand-white/10 bg-brand-black p-5 text-brand-white shadow-elegant lg:col-span-2 lg:row-span-2 lg:flex lg:p-6">
                 <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange font-semibold">
                   Impact
                 </span>
@@ -77,7 +77,7 @@ export const WhyUs = () => {
               </div>
 
               {/* Candle - hidden on small screens */}
-              <div className="hidden lg:block col-span-2 row-span-1 rounded-[20px] overflow-hidden shadow-soft">
+              <div className="no-card hidden overflow-hidden rounded-lg border border-brand-black/10 shadow-soft lg:col-span-2 lg:row-span-1 lg:block">
                 <img
                   src={candleImg}
                   alt="A hand holding a lit memorial candle at dusk"
@@ -111,7 +111,7 @@ export const WhyUs = () => {
               const Icon = f.icon;
               return (
                 <div key={f.title} className="group flex gap-4">
-                  <div className="shrink-0 h-12 w-12 rounded-2xl bg-brand-black flex items-center justify-center group-hover:bg-brand-orange transition-colors duration-500">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-brand-black/15 bg-card transition-colors duration-500 group-hover:border-brand-orange/50">
                     <Icon className="h-5 w-5 text-brand-orange group-hover:text-brand-white transition-colors duration-500" />
                   </div>
                   <div>
