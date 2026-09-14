@@ -73,7 +73,7 @@ export const Navbar = () => {
                 <Link to="/auth?tab=login"><LogIn className="mr-1.5 h-4 w-4" />Login</Link>
               </Button>
               <Button asChild className="rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
-                <Link to="/auth?tab=create-account"><UserPlus className="mr-1.5 h-4 w-4" />Create Account</Link>
+                <Link to="/auth?tab=create-account"><UserPlus className="mr-1.5 h-4 w-4" />Sign Up</Link>
               </Button>
             </>
           )}
@@ -108,7 +108,7 @@ export const Navbar = () => {
               ) : (
                 <>
                   <Button asChild variant="outline" className="flex-1 rounded-full bg-transparent text-brand-white border-brand-white/30 hover:bg-brand-white/10 hover:text-brand-white"><Link to="/auth?tab=login">Login</Link></Button>
-                  <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/auth?tab=create-account">Create Account</Link></Button>
+                  <Button asChild className="flex-1 rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Link to="/auth?tab=create-account">Sign Up</Link></Button>
                 </>
               )}
             </li>

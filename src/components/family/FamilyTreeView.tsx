@@ -74,6 +74,10 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
   const spouse = members.find(m => /spouse|wife|husband|partner/i.test(m.relationship));
   const siblings = members.filter(m => /sibling|brother|sister/i.test(m.relationship));
   const children = members.filter(m => /child|son|daughter/i.test(m.relationship));
+  const placed = new Set(
+    [father, mother, spouse, ...siblings, ...children].filter(Boolean).map(m => (m as FamilyMember).id)
+  );
+  const others = members.filter(m => !placed.has(m.id));
 
   return (
     <div className={cn("rounded-3xl border border-border bg-gradient-to-b from-muted/30 to-card p-6 sm:p-10 overflow-x-auto", className)}>
@@ -136,6 +140,19 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
             <div className="flex flex-wrap items-start justify-center gap-4 mt-2">
               {children.map(c => (
                 <NodeCard key={c.id} name={c.name} role={c.relationship} photo={c.photo_url} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Extended family / other relationships */}
+        {others.length > 0 && (
+          <>
+            <Connector className="h-6 mt-2" />
+            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-2">Extended Family</p>
+            <div className="flex flex-wrap items-start justify-center gap-4 mt-2">
+              {others.map(o => (
+                <NodeCard key={o.id} name={o.name} role={o.relationship} photo={o.photo_url} size="sm" />
               ))}
             </div>
           </>

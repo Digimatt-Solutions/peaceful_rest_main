@@ -13,6 +13,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/Auth";
 import SetupAdmin from "./pages/SetupAdmin";
+import ResetPassword from "./pages/ResetPassword";
 
 import MemorialDetail from "./pages/MemorialDetail";
 import AllMemorials from "./pages/AllMemorials";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/setup-admin" element={<SetupAdmin />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route path="/memorials" element={<AllMemorials />} />
             <Route path="/memorial/:id" element={<MemorialDetail />} />

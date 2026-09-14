@@ -12,7 +12,7 @@ import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, F
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImage from "@/assets/auth.png";
+import heroImage from "@/assets/auth.jpg";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
 import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
@@ -78,6 +78,24 @@ const Auth = () => {
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState("");
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
+  const sendResetLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = forgotEmail.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error("Please enter a valid email address"); return; }
+    setForgotBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotBusy(false);
+    if (error) { toast.error(friendlyError(error.message)); return; }
+    setForgotSent(true);
+    toast.success("Reset link sent - check your inbox");
+  };
   const bioAvailable = typeof window !== "undefined" && isWebAuthnSupported();
 
 
@@ -177,6 +195,15 @@ const Auth = () => {
 
     // With email confirmation on, signUp returns no session - the user is NOT signed in yet.
     if (!signUpData.session) {
+      // Safety net: if the confirmation email did not go out with the sign-up
+      // (e.g. the address was used by a previously deleted account), request it again.
+      if (!signUpData.user?.identities || signUpData.user.identities.length === 0) {
+        await supabase.auth.resend({
+          type: "signup",
+          email: parsed.data.email,
+          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        });
+      }
       setVerifyEmail(parsed.data.email);
       setVerifyOpen(true);
       return;
@@ -299,7 +326,13 @@ const Auth = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="li-pw">Password</Label>
-                    <button type="button" className="text-xs text-brand-orange hover:underline">Forgot Password?</button>
+                    <button
+                      type="button"
+                      onClick={() => { setForgotEmail(loginEmail); setForgotSent(false); setForgotOpen(true); }}
+                      className="text-xs text-brand-orange hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
                   </div>
                   <div className="relative">
                     <Input id="li-pw" name="password" type={showPw ? "text" : "password"} className="h-11 rounded-xl pr-11 border-2 border-brand-black/15 focus-visible:ring-brand-orange/40" required />
@@ -532,6 +565,50 @@ const Auth = () => {
               Resend the email
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forgot password - request a reset link */}
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent className="sm:max-w-md border-brand-orange/30">
+          <div className="flex flex-col items-center gap-2">
+            <img src={logoMark} alt="" className="h-12 w-12 object-contain rounded-lg" />
+            <img src={logoText} alt="Makiwa" className="h-5 w-auto object-contain" />
+          </div>
+          <DialogHeader className="items-center text-center">
+            <DialogTitle className="text-xl">Reset your password</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              {forgotSent
+                ? "If an account exists for that email, a reset link is on its way. The link opens a secure page where you can set a new password."
+                : "Enter the email you signed up with and we will send you a secure link to set a new password."}
+            </DialogDescription>
+          </DialogHeader>
+          {forgotSent ? (
+            <Button
+              className="w-full h-11 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90"
+              onClick={() => setForgotOpen(false)}
+            >
+              Got it
+            </Button>
+          ) : (
+            <form onSubmit={sendResetLink} className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="fp-email">Email address</Label>
+                <Input
+                  id="fp-email"
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="h-11 rounded-xl border-2 border-brand-black/15 focus-visible:ring-brand-orange/40"
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={forgotBusy} className="w-full h-11 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 border border-brand-orange/40">
+                {forgotBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><MailCheck className="h-4 w-4 mr-2" />Send reset link</>)}
+              </Button>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </main>

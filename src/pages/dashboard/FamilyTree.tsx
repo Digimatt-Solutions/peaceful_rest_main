@@ -12,7 +12,49 @@ import { Users, Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { FamilyTreeView } from "@/components/family/FamilyTreeView";
 
-const RELATIONSHIPS = ["Father", "Mother", "Spouse", "Child", "Sibling"];
+const RELATIONSHIPS = [
+  "Father",
+  "Mother",
+  "Spouse",
+  "Son",
+  "Daughter",
+  "Child",
+  "Brother",
+  "Sister",
+  "Sibling",
+  "Grandfather",
+  "Grandmother",
+  "Grandson",
+  "Granddaughter",
+  "Step Father",
+  "Step Mother",
+  "Step Child",
+  "Uncle",
+  "Aunt",
+  "Nephew",
+  "Niece",
+  "Cousin",
+  "Father in Law",
+  "Mother in Law",
+  "Son in Law",
+  "Daughter in Law",
+  "Brother in Law",
+  "Sister in Law",
+  "Guardian",
+  "Friend",
+  "Other",
+];
+
+/** Turn free text into a tidy Title Case label, e.g. "  best FRIEND " -> "Best Friend" */
+const tidyLabel = (v: string) =>
+  v
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (["in", "of", "the", "and"].includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(" ");
 
 type Member = { id: string; name: string; relationship: string; memorial_id: string };
 
@@ -24,9 +66,11 @@ const FamilyTree = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("Father");
+  const [customRel, setCustomRel] = useState("");
   const [editing, setEditing] = useState<Member | null>(null);
   const [editName, setEditName] = useState("");
   const [editRel, setEditRel] = useState("Father");
+  const [editCustomRel, setEditCustomRel] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const deceased = memorials.find(m => m.id === memorialId);
 
@@ -48,15 +92,19 @@ const FamilyTree = () => {
   }, [memorialId]);
 
   const add = async () => {
-    if (!name || !memorialId) return;
+    if (!name.trim() || !memorialId) return;
+    const rel = relationship === "Other" ? tidyLabel(customRel) : relationship;
+    if (!rel) return toast.error("Please describe the relationship");
     const { data, error } = await supabase
       .from("family_members")
-      .insert({ memorial_id: memorialId, name, relationship })
+      .insert({ memorial_id: memorialId, name: tidyLabel(name), relationship: rel })
       .select()
       .maybeSingle();
     if (error) return toast.error(error.message);
     setMembers([...members, data as Member]);
     setName("");
+    setCustomRel("");
+    setRelationship("Father");
     setAddOpen(false);
     toast.success("Family member added");
   };
@@ -72,18 +120,23 @@ const FamilyTree = () => {
   const startEdit = (m: Member) => {
     setEditing(m);
     setEditName(m.name);
-    setEditRel(m.relationship);
+    const known = RELATIONSHIPS.includes(m.relationship);
+    setEditRel(known ? m.relationship : "Other");
+    setEditCustomRel(known ? "" : m.relationship);
   };
 
   const saveEdit = async () => {
     if (!editing) return;
     if (!editName.trim()) return toast.error("Name required");
+    const rel = editRel === "Other" ? tidyLabel(editCustomRel) : editRel;
+    if (!rel) return toast.error("Please describe the relationship");
+    const nextName = tidyLabel(editName);
     const { error } = await supabase
       .from("family_members")
-      .update({ name: editName, relationship: editRel })
+      .update({ name: nextName, relationship: rel })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
-    setMembers(members.map(m => m.id === editing.id ? { ...m, name: editName, relationship: editRel } : m));
+    setMembers(members.map(m => m.id === editing.id ? { ...m, name: nextName, relationship: rel } : m));
     setEditing(null);
     toast.success("Updated");
   };
@@ -161,10 +214,25 @@ const FamilyTree = () => {
               <Label>Relationship</Label>
               <Select value={editRel} onValueChange={setEditRel}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-64">
                   {RELATIONSHIPS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {editRel === "Other" && (
+                <div className="space-y-1.5 pt-1">
+                  <Input
+                    value={editCustomRel}
+                    onChange={(e) => setEditCustomRel(e.target.value)}
+                    placeholder="e.g. Godmother, Family Friend"
+                    className="rounded-xl"
+                  />
+                  {editCustomRel.trim() && (
+                    <p className="text-xs text-muted-foreground">
+                      Will be saved as <span className="font-medium text-brand-orange">{tidyLabel(editCustomRel)}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -186,10 +254,25 @@ const FamilyTree = () => {
               <Label>Relationship</Label>
               <Select value={relationship} onValueChange={setRelationship}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-64">
                   {RELATIONSHIPS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {relationship === "Other" && (
+                <div className="space-y-1.5 pt-1">
+                  <Input
+                    value={customRel}
+                    onChange={(e) => setCustomRel(e.target.value)}
+                    placeholder="e.g. Godmother, Family Friend"
+                    className="rounded-xl"
+                  />
+                  {customRel.trim() && (
+                    <p className="text-xs text-muted-foreground">
+                      Will be saved as <span className="font-medium text-brand-orange">{tidyLabel(customRel)}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
