@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -428,6 +429,8 @@ const AllMemorials = () => {
       </section>
 
       <Footer />
+      <ScrollToTop />
+
     </main>
   );
 };
