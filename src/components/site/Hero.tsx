@@ -75,12 +75,12 @@ export const Hero = () => {
        <div aria-hidden className="absolute -right-28 top-24 h-72 w-72 rounded-full border border-brand-orange/15" />
        <div aria-hidden className="absolute -right-16 top-36 h-72 w-72 rounded-full border border-brand-black/10" />
 
-      <div className="container-luxe relative z-10 w-full py-14 lg:py-20">
-        <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-8">
+      <div className="container-luxe relative z-10 w-full py-9 sm:py-14 lg:py-20">
+        <div className="grid items-center gap-9 sm:gap-14 lg:grid-cols-12 lg:gap-8">
           {/* LEFT CONTENT */}
           <div className="lg:col-span-6 lg:pr-8">
-            <p className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase text-brand-orange"><span className="h-px w-10 bg-brand-orange/60" />A place for every story</p>
-            <h1 className="font-serif text-5xl font-medium leading-[0.92] text-brand-black sm:text-6xl lg:text-[5rem]">
+            <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase text-brand-orange sm:mb-6"><span className="h-px w-10 bg-brand-orange/60" />A place for every story</p>
+            <h1 className="font-serif text-[2.65rem] font-medium leading-[0.94] text-brand-black sm:text-6xl lg:text-[5rem]">
               Honoring Lives.
               <br />
               Sharing Memories.
@@ -88,14 +88,14 @@ export const Hero = () => {
               Keeping Love Alive.
             </h1>
 
-             <p className="mt-7 max-w-lg text-base leading-7 text-brand-black/65 sm:text-lg">
+             <p className="mt-5 max-w-lg text-base leading-7 text-brand-black/65 sm:mt-7 sm:text-lg">
               Makiwa is a compassionate online sanctuary where families and
               friends gather to celebrate lives, share stories, and preserve
               treasured memories for generations to come.
             </p>
 
             {/* CTA Buttons */}
-            <div className="mt-7 flex flex-wrap gap-3 sm:gap-4">
+            <div className="mt-6 flex flex-wrap gap-3 sm:mt-7 sm:gap-4">
               <Button
                 asChild
                 size="lg"
@@ -145,7 +145,7 @@ export const Hero = () => {
           {/* RIGHT: circular memorial carousel */}
           <div className="relative flex flex-col items-center lg:col-span-6">
             <div aria-hidden className="absolute -left-4 top-10 hidden h-40 w-px bg-brand-orange/40 lg:block" />
-            <div className="relative h-[280px] w-[280px] sm:h-[390px] sm:w-[390px] lg:h-[470px] lg:w-[470px]">
+            <div className="relative h-[235px] w-[235px] sm:h-[390px] sm:w-[390px] lg:h-[470px] lg:w-[470px]">
               <div className="absolute inset-0 overflow-hidden rounded-full border-[10px] border-card bg-brand-black shadow-elegant ring-1 ring-brand-black/10">
                 {memorials.map((m, i) => {
                   const photo = m.profile_photo_url || m.cover_photo_url;
@@ -177,18 +177,18 @@ export const Hero = () => {
 
                 {/* Overlay text */}
                 {current && (
-                  <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 text-center text-white">
+                   <div className="absolute inset-x-0 bottom-0 p-5 text-center text-brand-white sm:p-10">
                     <p className="text-xs sm:text-sm uppercase tracking-[0.3em] text-brand-orange font-semibold">
                       Latest Memorial
                     </p>
-                    <h3 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl leading-tight">
+                     <h3 className="mt-1 font-serif text-2xl leading-tight sm:mt-2 sm:text-4xl lg:text-5xl">
                       {current.full_name}
                     </h3>
                     <p className="mt-2 text-base sm:text-lg text-white/85">
                       {yearOf(current.date_of_birth)} –{" "}
                       {yearOf(current.date_of_death)}
                     </p>
-                    <p className="mt-3 italic text-sm sm:text-base text-white/90">
+                     <p className="mt-1.5 text-xs italic text-brand-white/90 sm:mt-3 sm:text-base">
                       Forever in our hearts.
                     </p>
                   </div>
