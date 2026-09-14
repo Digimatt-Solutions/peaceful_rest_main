@@ -16,7 +16,6 @@ export const HowItWorks = () => {
         loading="lazy"
         className="pointer-events-none absolute right-0 top-0 h-full w-2/3 object-cover opacity-20 grayscale"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/95 to-brand-black/55" />
       <div aria-hidden className="absolute -right-24 -top-24 h-80 w-80 rounded-full border border-brand-white/10" />
 
       <div className="container-luxe relative">

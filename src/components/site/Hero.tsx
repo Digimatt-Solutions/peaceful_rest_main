@@ -74,8 +74,8 @@ export const Hero = () => {
       <DotPattern className="absolute bottom-10 left-4 sm:left-10 opacity-80" />
       <DotPattern className="hidden lg:block absolute top-24 left-1/2 -translate-x-1/2 opacity-70" />
       <DotPattern className="hidden lg:block absolute bottom-10 right-10 opacity-70" />
-       <div aria-hidden className="absolute -right-28 top-24 h-72 w-72 rounded-full border border-brand-orange/15" />
-       <div aria-hidden className="absolute -right-16 top-36 h-72 w-72 rounded-full border border-brand-black/10" />
+       <div aria-hidden className="hidden lg:block absolute -right-28 top-24 h-72 w-72 rounded-full border border-brand-orange/15" />
+       <div aria-hidden className="hidden lg:block absolute -right-16 top-36 h-72 w-72 rounded-full border border-brand-black/10" />
 
       <div className="container-luxe relative z-10 w-full py-9 sm:py-14 lg:py-20">
         <div className="grid items-center gap-9 sm:gap-14 lg:grid-cols-12 lg:gap-8">
@@ -146,7 +146,7 @@ export const Hero = () => {
 
           {/* RIGHT: circular memorial carousel */}
           <div className="relative flex flex-col items-center lg:col-span-6">
-            <div className="relative h-[235px] w-[235px] sm:h-[390px] sm:w-[390px] lg:h-[470px] lg:w-[470px]">
+            <div className="relative w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[460px] lg:h-[460px]">
               <div className="absolute inset-0 overflow-hidden rounded-full border-[10px] border-card bg-brand-black shadow-elegant ring-1 ring-brand-black/10">
                 {memorials.map((m, i) => {
                   const photo = m.profile_photo_url || m.cover_photo_url;
