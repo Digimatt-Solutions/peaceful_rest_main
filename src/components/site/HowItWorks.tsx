@@ -9,14 +9,15 @@ const steps = [
 
 export const HowItWorks = () => {
   return (
-    <section className="py-24 lg:py-32 bg-brand-black text-brand-white relative overflow-hidden">
+    <section className="relative overflow-hidden border-b border-brand-white/10 bg-brand-black py-24 text-brand-white lg:py-32">
       <img
         src={HOW_BG}
         alt=""
         loading="lazy"
-        className="absolute right-0 top-0 h-full w-2/3 object-cover opacity-25 mix-blend-screen pointer-events-none"
+        className="pointer-events-none absolute right-0 top-0 h-full w-2/3 object-cover opacity-20 grayscale"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/95 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/95 to-brand-black/55" />
+      <div aria-hidden className="absolute -right-24 -top-24 h-80 w-80 rounded-full border border-brand-white/10" />
 
       <div className="container-luxe relative">
         <div className="max-w-2xl">

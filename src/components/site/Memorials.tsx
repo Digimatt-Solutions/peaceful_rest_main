@@ -180,7 +180,7 @@ export const Memorials = () => {
   return (
     <section
       id="memorials"
-      className="py-20 sm:py-24 lg:py-32 bg-[#faf8f5]"
+      className="paper-section relative overflow-hidden border-b border-brand-black/10 py-20 sm:py-24 lg:py-32"
     >
       <div className="container-luxe">
 
@@ -194,7 +194,7 @@ export const Memorials = () => {
               In Loving Memory
             </span>
 
-            <h2 className="mt-4 font-serif text-4xl lg:text-5xl font-medium leading-tight text-black">
+            <h2 className="mt-4 font-serif text-4xl font-medium leading-tight text-brand-black lg:text-6xl">
               Recently Shared Memorials
             </h2>
 
@@ -211,7 +211,7 @@ export const Memorials = () => {
                 placeholder="Search by name, location or tribute..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-12 pl-10 pr-10 rounded-xl border-black/10 bg-white shadow-sm focus-visible:border-brand-orange focus-visible:ring-brand-orange/30"
+                className="h-12 rounded-lg border-brand-black/15 bg-card pl-10 pr-10 shadow-none focus-visible:border-brand-orange focus-visible:ring-brand-orange/20"
               />
               {search && (
                 <button
@@ -229,7 +229,7 @@ export const Memorials = () => {
           <Button
             asChild
             variant="outline"
-            className="h-12 px-6 rounded-xl border-black/10 bg-white hover:bg-black hover:text-white shrink-0"
+            className="h-12 shrink-0 rounded-lg border-brand-black/20 bg-transparent px-6 text-brand-black hover:border-brand-orange hover:bg-brand-orange/5 hover:text-brand-orange"
           >
             <Link to="/memorials">
 
@@ -301,10 +301,10 @@ export const Memorials = () => {
                     to={`/memorial/${m.id}`}
                     className="group block"
                   >
-                    <article className="overflow-hidden rounded-[16px] bg-white border border-black/[0.06] shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]">
+                    <article className="no-card overflow-hidden rounded-lg border border-brand-black/10 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30 hover:shadow-elegant">
 
                       {/* Image */}
-                      <div className="relative h-[355px] overflow-hidden">
+                      <div className="relative aspect-[4/5] overflow-hidden">
 
                         {photo ? (
                           <img
@@ -354,7 +354,7 @@ export const Memorials = () => {
                       </div>
 
                       {/* Content */}
-                      <div className="p-5">
+                      <div className="p-6">
 
                         {m.location && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -421,10 +421,10 @@ export const Memorials = () => {
                         </div>
 
                         {/* View Memorial */}
-                        <div
-                          className="inline-flex items-center gap-2 rounded-[8px] px-3.5 py-2
-                                    border-2 border-brand-orange
-                                    bg-brand-orange text-white
+                          <div
+                          className="inline-flex items-center gap-2 rounded-lg px-3.5 py-2
+                                    border border-brand-orange
+                                    bg-brand-orange text-brand-white
                                     font-bold text-sm
                                     shadow-sm
                                     transition-all duration-300

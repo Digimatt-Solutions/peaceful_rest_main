@@ -27,7 +27,7 @@ const Index = () => {
   }, []);
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="paper-ink-theme min-h-screen bg-background">
       <Navbar />
       <Hero />
       <Memorials />

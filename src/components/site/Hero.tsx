@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight,
-  HeartHandshake,
   Heart,
   Users,
   ShieldCheck,
@@ -69,20 +67,20 @@ export const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center overflow-hidden pt-24 bg-white"
+      className="relative flex min-h-[min(900px,100svh)] items-center overflow-hidden border-b border-brand-black/10 bg-cream pt-20"
     >
       {/* Dotted patterns */}
-      <DotPattern className="absolute top-24 left-4 sm:left-10 opacity-80" />
-      <DotPattern className="absolute bottom-10 left-4 sm:left-10 opacity-80" />
-      <DotPattern className="hidden lg:block absolute top-24 left-1/2 -translate-x-1/2 opacity-70" />
-      <DotPattern className="hidden lg:block absolute top-24 right-10 opacity-70" />
-      <DotPattern className="hidden lg:block absolute bottom-10 right-10 opacity-70" />
+       <DotPattern className="absolute left-3 top-24 opacity-45 sm:left-10" />
+       <DotPattern className="absolute bottom-8 right-3 opacity-35 sm:right-10" />
+       <div aria-hidden className="absolute -right-28 top-24 h-72 w-72 rounded-full border border-brand-orange/15" />
+       <div aria-hidden className="absolute -right-16 top-36 h-72 w-72 rounded-full border border-brand-black/10" />
 
-      <div className="container-luxe relative z-10 w-full py-16 lg:py-24">
-        <div className="grid lg:grid-cols-12 items-center gap-12">
+      <div className="container-luxe relative z-10 w-full py-14 lg:py-20">
+        <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-8">
           {/* LEFT CONTENT */}
-          <div className="lg:col-span-6">
-            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl text-brand-black font-medium leading-[0.98] tracking-tight">
+          <div className="lg:col-span-6 lg:pr-8">
+            <p className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase text-brand-orange"><span className="h-px w-10 bg-brand-orange/60" />A place for every story</p>
+            <h1 className="font-serif text-5xl font-medium leading-[0.92] text-brand-black sm:text-6xl lg:text-[5rem]">
               Honoring Lives.
               <br />
               Sharing Memories.
@@ -90,7 +88,7 @@ export const Hero = () => {
               Keeping Love Alive.
             </h1>
 
-            <p className="mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-brand-black/70">
+             <p className="mt-7 max-w-lg text-base leading-7 text-brand-black/65 sm:text-lg">
               Makiwa is a compassionate online sanctuary where families and
               friends gather to celebrate lives, share stories, and preserve
               treasured memories for generations to come.
@@ -101,7 +99,7 @@ export const Hero = () => {
               <Button
                 asChild
                 size="lg"
-                className="h-12 px-4 rounded-2 bg-brand-orange hover:bg-brand-orange/90 text-white border-[2.1px] border-brand-orange font-bold text-[15px] shadow-lg"
+                className="h-12 rounded-lg border border-brand-orange bg-brand-orange px-5 text-[15px] font-bold text-brand-white shadow-none hover:bg-brand-orange/90"
               >
                 <Link to="/auth?tab=create-account">
                   <Plus className="h-5 w-5 stroke-[2.5]" />
@@ -113,7 +111,7 @@ export const Hero = () => {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 px-4 rounded-xl border-[2.1px] border-brand-orange bg-white text-brand-orange font-bold text-[15px] hover:bg-brand-orange hover:text-white"
+                className="h-12 rounded-lg border border-brand-black/20 bg-transparent px-5 text-[15px] font-bold text-brand-black hover:border-brand-orange hover:bg-brand-orange/5 hover:text-brand-orange"
               >
                 <a href="#memorials">
                   <Clock className="h-5 w-5 stroke-[2.5]" />
@@ -124,7 +122,7 @@ export const Hero = () => {
 
             {/* Memorial Pillars */}
             <div className="mt-10 max-w-lg hidden sm:block">
-              <div className="flex items-start gap-16 border-t border-brand-black/10 pt-6">
+              <div className="grid grid-cols-3 gap-8 border-t border-brand-black/10 pt-6">
                 <div>
                   <Heart className="h-6 w-6 text-brand-orange mb-2" />
                   <h3 className="font-semibold text-brand-black">Honor</h3>
@@ -145,9 +143,10 @@ export const Hero = () => {
           </div>
 
           {/* RIGHT: circular memorial carousel */}
-          <div className="lg:col-span-6 flex flex-col items-center">
-            <div className="relative w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[460px] lg:h-[460px]">
-              <div className="absolute inset-0 rounded-full ring-8 ring-white shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35)] overflow-hidden bg-brand-black">
+          <div className="relative flex flex-col items-center lg:col-span-6">
+            <div aria-hidden className="absolute -left-4 top-10 hidden h-40 w-px bg-brand-orange/40 lg:block" />
+            <div className="relative h-[280px] w-[280px] sm:h-[390px] sm:w-[390px] lg:h-[470px] lg:w-[470px]">
+              <div className="absolute inset-0 overflow-hidden rounded-full border-[10px] border-card bg-brand-black shadow-elegant ring-1 ring-brand-black/10">
                 {memorials.map((m, i) => {
                   const photo = m.profile_photo_url || m.cover_photo_url;
                   return (
@@ -210,7 +209,7 @@ export const Hero = () => {
 
             {/* Dots */}
             {memorials.length > 1 && (
-              <div className="mt-6 flex items-center gap-2">
+                 <div className="mt-7 flex items-center gap-2" role="tablist" aria-label="Latest memorials">
                 {memorials.map((_, i) => (
                   <button
                     key={i}

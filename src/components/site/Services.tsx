@@ -51,7 +51,7 @@ const features = [
 
 export const Services = () => {
   return (
-    <section id="services" className="py-24 lg:py-32 bg-[#f1ece3]">
+    <section id="services" className="organic-divider relative overflow-hidden border-b border-brand-black/10 bg-secondary py-24 lg:py-32">
       <div className="container-luxe">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-end mb-14 lg:mb-20">
           <div className="lg:col-span-7">
@@ -74,7 +74,7 @@ export const Services = () => {
 
         {/* Editorial feature row */}
         <div className="grid lg:grid-cols-12 gap-6 mb-6">
-          <div className="lg:col-span-7 relative rounded-[2rem] overflow-hidden aspect-[16/10] lg:aspect-auto lg:h-[440px] group">
+          <div className="no-card group relative aspect-[16/10] overflow-hidden rounded-lg border border-brand-black/10 lg:col-span-7 lg:h-[440px] lg:aspect-auto">
             <img
               src={FEATURE_IMG}
               alt="A memorial gathering"
@@ -112,10 +112,10 @@ export const Services = () => {
               return (
                 <div
                   key={s.name}
-                  className="rounded-[2rem] bg-white p-7 lg:p-8 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_-15px_rgba(249,115,22,0.25)] hover:-translate-y-1 transition-all duration-500 lg:flex-1 flex flex-col justify-between min-h-[210px]"
+                  className="no-card flex min-h-[210px] flex-col justify-between rounded-lg border border-brand-black/10 bg-cream p-7 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30 lg:flex-1 lg:p-8"
                 >
-                  <div className="h-12 w-12 rounded-xl bg-brand-orange flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-black" strokeWidth={2.25} />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-brand-orange/35 bg-brand-orange/10">
+                    <Icon className="h-5 w-5 text-brand-black" strokeWidth={2} />
                   </div>
                   <div className="mt-6">
                     <h3 className="font-serif text-2xl font-medium">{s.name}</h3>
@@ -135,10 +135,10 @@ export const Services = () => {
             return (
               <div
                 key={s.name}
-                className="group relative p-7 rounded-2xl bg-white shadow-[0_10px_30px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_45px_-15px_rgba(249,115,22,0.28)] hover:-translate-y-1 transition-all duration-500"
+                className="no-card group relative rounded-lg border border-brand-black/10 bg-cream p-7 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30"
               >
-                <div className="h-11 w-11 rounded-xl bg-brand-orange flex items-center justify-center group-hover:bg-brand-orange/80 transition-colors duration-500">
-                  <Icon className="h-5 w-5 text-black" strokeWidth={2.25} />
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-orange/35 bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange/15">
+                  <Icon className="h-5 w-5 text-brand-black" strokeWidth={2} />
                 </div>
                 <h3 className="mt-5 font-serif text-xl font-semibold">{s.name}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
