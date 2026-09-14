@@ -45,9 +45,10 @@ export const Footer = () => {
         <div>
           <h4 className="font-serif text-lg text-brand-white">Get in touch</h4>
           <ul className="mt-5 space-y-4 text-sm">
-            <li className="flex gap-3"><Mail className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> info@makiwa.com</li>
-            <li className="flex gap-3"><Phone className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> +254 700 000 000</li>
-            <li className="flex gap-3"><MapPin className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> Mon - Fri, 8:00 AM - 6:00 PM</li>
+            <li className="flex gap-3"><Mail className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> <a href="mailto:info@makiwa.ke" className="hover:text-brand-orange transition-colors">info@makiwa.ke</a></li>
+            <li className="flex gap-3"><Phone className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> <a href="tel:+254116797979" className="hover:text-brand-orange transition-colors">+254 116 797979</a></li>
+            <li className="flex gap-3"><MapPin className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" /> Wood Avenue, Kilimani, Nairobi</li>
+
           </ul>
         </div>
       </div>

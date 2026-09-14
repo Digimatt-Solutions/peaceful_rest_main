@@ -288,9 +288,10 @@ const MemorialDetail = () => {
 
               {memorial.short_tribute && (
                 <div className="mt-8 max-w-2xl border-l-2 border-orange-400/70 pl-5">
-                  <p className="italic text-white/90 text-xl leading-relaxed font-serif">
+                  <p className="italic text-white/90 text-xl leading-relaxed font-serif line-clamp-3">
                     "{memorial.short_tribute}"
                   </p>
+
                 </div>
               )}
 
