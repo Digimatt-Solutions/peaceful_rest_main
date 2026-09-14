@@ -209,13 +209,13 @@
 /* Public landing page: warm paper surfaces, fine rules, and subtle print texture. */
 .paper-ink-theme {
   --background: var(--paper);
-  --foreground: 0 0% 22%;
+  --foreground: 0 0% 7%;
   --card: 42 28% 98%;
   --secondary: var(--paper-deep);
   --muted: 40 18% 92%;
-  --muted-foreground: 25 7% 38%;
+  --muted-foreground: 0 0% 24%;
   --border: 30 10% 82%;
-  --brand-black: 60 2% 22%;
+  --brand-black: 0 0% 0%;
   --brand-orange: 16 81% 54%;
   background-color: hsl(var(--paper));
 }
