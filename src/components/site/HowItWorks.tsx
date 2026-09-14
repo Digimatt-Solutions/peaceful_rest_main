@@ -17,6 +17,7 @@ export const HowItWorks = () => {
         className="pointer-events-none absolute right-0 top-0 h-full w-2/3 object-cover opacity-20 grayscale"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/95 to-brand-black/55" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/95 to-brand-black/55" />
       <div aria-hidden className="absolute -right-24 -top-24 h-80 w-80 rounded-full border border-brand-white/10" />
 
       <div className="container-luxe relative">
@@ -33,6 +34,7 @@ export const HowItWorks = () => {
         <div className="mt-16 grid md:grid-cols-3 gap-8 lg:gap-12">
           {steps.map((s, i) => (
             <div key={s.n} className="relative pt-8">
+              <div className="absolute top-0 left-0 right-12 h-px bg-gradient-to-r from-brand-orange/60 to-transparent" />
               <div className="font-serif text-7xl text-brand-orange/85 leading-none">{s.n}</div>
               <h3 className="mt-6 font-serif text-2xl font-medium">{s.title}</h3>
               <p className="mt-3 text-brand-white/70 leading-relaxed">{s.desc}</p>
