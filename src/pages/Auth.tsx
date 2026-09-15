@@ -12,7 +12,7 @@ import { Loader2, ArrowLeft, Heart, ShieldCheck, Eye, EyeOff, LogIn, UserPlus, F
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import heroImage from "@/assets/auth.jpg";
+import heroImage from "@/assets/authbg.png";
 import logoMark from "@/assets/makiwa-mark.png";
 import logoText from "@/assets/makiwa-logo-black.png";
 import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
@@ -274,7 +274,7 @@ const Auth = () => {
       {/* Visual side */}
       <div className="relative hidden lg:block overflow-hidden bg-neutral-200">
         <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover scale-105" onError={(e) => ((e.currentTarget.style.display = "none"))} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-brand-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-brand-black/75" />
         <div  />
 
         <div className="relative z-10 h-full flex flex-col justify-end gap-8 p-10 xl:p-14 text-brand-white">
