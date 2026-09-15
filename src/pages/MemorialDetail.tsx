@@ -88,6 +88,13 @@ const MemorialDetail = () => {
     });
   }, [id]);
 
+  // Identify the signed-in visitor so they only write a message.
+  useEffect(() => {
+    if (!user) { setMyProfile(null); return; }
+    supabase.from("profiles").select("full_name,avatar_url").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setMyProfile(data));
+  }, [user]);
+
   const submitCondolence = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
