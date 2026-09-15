@@ -78,8 +78,10 @@ const MemorialDetail = () => {
   const submitCondolence = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    // Signed-in visitors are identified automatically; guests type their name.
+    const signedInName = myProfile?.full_name || user?.email?.split("@")[0] || "";
     const parsed = condolenceSchema.safeParse({
-      name: fd.get("name"),
+      name: user ? signedInName : fd.get("name"),
       relationship: fd.get("relationship") || undefined,
       message: fd.get("message"),
     });
@@ -91,10 +93,17 @@ const MemorialDetail = () => {
       relationship: parsed.data.relationship,
       message: parsed.data.message,
       status: "pending",
+      user_id: user?.id || null,
     });
     setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error("Your condolence could not be sent. Please try again."); return; }
     (e.target as HTMLFormElement).reset();
+    if (user) {
+      logActivity("condolence", {
+        entity_type: "memorial", entity_id: id,
+        description: `Shared a condolence for ${memorial?.full_name || "a memorial"}`,
+      });
+    }
     toast.success("Thank you. Your condolence was submitted and will appear once verified by an admin.");
   };
 
@@ -248,35 +257,40 @@ const MemorialDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-6 overflow-hidden">
+      <section className="relative overflow-hidden">
         {/* Layered background */}
-        <div className="absolute inset-0 z-0 h-[28vh] min-h-[800px] overflow-hidden">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           {cover ? (
-            <img
-              src={cover}
-              alt={memorial.full_name}
-              className="w-full h-full object-cover scale-105"
-            />
+            <img src={cover} alt="" aria-hidden className="h-full w-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-neutral-900 to-neutral-800" />
+            <div className="h-full w-full bg-gradient-to-br from-neutral-900 to-neutral-800" />
           )}
-          {/* Editorial gradient stack */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-          <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-brand-orange/15 blur-[160px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/72 to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/25" />
         </div>
 
-        <div className="relative z-10 container-luxe pt-28 pb-20 lg:pt-36 lg:pb-28 text-white">
-          <div className="grid lg:grid-cols-12 gap-10 items-end">
-            <div className="lg:col-span-8">
-              <h1 className="mt-7 font-serif text-5xl sm:text-6xl lg:text-8xl font-medium leading-[0.95] tracking-tight">
+        <div className="relative z-10 container-luxe pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-24 text-white">
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="lg:col-span-7">
+              {/* Portrait on small screens, above the name */}
+              {memorial.profile_photo_url && (
+                <img
+                  src={memorial.profile_photo_url}
+                  alt={memorial.full_name}
+                  className="mb-6 h-28 w-28 rounded-full object-cover ring-4 ring-white/20 shadow-xl sm:h-32 sm:w-32 lg:hidden"
+                />
+              )}
+
+              <p className="text-[10px] uppercase tracking-[0.35em] text-orange-300">In loving memory</p>
+
+              <h1 className="mt-4 font-serif text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
                 {memorial.full_name}
               </h1>
 
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-white/80">
-                <p className="text-lg font-light tracking-wide font-serif italic">
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-white/80">
+                <p className="font-serif text-base italic tracking-wide sm:text-lg">
                   {fmt(memorial.date_of_birth)}
-                  <span className="mx-3 text-orange-400">-</span>
+                  <span className="mx-2.5 text-orange-400">-</span>
                   {fmt(memorial.date_of_death)}
                 </p>
                 {memorial.location && (
@@ -288,15 +302,14 @@ const MemorialDetail = () => {
               </div>
 
               {memorial.short_tribute && (
-                <div className="mt-8 max-w-2xl border-l-2 border-orange-400/70 pl-5">
-                  <p className="italic text-white/90 text-xl leading-relaxed font-serif line-clamp-3">
+                <div className="mt-7 max-w-2xl border-l-2 border-orange-400/70 pl-5">
+                  <p className="font-serif text-base italic leading-relaxed text-white/90 line-clamp-3 sm:text-lg lg:text-xl">
                     "{memorial.short_tribute}"
                   </p>
-
                 </div>
               )}
 
-              <div className="mt-8 lg:mt-10 flex flex-wrap gap-2 sm:gap-3">
+              <div className="mt-8 flex flex-wrap gap-2.5">
                 <Button
                   onClick={async () => {
                     const url = window.location.href;
@@ -307,7 +320,7 @@ const MemorialDetail = () => {
                       toast.success("Link copied to clipboard");
                     }
                   }}
-                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 sm:px-4 shadow-lg font-bold"
+                  className="h-11 rounded-xl border-2 border-brand-orange bg-brand-orange px-5 font-semibold text-white shadow-lg hover:bg-brand-orange/90 sm:h-12"
                 >
                   <Share2 className="h-4 w-4" />
                   Share memorial
@@ -315,44 +328,33 @@ const MemorialDetail = () => {
 
                 <a
                   href="#condolence"
-                  className="inline-flex items-center gap-2 rounded-xl h-11 sm:h-12 px-4 sm:px-4  border border-brand-orange text-brand-orange backdrop-blur-md hover:bg-brand-orange hover:text-white transition-colors text-sm font-bold"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/40 px-5 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:border-brand-orange hover:bg-brand-orange hover:text-white sm:h-12"
                 >
                   <Heart className="h-4 w-4" />
                   Send condolences
                 </a>
               </div>
 
-              <div className="mt-12 grid grid-cols-3 gap-4 max-w-md border-t border-white/15 pt-6">
+              <div className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/15 pt-6">
                 <Stat label="Visits" value={(memorial.visitor_count || 0).toLocaleString()} />
                 <Stat label="Condolences" value={condolences.length.toString()} />
                 <Stat label="Memories" value={memories.length.toString()} />
               </div>
             </div>
 
-            {/* Right circular portrait */}
+            {/* Portrait on large screens */}
             {memorial.profile_photo_url && (
-              <div className="hidden lg:flex lg:col-span-4 h-full items-center justify-center">
-                <div className="relative flex items-center justify-center">
-                  <div className="relative h-[300px] w-[300px] xl:h-[360px] xl:w-[360px] rounded-full overflow-hidden ring-8 ring-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]">
-                    
-                    <img
-                      src={memorial.profile_photo_url}
-                      alt={memorial.full_name}
-                      className="absolute inset-0 h-full w-full object-cover object-center"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-                    <div className="absolute inset-x-0 bottom-0 p-6 text-center">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">
-                        Cherished Always
-                      </p>
-
-                      <p className="mt-1 font-serif text-2xl">
-                        {memorial.full_name.split(" ")[0]}
-                      </p>
-                    </div>
-
+              <div className="hidden lg:col-span-5 lg:flex lg:justify-center">
+                <div className="relative h-[300px] w-[300px] overflow-hidden rounded-full ring-8 ring-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] xl:h-[360px] xl:w-[360px]">
+                  <img
+                    src={memorial.profile_photo_url}
+                    alt={memorial.full_name}
+                    className="absolute inset-0 h-full w-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 text-center">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-orange-300">Cherished Always</p>
+                    <p className="mt-1 font-serif text-2xl">{memorial.full_name.split(" ")[0]}</p>
                   </div>
                 </div>
               </div>
@@ -560,8 +562,25 @@ const MemorialDetail = () => {
 
             <form onSubmit={submitCondolence} className="mt-8 rounded-3xl border border-border bg-card p-6 sm:p-8 space-y-4">
               <h4 className="font-serif text-xl">Leave a message</h4>
+              {user ? (
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/40 p-3">
+                  {myProfile?.avatar_url ? (
+                    <img src={myProfile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-brand-orange/15 text-brand-orange flex items-center justify-center font-serif">
+                      {(myProfile?.full_name || user.email || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{myProfile?.full_name || user.email}</p>
+                    <p className="text-xs text-muted-foreground">Posting from your account</p>
+                  </div>
+                </div>
+              ) : null}
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label htmlFor="c-name">Your name</Label><Input id="c-name" name="name" required className="rounded-xl" /></div>
+                {!user && (
+                  <div className="space-y-2"><Label htmlFor="c-name">Your name</Label><Input id="c-name" name="name" required className="rounded-xl" /></div>
+                )}
                 <div className="space-y-2"><Label htmlFor="c-rel">Relationship <span className="text-muted-foreground font-normal">(optional)</span></Label><Input id="c-rel" name="relationship" placeholder="Friend, colleague, neighbor…" className="rounded-xl" /></div>
               </div>
               <div className="space-y-2"><Label htmlFor="c-msg">Your message</Label><Textarea id="c-msg" name="message" rows={4} required className="rounded-xl" placeholder="Share a memory or word of comfort…" /></div>
@@ -577,11 +596,19 @@ const MemorialDetail = () => {
               ) : condolences.map(c => (
                 <div key={c.id} className={`rounded-2xl border p-6 ${c.is_pinned ? "border-brand-orange/40 bg-brand-orange/[0.03]" : "border-border bg-card"}`}>
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center font-serif text-sm">
-                      {c.name.charAt(0).toUpperCase()}
-                    </div>
+                    {c.avatar_url ? (
+                      <img src={c.avatar_url} alt={c.name} loading="lazy"
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-brand-orange/20" />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center font-serif text-sm">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{c.name}</p>
+                      <p className="font-medium truncate">
+                        {c.name}
+                        {c.user_id && <span className="ml-2 text-[10px] uppercase tracking-wider font-semibold text-emerald-600">verified</span>}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {c.relationship ? `${c.relationship} · ` : ""}{format(new Date(c.created_at), "MMM d, yyyy")}
                       </p>
