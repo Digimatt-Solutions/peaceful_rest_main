@@ -437,7 +437,7 @@ const Community = () => {
                           alt=""
                           loading="lazy"
                           onClick={() => setPreviewImage(p.image_url)}
-                          className="w-full max-h-[520px] cursor-pointer object-cover transition-opacity hover:opacity-95"
+                          className="w-full max-h-[300px] sm:max-h-[520px] cursor-pointer object-cover transition-opacity hover:opacity-95"
                         />
                       </div>
                     )}
@@ -449,8 +449,12 @@ const Community = () => {
                         </span>
                       )}
                       {cm.length > 0 && (
-                        <button onClick={() => setOpenComments(o => ({ ...o, [p.id]: !o[p.id] }))} className="ml-auto hover:underline">
-                          {cm.length} {cm.length === 1 ? "comment" : "comments"}
+                        <button
+                          onClick={() => setOpenComments(o => ({ ...o, [p.id]: !o[p.id] }))}
+                          className="ml-auto hover:underline"
+                          aria-expanded={!!openComments[p.id]}
+                        >
+                          {openComments[p.id] ? "Hide comments" : `View ${cm.length} ${cm.length === 1 ? "comment" : "comments"}`}
                         </button>
                       )}
                     </div>
@@ -470,8 +474,8 @@ const Community = () => {
                       </button>
                     </div>
 
-                    {(openComments[p.id] || cm.length > 0) && (
-                      <div className="border-t border-border p-4 space-y-3">
+                    {openComments[p.id] && (
+                      <div className="border-t border-border p-3 sm:p-4 space-y-3">
                         {cm.map(c => {
                           const a = profiles[c.user_id];
                           const canDel = c.user_id === user?.id || isSuperAdmin;
