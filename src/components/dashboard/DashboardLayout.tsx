@@ -152,7 +152,7 @@ export const DashboardLayout = () => {
             ))
           ) : visibleNav.map((item) => {
             const Icon = item.icon;
-            const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
+            const badge = item.to === "/dashboard/messages" ? unreadMessages : item.to === "/dashboard/condolences" ? pendingCondolences : 0;
             return (
               <NavLink
                 key={item.to}
@@ -330,7 +330,7 @@ export const DashboardLayout = () => {
             .slice(0, 5)
             .map(item => {
               const Icon = item.icon;
-              const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
+              const badge = item.to === "/dashboard/messages" ? unreadMessages : item.to === "/dashboard/condolences" ? pendingCondolences : 0;
               return (
                 <NavLink
                   key={item.to}
