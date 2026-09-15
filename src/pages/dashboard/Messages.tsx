@@ -567,80 +567,78 @@ export default function Messages() {
                   Only users with a phone number on their profile receive the SMS.
                 </p>
               </SideCard>
-
-
-              {/* Directory */}
-              <SideCard icon={Users} title="All users" subtitle="Start a direct message">
-                <div className="mb-2 space-y-1.5">
-                  <p className="text-xs font-medium text-muted-foreground">Chat context</p>
-                  <Select value={contextValue} onValueChange={setContextValue}>
-                    <SelectTrigger className="rounded-xl"><SelectValue placeholder="General" /></SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      <SelectItem value="general">General</SelectItem>
-                      {contextOptions.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search users…" className="pl-9 rounded-xl" />
-                </div>
-                <div className="mt-3 max-h-96 overflow-y-auto rounded-xl border border-border">
-                  {dirLoading ? (
-                    <p className="p-4 text-center text-sm text-muted-foreground">Loading users…</p>
-                  ) : groupedUsers.length === 0 ? (
-                    <p className="p-4 text-center text-sm text-muted-foreground">No users found.</p>
-                  ) : (
-                    groupedUsers.map(([group, users]) => (
-                      <div key={group}>
-                        <p className="sticky top-0 bg-muted/80 backdrop-blur px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          {group} · {users.length}
-                        </p>
-                        {users.map((u) => (
-                          <button
-                            key={u.id}
-                            onClick={() =>
-                              setActive({
-                                id: u.id,
-                                name: u.full_name || u.email?.split("@")[0] || "User",
-                                avatar_url: u.avatar_url,
-                                subtitle: selectedContext
-                                  ? `About ${selectedContext.label.replace(/^(Memorial|Fundraiser) · /, "")}`
-                                  : roleLabels[u.role] || "Mourner",
-                                context: selectedContext
-                                  ? {
-                                      memorialId: selectedContext.memorialId,
-                                      fundraiserId: selectedContext.fundraiserId,
-                                      label: selectedContext.label.replace(/^(Memorial|Fundraiser) · /, ""),
-                                    }
-                                  : undefined,
-                              })
-                            }
-
-                            className="flex w-full items-center gap-3 border-t border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
-                          >
-                            <Avatar className="h-9 w-9">
-                              <AvatarImage src={u.avatar_url || undefined} />
-                              <AvatarFallback className="bg-brand-orange/10 text-brand-orange text-xs">
-                                {initialsOf(u.full_name || u.email || "U")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium">{u.full_name || "Unnamed user"}</p>
-                              <p className="truncate text-xs text-muted-foreground">{u.email}</p>
-                            </div>
-                            <MessageCircle className="h-4 w-4 shrink-0 text-brand-orange" />
-                          </button>
-                        ))}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </SideCard>
             </>
           )}
+
+          {/* People directory - available to every signed-in user */}
+          <SideCard icon={Users} title={isAdmin ? "All users" : "Start a conversation"} subtitle="Choose someone to message">
+            <div className="mb-2 space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Chat context</p>
+              <Select value={contextValue} onValueChange={setContextValue}>
+                <SelectTrigger className="rounded-xl"><SelectValue placeholder="General" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="general">General</SelectItem>
+                  {contextOptions.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search people…" className="pl-9 rounded-xl" />
+            </div>
+            <div className="mt-3 max-h-96 overflow-y-auto rounded-xl border border-border">
+              {dirLoading ? (
+                <p className="p-4 text-center text-sm text-muted-foreground">Loading people…</p>
+              ) : groupedUsers.length === 0 ? (
+                <p className="p-4 text-center text-sm text-muted-foreground">No people found.</p>
+              ) : (
+                groupedUsers.map(([group, users]) => (
+                  <div key={group}>
+                    <p className="sticky top-0 bg-muted/80 backdrop-blur px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {group} · {users.length}
+                    </p>
+                    {users.map((u) => (
+                      <button
+                        key={u.id}
+                        onClick={() =>
+                          setActive({
+                            id: u.id,
+                            name: u.full_name || u.email?.split("@")[0] || "User",
+                            avatar_url: u.avatar_url,
+                            subtitle: selectedContext
+                              ? `About ${selectedContext.label.replace(/^(Memorial|Fundraiser) · /, "")}`
+                              : roleLabels[u.role] || "Mourner",
+                            context: selectedContext
+                              ? {
+                                  memorialId: selectedContext.memorialId,
+                                  fundraiserId: selectedContext.fundraiserId,
+                                  label: selectedContext.label.replace(/^(Memorial|Fundraiser) · /, ""),
+                                }
+                              : undefined,
+                          })
+                        }
+                        className="flex w-full items-center gap-3 border-t border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
+                      >
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={u.avatar_url || undefined} />
+                          <AvatarFallback className="bg-brand-orange/10 text-brand-orange text-xs">
+                            {initialsOf(u.full_name || u.email || "U")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{u.full_name || "Unnamed user"}</p>
+                          <p className="truncate text-xs text-muted-foreground">{roleLabels[u.role] || "Mourner"}</p>
+                        </div>
+                        <MessageCircle className="h-4 w-4 shrink-0 text-brand-orange" />
+                      </button>
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          </SideCard>
           </div>
         </div>
 
