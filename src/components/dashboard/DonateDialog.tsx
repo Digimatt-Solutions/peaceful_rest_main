@@ -48,15 +48,23 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
   if (!fundraiser) return null;
 
   const finish = async (donationId?: string, amount?: number) => {
+    let don: any = null;
     if (donationId) {
-      const { data: don } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
-      if (don) {
-        await saveDonationReceipt({
-          ...don,
-          fundraiser_title: fundraiser.title,
-          memorial_name: fundraiser.memorial_name,
-        } as any);
-      }
+      const { data } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+      don = data;
+    } else if (user) {
+      const { data } = await supabase
+        .from("donations").select("*")
+        .eq("fundraiser_id", fundraiser.id).eq("user_id", user.id)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      don = data;
+    }
+    if (don) {
+      await saveDonationReceipt({
+        ...don,
+        fundraiser_title: fundraiser.title,
+        memorial_name: fundraiser.memorial_name,
+      });
     }
     logActivity("donation", {
       entity_type: "fundraiser",
