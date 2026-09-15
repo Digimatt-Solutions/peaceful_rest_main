@@ -75,6 +75,25 @@ export const DashboardLayout = () => {
       .then(({ data }) => setProfile(data));
   }, [user]);
 
+  // Condolences awaiting approval (row-level security only exposes these to admins).
+  const [pendingCondolences, setPendingCondolences] = useState(0);
+  useEffect(() => {
+    if (!user) return;
+    const loadPending = async () => {
+      const { count } = await supabase
+        .from("condolences")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      setPendingCondolences(count || 0);
+    };
+    loadPending();
+    const ch = supabase
+      .channel("pending-condolences")
+      .on("postgres_changes", { event: "*", schema: "public", table: "condolences" }, () => loadPending())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
+
   // Log every dashboard page visit for the activity trail (throttled per-path).
   const location = useLocation();
   const lastLoggedRef = useRef<{ path: string; ts: number }>({ path: "", ts: 0 });
