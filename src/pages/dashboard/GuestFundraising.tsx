@@ -94,7 +94,6 @@ const GuestFundraising = () => {
       <PageHeader
         title="Fundraising"
         subtitle="Support families raising funds, and keep every receipt in one place."
-        onRefresh={load}
       />
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
