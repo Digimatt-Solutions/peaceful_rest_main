@@ -238,9 +238,9 @@ export default function Messages() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Admin directory
+  // People directory - available to every signed-in user so anyone can start a chat
   useEffect(() => {
-    if (!isAdmin || !user) return;
+    if (!user) return;
     setDirLoading(true);
     (async () => {
       const [{ data: profs }, { data: roles }] = await Promise.all([
