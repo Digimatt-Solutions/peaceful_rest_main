@@ -437,7 +437,7 @@ const Community = () => {
                           alt=""
                           loading="lazy"
                           onClick={() => setPreviewImage(p.image_url)}
-                          className="w-full max-h-[520px] cursor-pointer object-cover transition-opacity hover:opacity-95"
+                          className="w-full max-h-[300px] sm:max-h-[520px] cursor-pointer object-cover transition-opacity hover:opacity-95"
                         />
                       </div>
                     )}
@@ -449,8 +449,12 @@ const Community = () => {
                         </span>
                       )}
                       {cm.length > 0 && (
-                        <button onClick={() => setOpenComments(o => ({ ...o, [p.id]: !o[p.id] }))} className="ml-auto hover:underline">
-                          {cm.length} {cm.length === 1 ? "comment" : "comments"}
+                        <button
+                          onClick={() => setOpenComments(o => ({ ...o, [p.id]: !o[p.id] }))}
+                          className="ml-auto hover:underline"
+                          aria-expanded={!!openComments[p.id]}
+                        >
+                          {openComments[p.id] ? "Hide comments" : `View ${cm.length} ${cm.length === 1 ? "comment" : "comments"}`}
                         </button>
                       )}
                     </div>
@@ -470,8 +474,8 @@ const Community = () => {
                       </button>
                     </div>
 
-                    {(openComments[p.id] || cm.length > 0) && (
-                      <div className="border-t border-border p-4 space-y-3">
+                    {openComments[p.id] && (
+                      <div className="border-t border-border p-3 sm:p-4 space-y-3">
                         {cm.map(c => {
                           const a = profiles[c.user_id];
                           const canDel = c.user_id === user?.id || isSuperAdmin;
@@ -497,7 +501,7 @@ const Community = () => {
                               </div>
                               {canDel && (
                                 <button onClick={() => deleteComment(p.id, c.id)}
-                                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1">
+                                  className="text-muted-foreground hover:text-destructive p-1 sm:opacity-0 sm:group-hover:opacity-100">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               )}

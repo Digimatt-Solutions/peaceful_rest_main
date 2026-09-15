@@ -23,7 +23,7 @@ import MyMemorials from "./pages/dashboard/MyMemorials";
 import ObituaryManagement from "./pages/dashboard/ObituaryManagement";
 import FamilyTree from "./pages/dashboard/FamilyTree";
 import Condolences from "./pages/dashboard/Condolences";
-import Fundraising from "./pages/dashboard/Fundraising";
+import FundraisingRoute from "./pages/dashboard/FundraisingRoute";
 import LifeMoments from "./pages/dashboard/LifeMoments";
 import Anniversary from "./pages/dashboard/Anniversary";
 
@@ -71,7 +71,7 @@ const App = () => (
               <Route path="obituary" element={<ObituaryManagement />} />
               <Route path="family" element={<FamilyTree />} />
               <Route path="condolences" element={<Condolences />} />
-              <Route path="fundraising" element={<Fundraising />} />
+              <Route path="fundraising" element={<FundraisingRoute />} />
               <Route path="moments" element={<LifeMoments />} />
               <Route path="anniversary" element={<Anniversary />} />
               <Route path="community" element={<Community />} />

@@ -28,12 +28,13 @@ type NavItem = { to: string; label: string; icon: any; end?: boolean; roles?: st
 const allNav: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/dashboard/memorials", label: "My Memorials", icon: BookHeart, roles: ["super_admin", "memorial_admin"] },
+  { to: "/dashboard/memorials", label: "Memorials", icon: BookHeart, roles: ["mourner", "user"] },
   { to: "/dashboard/obituary", label: "Obituary Management", icon: FileText, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/family", label: "Family Tree", icon: Users, roles: ["super_admin", "memorial_admin"] },
   { to: "/dashboard/condolences", label: "Condolences", icon: MessageCircle },
-  { to: "/dashboard/fundraising", label: "Fundraising", icon: HeartHandshake, roles: ["super_admin", "memorial_admin"] },
+  { to: "/dashboard/fundraising", label: "Fundraising", icon: HeartHandshake },
   { to: "/dashboard/moments", label: "Life Moments", icon: Camera },
-  { to: "/dashboard/anniversary", label: "Anniversary", icon: CalendarHeart, roles: ["super_admin", "memorial_admin"] },
+  { to: "/dashboard/anniversary", label: "Anniversary", icon: CalendarHeart },
   { to: "/dashboard/community", label: "Community", icon: MessagesSquare },
   { to: "/dashboard/messages", label: "Messages", icon: MessageSquare },
   { to: "/dashboard/oversight", label: "Memorial Oversight", icon: Globe, roles: ["super_admin"] },
@@ -72,6 +73,25 @@ export const DashboardLayout = () => {
     if (!user) return;
     supabase.from("profiles").select("full_name,avatar_url,email").eq("id", user.id).maybeSingle()
       .then(({ data }) => setProfile(data));
+  }, [user]);
+
+  // Condolences awaiting approval (row-level security only exposes these to admins).
+  const [pendingCondolences, setPendingCondolences] = useState(0);
+  useEffect(() => {
+    if (!user) return;
+    const loadPending = async () => {
+      const { count } = await supabase
+        .from("condolences")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      setPendingCondolences(count || 0);
+    };
+    loadPending();
+    const ch = supabase
+      .channel("pending-condolences")
+      .on("postgres_changes", { event: "*", schema: "public", table: "condolences" }, () => loadPending())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [user]);
 
   // Log every dashboard page visit for the activity trail (throttled per-path).
@@ -132,7 +152,7 @@ export const DashboardLayout = () => {
             ))
           ) : visibleNav.map((item) => {
             const Icon = item.icon;
-            const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
+            const badge = item.to === "/dashboard/messages" ? unreadMessages : item.to === "/dashboard/condolences" ? pendingCondolences : 0;
             return (
               <NavLink
                 key={item.to}
@@ -310,7 +330,7 @@ export const DashboardLayout = () => {
             .slice(0, 5)
             .map(item => {
               const Icon = item.icon;
-              const badge = item.to === "/dashboard/messages" ? unreadMessages : 0;
+              const badge = item.to === "/dashboard/messages" ? unreadMessages : item.to === "/dashboard/condolences" ? pendingCondolences : 0;
               return (
                 <NavLink
                   key={item.to}

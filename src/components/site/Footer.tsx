@@ -12,16 +12,24 @@ export const Footer = () => {
             A sanctuary to honor lives, preserve memories, and support families through grief.
           </p>
           <div className="mt-6 flex gap-3">
-            {[Facebook, Instagram, Twitter].map((Icon, i) => (
-              <a
-                key={i}
-                href="#"
-               className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-white/20 transition-colors hover:border-brand-orange hover:text-brand-orange"
-                aria-label="Social link"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+            {[
+              { Icon: Facebook, label: "Facebook", href: "https://www.facebook.com/profile.php?id=61594408438497" },
+              { Icon: Instagram, label: "Instagram", href: "#" },
+              { Icon: Twitter, label: "Twitter", href: "#" },
+            ].map(({ Icon, label, href }) => {
+              const external = href.startsWith("http");
+              return (
+                <a
+                  key={label}
+                  href={href}
+                  {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-white/20 transition-colors hover:border-brand-orange hover:text-brand-orange"
+                  aria-label={label}
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              );
+            })}
           </div>
         </div>
 

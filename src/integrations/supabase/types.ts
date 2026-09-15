@@ -91,6 +91,35 @@ export type Database = {
           },
         ]
       }
+      anniversary_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          memorial_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memorial_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memorial_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anniversary_reminders_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcement_participations: {
         Row: {
           action_type: string
@@ -313,6 +342,50 @@ export type Database = {
             columns: ["memorial_id"]
             isOneToOne: false
             referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donation_receipts: {
+        Row: {
+          amount: number
+          created_at: string
+          donation_id: string
+          fundraiser_title: string | null
+          html: string
+          id: string
+          memorial_name: string | null
+          receipt_no: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          donation_id: string
+          fundraiser_title?: string | null
+          html: string
+          id?: string
+          memorial_name?: string | null
+          receipt_no: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          donation_id?: string
+          fundraiser_title?: string | null
+          html?: string
+          id?: string
+          memorial_name?: string | null
+          receipt_no?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_receipts_donation_id_fkey"
+            columns: ["donation_id"]
+            isOneToOne: true
+            referencedRelation: "donations"
             referencedColumns: ["id"]
           },
         ]
@@ -844,6 +917,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          anniversary_muted: boolean
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -855,6 +929,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anniversary_muted?: boolean
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -866,6 +941,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anniversary_muted?: boolean
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
