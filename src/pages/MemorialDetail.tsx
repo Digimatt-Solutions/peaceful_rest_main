@@ -35,6 +35,8 @@ const condolenceSchema = z.object({
 
 const MemorialDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  const [myProfile, setMyProfile] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [memorial, setMemorial] = useState<any>(null);
   const [family, setFamily] = useState<any[]>([]);
@@ -62,11 +64,20 @@ const MemorialDetail = () => {
       supabase.from("condolences").select("*").eq("memorial_id", id).in("status", ["approved", "pinned"]).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("announcements").select("*").eq("memorial_id", id).order("created_at", { ascending: false }),
       supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).eq("status", "approved").order("created_at", { ascending: false }),
-    ]).then(([m, f, mm, c, a, fr]) => {
+    ]).then(async ([m, f, mm, c, a, fr]) => {
       setMemorial(m.data);
       setFamily(f.data || []);
       setMemories(mm.data || []);
-      setCondolences(c.data || []);
+      // Show the profile photo of signed-in people who left a tribute.
+      const rows = c.data || [];
+      const authorIds = Array.from(new Set(rows.map((r: any) => r.user_id).filter(Boolean)));
+      if (authorIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id,avatar_url").in("id", authorIds as string[]);
+        const map = new Map((profs || []).map(p => [p.id, p.avatar_url]));
+        setCondolences(rows.map((r: any) => ({ ...r, avatar_url: r.user_id ? map.get(r.user_id) || null : null })));
+      } else {
+        setCondolences(rows);
+      }
       setAnnouncements(a.data || []);
       setFundraisers(fr.data || []);
       setLoading(false);
