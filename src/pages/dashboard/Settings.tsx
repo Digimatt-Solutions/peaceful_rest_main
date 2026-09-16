@@ -70,6 +70,30 @@ const Settings = () => {
       )}
       <div className="max-w-2xl space-y-5">
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
+          <div>
+            <h3 className="font-serif text-xl">Your details</h3>
+            <p className="text-sm text-muted-foreground">These are the details you gave when you registered.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Full name</Label>
+              <Input value={account.full_name} onChange={(e) => setAccount({ ...account, full_name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={account.email} disabled />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone number</Label>
+              <Input type="tel" value={account.phone} onChange={(e) => setAccount({ ...account, phone: e.target.value })} />
+            </div>
+          </div>
+          <Button onClick={saveAccount} disabled={savingAccount} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+            {savingAccount ? "Saving…" : "Save details"}
+          </Button>
+        </section>
+
+        <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Preferences</h3>
           <div className="flex items-center justify-between"><div><p className="font-medium">Email notifications</p><p className="text-sm text-muted-foreground">New condolences, donations, anniversaries.</p></div><Switch checked={notifs} onCheckedChange={setNotifs} /></div>
           <div className="flex items-center justify-between"><div><p className="font-medium">Public profile</p><p className="text-sm text-muted-foreground">Allow others to see your name on tributes.</p></div><Switch checked={privacy} onCheckedChange={setPrivacy} /></div>
