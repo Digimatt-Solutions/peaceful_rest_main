@@ -173,6 +173,7 @@ const ObituaryManagement = () => {
         </div>
       )}
 
+      <div className="grid xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
       <form onSubmit={save} className="space-y-7 max-w-3xl">
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Basic information</h3>
