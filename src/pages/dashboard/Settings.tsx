@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -18,6 +18,31 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [notifs, setNotifs] = useState(true);
   const [privacy, setPrivacy] = useState(true);
+  const [account, setAccount] = useState({ full_name: "", email: "", phone: "" });
+  const [savingAccount, setSavingAccount] = useState(false);
+
+  // Prefill with the details given at registration.
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setAccount({
+        full_name: data?.full_name || "",
+        email: data?.email || user.email || "",
+        phone: data?.phone || "",
+      }));
+  }, [user]);
+
+  const saveAccount = async () => {
+    if (!user) return;
+    setSavingAccount(true);
+    const { error } = await supabase.from("profiles")
+      .update({ full_name: account.full_name.trim(), phone: account.phone.trim() })
+      .eq("id", user.id);
+    setSavingAccount(false);
+    if (error) return toast.error("We couldn't save your details. Please try again.");
+    toast.success("Your details were saved");
+  };
+
 
   const changePassword = async () => {
     if (newPassword.length < 8) return toast.error("At least 8 characters");
