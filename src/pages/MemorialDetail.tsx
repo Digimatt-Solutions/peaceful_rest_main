@@ -49,6 +49,26 @@ const MemorialDetail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
 
+  // Prefill the contribution form with the signed-in visitor's own details.
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user || cancelled) return;
+      supabase.from("profiles").select("full_name,phone,email").eq("id", user.id).maybeSingle()
+        .then(({ data }) => {
+          if (cancelled) return;
+          setDonateForm(f => ({
+            ...f,
+            donor_name: f.donor_name || data?.full_name || "",
+            donor_phone: f.donor_phone || data?.phone || "",
+            email: f.email || data?.email || user.email || "",
+          }));
+        });
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+
 
   useEffect(() => {
     if (!id) return;
