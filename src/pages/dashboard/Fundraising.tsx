@@ -61,6 +61,36 @@ const Fundraising = () => {
   const [donateForm, setDonateForm] = useState({ email: "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
   const [donating, setDonating] = useState(false);
   const [stkStatus, setStkStatus] = useState<string>("");
+  const [myProfile, setMyProfile] = useState<any>(null);
+
+  // Prefill organiser and donor details from the signed-in account.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    supabase.from("profiles").select("full_name,phone,email").eq("id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setMyProfile(data);
+        setForm(f => ({
+          ...f,
+          organiser_name: f.organiser_name || data.full_name || "",
+          payout_phone: f.payout_phone || data.phone || "",
+        }));
+        setDonateForm(f => ({
+          ...f,
+          donor_name: f.donor_name || data.full_name || "",
+          donor_phone: f.donor_phone || data.phone || "",
+          email: f.email || data.email || user.email || "",
+        }));
+        setContribForm(f => ({
+          ...f,
+          donor_name: f.donor_name || data.full_name || "",
+          donor_phone: f.donor_phone || data.phone || "",
+        }));
+      });
+    return () => { cancelled = true; };
+  }, [user]);
+
 
   const selectedMemorialRef = () => memorials.find(m => m.id === memorialId)?.full_name;
 
@@ -618,7 +648,12 @@ const Fundraising = () => {
                           setDonatingFund(f);
                           setPayMethod("mpesa");
                           setStkStatus("");
-                          setDonateForm({ email: user?.email || "", donor_name: "", donor_phone: "", amount: "", message: "", is_anonymous: false });
+                          setDonateForm({
+                            email: myProfile?.email || user?.email || "",
+                            donor_name: myProfile?.full_name || "",
+                            donor_phone: myProfile?.phone || "",
+                            amount: "", message: "", is_anonymous: false,
+                          });
                           setOpenDonate(true);
                         }}
                         className="mt-4 w-full rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90"
