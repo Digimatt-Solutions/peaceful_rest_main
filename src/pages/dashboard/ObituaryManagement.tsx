@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Trash2 } from "lucide-react";
+import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music, Flower2, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
@@ -28,6 +28,48 @@ const ObituaryManagement = () => {
   const [form, setForm] = useState<any>(empty);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const [readFile, setReadFile] = useState<string | null>(null);
+
+  const readDocument = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) { toast.error("Please upload a document under 10MB"); return; }
+    setReading(true);
+    setReadFile(file.name);
+    try {
+      const isText = /\.(txt|md|csv)$/i.test(file.name) || file.type.startsWith("text/");
+      let body: any;
+      if (isText) {
+        body = { text: await file.text() };
+      } else {
+        const dataUrl: string = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result));
+          r.onerror = () => reject(new Error("read failed"));
+          r.readAsDataURL(file);
+        });
+        body = { file_data: dataUrl, mime: file.type, filename: file.name };
+      }
+      const { data, error } = await supabase.functions.invoke("extract-obituary", { body });
+      if (error || !data?.fields) {
+        toast.error(data?.error || "We couldn't read that document. Please fill the form in manually.");
+        return;
+      }
+      const f = data.fields as Record<string, string>;
+      setForm((prev: any) => {
+        const next = { ...prev };
+        Object.entries(f).forEach(([k, v]) => {
+          if (v && String(v).trim() && !String(prev[k] || "").trim()) next[k] = String(v).trim();
+        });
+        return next;
+      });
+      toast.success("Details filled in from your document. Please review before saving.");
+    } catch {
+      toast.error("We couldn't read that document. Please fill the form in manually.");
+    } finally {
+      setReading(false);
+    }
+  };
+
 
   useEffect(() => {
     document.title = "Obituary Management · Makiwa";
