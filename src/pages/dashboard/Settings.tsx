@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -18,6 +18,31 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [notifs, setNotifs] = useState(true);
   const [privacy, setPrivacy] = useState(true);
+  const [account, setAccount] = useState({ full_name: "", email: "", phone: "" });
+  const [savingAccount, setSavingAccount] = useState(false);
+
+  // Prefill with the details given at registration.
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("full_name,email,phone").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setAccount({
+        full_name: data?.full_name || "",
+        email: data?.email || user.email || "",
+        phone: data?.phone || "",
+      }));
+  }, [user]);
+
+  const saveAccount = async () => {
+    if (!user) return;
+    setSavingAccount(true);
+    const { error } = await supabase.from("profiles")
+      .update({ full_name: account.full_name.trim(), phone: account.phone.trim() })
+      .eq("id", user.id);
+    setSavingAccount(false);
+    if (error) return toast.error("We couldn't save your details. Please try again.");
+    toast.success("Your details were saved");
+  };
+
 
   const changePassword = async () => {
     if (newPassword.length < 8) return toast.error("At least 8 characters");
@@ -44,6 +69,30 @@ const Settings = () => {
         </div>
       )}
       <div className="max-w-2xl space-y-5">
+        <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
+          <div>
+            <h3 className="font-serif text-xl">Your details</h3>
+            <p className="text-sm text-muted-foreground">These are the details you gave when you registered.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Full name</Label>
+              <Input value={account.full_name} onChange={(e) => setAccount({ ...account, full_name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={account.email} disabled />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone number</Label>
+              <Input type="tel" value={account.phone} onChange={(e) => setAccount({ ...account, phone: e.target.value })} />
+            </div>
+          </div>
+          <Button onClick={saveAccount} disabled={savingAccount} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+            {savingAccount ? "Saving…" : "Save details"}
+          </Button>
+        </section>
+
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Preferences</h3>
           <div className="flex items-center justify-between"><div><p className="font-medium">Email notifications</p><p className="text-sm text-muted-foreground">New condolences, donations, anniversaries.</p></div><Switch checked={notifs} onCheckedChange={setNotifs} /></div>

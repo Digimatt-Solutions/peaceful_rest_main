@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Trash2 } from "lucide-react";
+import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music, Flower2, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
@@ -28,6 +28,48 @@ const ObituaryManagement = () => {
   const [form, setForm] = useState<any>(empty);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const [readFile, setReadFile] = useState<string | null>(null);
+
+  const readDocument = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) { toast.error("Please upload a document under 10MB"); return; }
+    setReading(true);
+    setReadFile(file.name);
+    try {
+      const isText = /\.(txt|md|csv)$/i.test(file.name) || file.type.startsWith("text/");
+      let body: any;
+      if (isText) {
+        body = { text: await file.text() };
+      } else {
+        const dataUrl: string = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result));
+          r.onerror = () => reject(new Error("read failed"));
+          r.readAsDataURL(file);
+        });
+        body = { file_data: dataUrl, mime: file.type, filename: file.name };
+      }
+      const { data, error } = await supabase.functions.invoke("extract-obituary", { body });
+      if (error || !data?.fields) {
+        toast.error(data?.error || "We couldn't read that document. Please fill the form in manually.");
+        return;
+      }
+      const f = data.fields as Record<string, string>;
+      setForm((prev: any) => {
+        const next = { ...prev };
+        Object.entries(f).forEach(([k, v]) => {
+          if (v && String(v).trim() && !String(prev[k] || "").trim()) next[k] = String(v).trim();
+        });
+        return next;
+      });
+      toast.success("Details filled in from your document. Please review before saving.");
+    } catch {
+      toast.error("We couldn't read that document. Please fill the form in manually.");
+    } finally {
+      setReading(false);
+    }
+  };
+
 
   useEffect(() => {
     document.title = "Obituary Management · Makiwa";
@@ -131,7 +173,42 @@ const ObituaryManagement = () => {
         </div>
       )}
 
+      <div className="grid xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
       <form onSubmit={save} className="space-y-7 max-w-3xl">
+        <section className="rounded-2xl border border-brand-orange/30 bg-brand-orange/5 p-6 sm:p-7">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 shrink-0 rounded-xl bg-brand-orange/15 text-brand-orange inline-flex items-center justify-center">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-serif text-xl">Start from a document</h3>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                Upload a funeral program, eulogy or obituary (PDF, photo or text) and we will fill in as much of this
+                form as we can. Nothing is saved until you review the details and save.
+              </p>
+              <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <Input
+                  type="file"
+                  accept=".pdf,.txt,.md,image/*"
+                  disabled={reading}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) readDocument(f); e.target.value = ""; }}
+                  className="bg-card"
+                />
+                {reading && (
+                  <span className="inline-flex items-center gap-2 text-sm text-brand-orange whitespace-nowrap">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Reading {readFile}…
+                  </span>
+                )}
+              </div>
+              {!reading && readFile && (
+                <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <FileUp className="h-3.5 w-3.5" /> Last document read: {readFile}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Basic information</h3>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -191,6 +268,41 @@ const ObituaryManagement = () => {
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4 mr-2" /> {id ? "Save changes" : "Create memorial"}</>}
         </Button>
       </form>
+
+      <aside className="rounded-2xl border border-border bg-card p-6 xl:sticky xl:top-6">
+        <p className="text-[10px] uppercase tracking-[0.25em] text-brand-orange font-semibold">Makiwa services</p>
+        <h3 className="mt-2 font-serif text-xl">Funeral program services</h3>
+        <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+          Let our team handle the send-off details while you focus on family.
+        </p>
+        <ul className="mt-5 space-y-4">
+          {[
+            { icon: BookOpen, title: "Hardcopy eulogy design", desc: "Printed programs and eulogy booklets, designed and delivered." },
+            { icon: Camera, title: "Photography", desc: "Respectful coverage of the service and family portraits." },
+            { icon: Video, title: "Live streaming", desc: "Bring family abroad into the service in real time." },
+            { icon: Music, title: "Sound & PA setup", desc: "Clear audio for tributes, hymns and the eulogy." },
+            { icon: Flower2, title: "Flowers & décor", desc: "Casket arrangements, wreaths and venue styling." },
+          ].map((s) => (
+            <li key={s.title} className="flex gap-3">
+              <div className="h-9 w-9 shrink-0 rounded-lg bg-brand-orange/10 text-brand-orange inline-flex items-center justify-center">
+                <s.icon className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium leading-tight">{s.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <a
+          href="tel:+254116797979"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-5 h-11 text-sm font-medium text-brand-white hover:bg-brand-orange/90 transition-colors"
+        >
+          <Phone className="h-4 w-4" /> Talk to our team
+        </a>
+        <p className="mt-2 text-center text-xs text-muted-foreground">+254 116 797979 · info@makiwa.ke</p>
+      </aside>
+      </div>
     </>
   );
 };
