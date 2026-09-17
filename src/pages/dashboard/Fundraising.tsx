@@ -156,7 +156,7 @@ const Fundraising = () => {
         const ids = (fs || []).map(f => f.id);
         if (ids.length) {
           const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
-          setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+          setDonations((ds || []).filter((d: any) => d.status === "paid"));
         }
       }
     })();
@@ -170,7 +170,7 @@ const Fundraising = () => {
     const ids = (fs || []).map(f => f.id);
     if (ids.length) {
       const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
-      setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+      setDonations((ds || []).filter((d: any) => d.status === "paid"));
     }
   };
 
@@ -252,7 +252,7 @@ const Fundraising = () => {
       const ids = (fs || []).map(f => f.id);
       if (ids.length) {
         const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
-        setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+        setDonations((ds || []).filter((d: any) => d.status === "paid"));
       } else setDonations([]);
       const { data: ps } = ids.length
         ? await supabase.from("payouts").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false })

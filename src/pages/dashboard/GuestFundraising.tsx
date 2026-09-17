@@ -59,7 +59,7 @@ const GuestFundraising = () => {
   }, [load]);
 
   const totalGiven = useMemo(
-    () => myDonations.filter(d => d.status === "paid" || d.status === "completed" || !d.status).reduce((s, d) => s + Number(d.amount || 0), 0),
+    () => myDonations.filter(d => d.status === "paid").reduce((s, d) => s + Number(d.amount || 0), 0),
     [myDonations]
   );
 
