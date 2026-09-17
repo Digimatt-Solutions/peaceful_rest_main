@@ -10,7 +10,7 @@ import {
   LayoutDashboard, BookHeart, FileText, Users, MessageCircle, HeartHandshake,
   Camera, CalendarHeart, Megaphone, CalendarDays, MessagesSquare, ShieldCheck,
   UserCircle, Settings, LogOut, Menu, Sun, Moon, Bell, Search, Globe, Activity,
-  MessageSquare
+  MessageSquare, ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
