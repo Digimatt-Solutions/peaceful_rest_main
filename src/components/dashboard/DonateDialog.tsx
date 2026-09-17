@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { saveDonationReceipt } from "@/lib/receipts";
+import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 
@@ -147,7 +148,8 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
   };
 
   return (
-    <Dialog open={!!fundraiser} onOpenChange={onOpenChange}>
+    <>
+    <Dialog open={!!fundraiser && !receiptOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">Contribute</DialogTitle>
@@ -228,5 +230,11 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
         </div>
       </DialogContent>
     </Dialog>
+    <DonationReceipt
+      open={receiptOpen}
+      onOpenChange={(o) => { setReceiptOpen(o); if (!o) onOpenChange(false); }}
+      donation={receiptDonation}
+    />
+    </>
   );
 };
