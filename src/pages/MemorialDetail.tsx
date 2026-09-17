@@ -212,6 +212,14 @@ const MemorialDetail = () => {
         setStkStatus(""); setDonating(false); setDonateOpen(null);
         toast.success("Payment received. Thank you!");
         await refreshFundsAfterPayment();
+        if (s.donation_id) {
+          const { data: don } = await supabase.from("donations").select("*").eq("id", s.donation_id).maybeSingle();
+          if (don && don.status === "paid") {
+            const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
+            setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
+            setReceiptOpen(true);
+          }
+        }
         return;
       }
       if (s && !s.pending && s.result_code) {
