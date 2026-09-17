@@ -242,6 +242,7 @@ const Fundraising = () => {
         toast.success("Payment received");
         setDonating(false); setOpenDonate(false); setStkStatus("");
         await refreshFundsAndDonations();
+        await showReceiptFor(s.donation_id);
         return;
       }
       if (s && !s.pending && s.result_code) {
