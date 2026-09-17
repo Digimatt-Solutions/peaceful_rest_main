@@ -8,6 +8,13 @@
       "when": 1789457760796,
       "tag": "0000_guest_engagement_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789629535013,
+      "tag": "0001_create_service_bookings",
+      "breakpoints": true
     }
   ]
 }
