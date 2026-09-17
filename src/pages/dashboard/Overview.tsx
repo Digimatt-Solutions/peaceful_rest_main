@@ -86,7 +86,8 @@ const Overview = () => {
       const { data: fs } = await supabase.from("fundraisers").select("id").in("memorial_id", memIds);
       fundIdsForScope = (fs || []).map(f => f.id);
     }
-    let donQ = supabase.from("donations").select("amount,fundraiser_id,created_at,user_id");
+    // Only confirmed (successfully paid) contributions count towards any statistic.
+    let donQ = supabase.from("donations").select("amount,fundraiser_id,created_at,user_id").eq("status", "paid");
     if (!isMourner && fundIdsForScope.length) donQ = donQ.in("fundraiser_id", fundIdsForScope);
     if (!isMourner && !fundIdsForScope.length) donQ = donQ.eq("fundraiser_id", "00000000-0000-0000-0000-000000000000");
     if (isMourner) donQ = donQ.eq("user_id", user.id);

@@ -48,7 +48,10 @@ Deno.serve(async (req) => {
       await admin.from("donations").update({ status: "failed" }).eq("id", donation.id);
     }
 
-    return json({ paid, status: data.status, amount: data.amount / 100, reference });
+    return json({
+      paid, status: data.status, amount: data.amount / 100, reference,
+      donation_id: donation?.id ?? null,
+    });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
