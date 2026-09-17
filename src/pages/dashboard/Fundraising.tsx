@@ -145,8 +145,10 @@ const Fundraising = () => {
     (async () => {
       const { data, error } = await supabase.functions.invoke("paystack-verify", { body: { reference } });
       if (error) { toast.error("Could not verify payment"); return; }
-      if (data?.paid) toast.success("Payment received. Thank you!");
-      else toast.error("Payment was not completed");
+      if (data?.paid) {
+        toast.success("Payment received. Thank you!");
+        await showReceiptFor(data.donation_id);
+      } else toast.error("Payment was not completed");
       const url = new URL(window.location.href);
       url.searchParams.delete("reference"); url.searchParams.delete("trxref");
       window.history.replaceState({}, "", url.toString());
@@ -156,12 +158,23 @@ const Fundraising = () => {
         const ids = (fs || []).map(f => f.id);
         if (ids.length) {
           const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
-          setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+          setDonations((ds || []).filter((d: any) => d.status === "paid"));
         }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memorialId]);
+
+  // Show the printable receipt only once a payment is confirmed as successful.
+  const showReceiptFor = async (donationId?: string | null) => {
+    if (!donationId) return;
+    const { data: don } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+    if (!don || don.status !== "paid") return;
+    const { data: fund } = await supabase.from("fundraisers").select("title,memorial_id").eq("id", don.fundraiser_id).maybeSingle();
+    const mem = memorials.find(m => m.id === fund?.memorial_id);
+    setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: mem?.full_name });
+    setReceiptOpen(true);
+  };
 
   const refreshFundsAndDonations = async () => {
     if (!memorialId) return;
@@ -170,7 +183,7 @@ const Fundraising = () => {
     const ids = (fs || []).map(f => f.id);
     if (ids.length) {
       const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
-      setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+      setDonations((ds || []).filter((d: any) => d.status === "paid"));
     }
   };
 
@@ -229,6 +242,7 @@ const Fundraising = () => {
         toast.success("Payment received");
         setDonating(false); setOpenDonate(false); setStkStatus("");
         await refreshFundsAndDonations();
+        await showReceiptFor(s.donation_id);
         return;
       }
       if (s && !s.pending && s.result_code) {
@@ -252,7 +266,7 @@ const Fundraising = () => {
       const ids = (fs || []).map(f => f.id);
       if (ids.length) {
         const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
-        setDonations((ds || []).filter((d: any) => d.status !== "pending" || !d.stripe_session_id));
+        setDonations((ds || []).filter((d: any) => d.status === "paid"));
       } else setDonations([]);
       const { data: ps } = ids.length
         ? await supabase.from("payouts").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false })

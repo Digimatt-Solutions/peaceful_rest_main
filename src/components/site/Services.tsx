@@ -9,6 +9,7 @@ import {
   Flame,
   ArrowUpRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import FEATURE_IMG from "@/assets/hero-memorial.jpg";
 
 const features = [
@@ -69,6 +70,12 @@ export const Services = () => {
               everything together - eulogies, condolences, fundraising and
               shareable QR codes - in one calm, dignified place.
             </p>
+            <Link
+              to="/funeral-services"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-sm font-semibold text-brand-black transition-all hover:gap-3 hover:bg-brand-orange/90"
+            >
+              Funeral program services <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
 

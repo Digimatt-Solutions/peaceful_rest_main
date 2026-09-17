@@ -17,6 +17,7 @@ import ResetPassword from "./pages/ResetPassword";
 
 import MemorialDetail from "./pages/MemorialDetail";
 import AllMemorials from "./pages/AllMemorials";
+import FuneralServices from "./pages/FuneralServices";
 
 import Overview from "./pages/dashboard/Overview";
 import MyMemorials from "./pages/dashboard/MyMemorials";
@@ -34,6 +35,7 @@ import Oversight from "./pages/dashboard/Oversight";
 import ActivityLogs from "./pages/dashboard/ActivityLogs";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
+import Bookings from "./pages/dashboard/Bookings";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route path="/memorials" element={<AllMemorials />} />
+            <Route path="/funeral-services" element={<FuneralServices />} />
             <Route path="/memorial/:id" element={<MemorialDetail />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
@@ -80,6 +83,7 @@ const App = () => (
               <Route path="access" element={<AccessControl />} />
               <Route path="oversight" element={<Oversight />} />
               <Route path="activity" element={<ActivityLogs />} />
+              <Route path="bookings" element={<Bookings />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
             </Route>

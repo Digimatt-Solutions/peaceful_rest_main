@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { saveDonationReceipt } from "@/lib/receipts";
+import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 
@@ -30,6 +31,8 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
   const [form, setForm] = useState({ donor_name: "", donor_phone: "", email: "", amount: "", is_anonymous: false });
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptDonation, setReceiptDonation] = useState<any>(null);
 
   // Prefill from the signed-in account so the donor only chooses an amount.
   useEffect(() => {
@@ -59,7 +62,8 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       don = data;
     }
-    if (don) {
+    const confirmed = don && don.status === "paid";
+    if (confirmed) {
       await saveDonationReceipt({
         ...don,
         fundraiser_title: fundraiser.title,
@@ -72,6 +76,12 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
       description: `Contributed KSh ${(amount || Number(form.amount) || 0).toLocaleString()} to ${fundraiser.title}`,
     });
     onCompleted?.();
+    if (confirmed) {
+      // Show the receipt straight away, only after the payment is confirmed.
+      setReceiptDonation({ ...don, fundraiser_title: fundraiser.title, memorial_name: fundraiser.memorial_name });
+      setReceiptOpen(true);
+      return;
+    }
     onOpenChange(false);
   };
 
@@ -138,7 +148,8 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
   };
 
   return (
-    <Dialog open={!!fundraiser} onOpenChange={onOpenChange}>
+    <>
+    <Dialog open={!!fundraiser && !receiptOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">Contribute</DialogTitle>
@@ -219,5 +230,11 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
         </div>
       </DialogContent>
     </Dialog>
+    <DonationReceipt
+      open={receiptOpen}
+      onOpenChange={(o) => { setReceiptOpen(o); if (!o) onOpenChange(false); }}
+      donation={receiptDonation}
+    />
+    </>
   );
 };

@@ -954,6 +954,72 @@ export type Database = {
         }
         Relationships: []
       }
+      service_bookings: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          customer_name: string
+          design: string | null
+          email: string | null
+          expected_date: string | null
+          id: string
+          memorial_name: string | null
+          notes: string | null
+          options: Json
+          pages: number | null
+          phone: string
+          quantity: number | null
+          service: string
+          status: string
+          total_amount: number
+          unit_price: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_name: string
+          design?: string | null
+          email?: string | null
+          expected_date?: string | null
+          id?: string
+          memorial_name?: string | null
+          notes?: string | null
+          options?: Json
+          pages?: number | null
+          phone: string
+          quantity?: number | null
+          service?: string
+          status?: string
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_name?: string
+          design?: string | null
+          email?: string | null
+          expected_date?: string | null
+          id?: string
+          memorial_name?: string | null
+          notes?: string | null
+          options?: Json
+          pages?: number | null
+          phone?: string
+          quantity?: number | null
+          service?: string
+          status?: string
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       site_visits: {
         Row: {
           browser: string | null

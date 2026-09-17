@@ -71,7 +71,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ paid, pending, result_code: qJson.ResultCode, result_desc: qJson.ResultDesc || qJson.errorMessage });
+    return json({
+      paid, pending,
+      donation_id: donation?.id ?? null,
+      result_code: qJson.ResultCode,
+      result_desc: qJson.ResultDesc || qJson.errorMessage,
+    });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
