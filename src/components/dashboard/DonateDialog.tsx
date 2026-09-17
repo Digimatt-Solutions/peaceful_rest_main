@@ -30,6 +30,8 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
   const [form, setForm] = useState({ donor_name: "", donor_phone: "", email: "", amount: "", is_anonymous: false });
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptDonation, setReceiptDonation] = useState<any>(null);
 
   // Prefill from the signed-in account so the donor only chooses an amount.
   useEffect(() => {
@@ -59,7 +61,8 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       don = data;
     }
-    if (don) {
+    const confirmed = don && don.status === "paid";
+    if (confirmed) {
       await saveDonationReceipt({
         ...don,
         fundraiser_title: fundraiser.title,
@@ -72,6 +75,12 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
       description: `Contributed KSh ${(amount || Number(form.amount) || 0).toLocaleString()} to ${fundraiser.title}`,
     });
     onCompleted?.();
+    if (confirmed) {
+      // Show the receipt straight away, only after the payment is confirmed.
+      setReceiptDonation({ ...don, fundraiser_title: fundraiser.title, memorial_name: fundraiser.memorial_name });
+      setReceiptOpen(true);
+      return;
+    }
     onOpenChange(false);
   };
 
