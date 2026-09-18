@@ -232,10 +232,22 @@ export const MemorialValidators = ({
       )}
 
       {verificationStatus !== "verified" && (
-        <Button type="button" disabled={!ready || busy === "publish"} onClick={publish}
-          className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
-          {busy === "publish" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Publish memorial"}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="button" disabled={!ready || busy === "publish"} onClick={publish}
+            className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+            {busy === "publish" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Publish memorial"}
+          </Button>
+          {!ready && verificationStatus !== "pending_review" && (
+            <Button type="button" variant="outline" className="rounded-full" onClick={sendForReview}>
+              Send for admin review
+            </Button>
+          )}
+          {!ready && (
+            <span className="text-xs text-muted-foreground">
+              Two confirmed validators are needed before this memorial can go public.
+            </span>
+          )}
+        </div>
       )}
     </section>
   );
