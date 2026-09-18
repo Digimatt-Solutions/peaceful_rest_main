@@ -12,12 +12,13 @@ import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
+import { MemorialValidators } from "@/components/dashboard/MemorialValidators";
 
 const empty = {
   full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
   cover_photo_url: "", profile_photo_url: "", biography: "",
   burial_details: "", service_schedule: "", venue: "", location: "",
-  map_url: "", program_pdf_url: "", short_tribute: "", is_public: true,
+  map_url: "", program_pdf_url: "", short_tribute: "", is_public: false, verification_status: "pending",
 };
 
 const ObituaryManagement = () => {
@@ -111,12 +112,16 @@ const ObituaryManagement = () => {
       }
     }
     setLoading(true);
+    const verified = form.verification_status === "verified";
     const payload = {
       ...form,
       national_id: nid || null,
       created_by: user.id,
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
+      // A memorial only goes public once two validators have verified it.
+      is_public: verified ? form.is_public : false,
+      verification_status: form.verification_status || "pending",
     };
     const { data, error } = id
       ? await supabase.from("memorials").update(payload).eq("id", id).select().maybeSingle()
