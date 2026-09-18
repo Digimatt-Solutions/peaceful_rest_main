@@ -141,12 +141,12 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-xl border border-border p-4">
-            <div>
-              <p className="font-medium text-sm">Public memorial</p>
-              <p className="text-xs text-muted-foreground">Visible to everyone on Makiwa.</p>
-            </div>
-            <Switch checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
+          <div className="rounded-xl border border-border p-4">
+            <p className="font-medium text-sm">Verification required before publishing</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              After saving, add two people who knew the deceased. Each verifies their phone number with a code and
+              confirms the passing before the memorial goes public.
+            </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

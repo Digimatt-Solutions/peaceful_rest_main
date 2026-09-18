@@ -116,6 +116,17 @@ export const MemorialValidators = ({
     load();
   };
 
+  const sendForReview = async () => {
+    setBusy("review");
+    const { error } = await supabase.from("memorials")
+      .update({ verification_status: "pending_review", is_public: false })
+      .eq("id", memorialId);
+    setBusy(null);
+    if (error) return toast.error(error.message);
+    toast.success("Sent for admin review", { description: "Our team will check the details and get back to you." });
+    onStatusChange?.("pending_review", false);
+  };
+
   const publish = async () => {
     if (!ready) return;
     setBusy("publish");
