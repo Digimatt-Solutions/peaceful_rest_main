@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Plus, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
@@ -25,7 +24,7 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
     full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
     location: "", short_tribute: "",
     profile_photo_url: "", cover_photo_url: "",
-    is_public: true,
+    is_public: false,
   });
 
 
@@ -56,6 +55,7 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
       created_by: user.id,
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
+      is_public: false,
     };
     const { data, error } = await supabase.from("memorials").insert(payload).select().maybeSingle();
     setSaving(false);
@@ -68,9 +68,9 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
       entity_type: "memorial", entity_id: data?.id,
       description: `Created memorial for ${form.full_name}`,
     });
-    toast.success("Memorial created", { description: `${form.full_name}'s memorial page is ready.` });
+    toast.success("Memorial created", { description: "Add two validators to verify it before it goes public." });
     setOpen(false);
-    setForm({ full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "", location: "", short_tribute: "", profile_photo_url: "", cover_photo_url: "", is_public: true });
+    setForm({ full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "", location: "", short_tribute: "", profile_photo_url: "", cover_photo_url: "", is_public: false });
     onCreated?.(data);
   };
 
@@ -141,12 +141,12 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-xl border border-border p-4">
-            <div>
-              <p className="font-medium text-sm">Public memorial</p>
-              <p className="text-xs text-muted-foreground">Visible to everyone on Makiwa.</p>
-            </div>
-            <Switch checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
+          <div className="rounded-xl border border-border p-4">
+            <p className="font-medium text-sm">Verification required before publishing</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              After saving, add two people who knew the deceased. Each verifies their phone number with a code and
+              confirms the passing before the memorial goes public.
+            </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

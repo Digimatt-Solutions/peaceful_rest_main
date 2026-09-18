@@ -620,6 +620,56 @@ export type Database = {
           },
         ]
       }
+      memorial_validators: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_deceased: boolean
+          confirmed_good_faith: boolean
+          created_at: string
+          created_by: string | null
+          full_name: string
+          id: string
+          memorial_id: string
+          otp_verified: boolean
+          phone: string
+          verified_at: string | null
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_deceased?: boolean
+          confirmed_good_faith?: boolean
+          created_at?: string
+          created_by?: string | null
+          full_name: string
+          id?: string
+          memorial_id: string
+          otp_verified?: boolean
+          phone: string
+          verified_at?: string | null
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_deceased?: boolean
+          confirmed_good_faith?: boolean
+          created_at?: string
+          created_by?: string | null
+          full_name?: string
+          id?: string
+          memorial_id?: string
+          otp_verified?: boolean
+          phone?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_validators_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorials: {
         Row: {
           biography: string | null
@@ -642,6 +692,7 @@ export type Database = {
           short_tribute: string | null
           updated_at: string
           venue: string | null
+          verification_status: string
           visitor_count: number
         }
         Insert: {
@@ -665,6 +716,7 @@ export type Database = {
           short_tribute?: string | null
           updated_at?: string
           venue?: string | null
+          verification_status?: string
           visitor_count?: number
         }
         Update: {
@@ -688,6 +740,7 @@ export type Database = {
           short_tribute?: string | null
           updated_at?: string
           venue?: string | null
+          verification_status?: string
           visitor_count?: number
         }
         Relationships: []
