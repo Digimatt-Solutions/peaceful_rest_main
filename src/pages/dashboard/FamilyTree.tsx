@@ -26,6 +26,8 @@ const RELATIONSHIPS = [
   "Grandmother",
   "Grandson",
   "Granddaughter",
+  "Great Grandson",
+  "Great Granddaughter",
   "Step Father",
   "Step Mother",
   "Step Child",
@@ -40,8 +42,7 @@ const RELATIONSHIPS = [
   "Daughter in Law",
   "Brother in Law",
   "Sister in Law",
-  "Guardian",
-  "Friend",
+  "Co-wife",
   "Other",
 ];
 
@@ -237,7 +238,7 @@ const FamilyTree = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button onClick={saveEdit} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white">Save</Button>
+            <Button onClick={saveEdit} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-brand-white">Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -277,7 +278,7 @@ const FamilyTree = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={add} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white">
+            <Button onClick={add} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-brand-white">
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
           </DialogFooter>
