@@ -30,7 +30,6 @@ const CARD_WIDTH = 152;
 const CARD_HEIGHT = 112;
 const COLUMN_GAP = 34;
 const ROW_GAP = 184;
-const VIEW_HEIGHT = 610;
 const MIN_SCALE = 0.35;
 const MAX_SCALE = 1.65;
 

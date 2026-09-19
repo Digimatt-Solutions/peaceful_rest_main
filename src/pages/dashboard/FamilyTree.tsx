@@ -26,6 +26,8 @@ const RELATIONSHIPS = [
   "Grandmother",
   "Grandson",
   "Granddaughter",
+  "Great Grandson",
+  "Great Granddaughter",
   "Step Father",
   "Step Mother",
   "Step Child",
