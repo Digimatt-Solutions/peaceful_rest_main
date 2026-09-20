@@ -142,25 +142,19 @@ const FamilyTree = () => {
     toast.success("Updated");
   };
 
-  const swapMembers = async (first: Member, second: Member) => {
-    const firstOrder = first.display_order ?? members.findIndex((member) => member.id === first.id);
-    const secondOrder = second.display_order ?? members.findIndex((member) => member.id === second.id);
-    const [firstResult, secondResult] = await Promise.all([
-      supabase.from("family_members").update({ display_order: secondOrder }).eq("id", first.id),
-      supabase.from("family_members").update({ display_order: firstOrder }).eq("id", second.id),
-    ]);
-    const error = firstResult.error || secondResult.error;
+  const swapMembers = async (_first: Member, _second: Member, orderedLane: Member[]) => {
+    const results = await Promise.all(orderedLane.map((member, index) =>
+      supabase.from("family_members").update({ display_order: index }).eq("id", member.id),
+    ));
+    const error = results.find((result) => result.error)?.error;
     if (error) {
       toast.error("The family members could not be moved. Please try again.");
       const { data } = await supabase.from("family_members").select("*").eq("memorial_id", memorialId).order("created_at");
       setMembers((data as Member[]) || []);
       return;
     }
-    setMembers((current) => current.map((member) => {
-      if (member.id === first.id) return { ...member, display_order: secondOrder };
-      if (member.id === second.id) return { ...member, display_order: firstOrder };
-      return member;
-    }));
+    const orders = new Map(orderedLane.map((member, index) => [member.id, index]));
+    setMembers((current) => current.map((member) => orders.has(member.id) ? { ...member, display_order: orders.get(member.id) } : member));
     toast.success("Family positions updated");
   };
 

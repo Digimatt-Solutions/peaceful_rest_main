@@ -19,7 +19,7 @@ type Props = {
   members: FamilyMember[];
   className?: string;
   canReorder?: boolean;
-  onSwap?: (first: FamilyMember, second: FamilyMember) => Promise<void> | void;
+  onSwap?: (first: FamilyMember, second: FamilyMember, orderedLane: FamilyMember[]) => Promise<void> | void;
   expandedMode?: boolean;
 };
 
@@ -331,7 +331,14 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
       toast.error("That position is reserved for a different relationship group.");
       return;
     }
-    await onSwap?.(source, target);
+    const orderedLane = layout.nodes
+      .filter((node) => !node.deceased && node.generation === source.generation && relationshipLane(node.generation, node.relationship) === relationshipLane(source.generation, source.relationship))
+      .sort((a, b) => a.x - b.x);
+    const sourceIndex = orderedLane.findIndex((node) => node.id === source.id);
+    const targetIndex = orderedLane.findIndex((node) => node.id === target.id);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+    [orderedLane[sourceIndex], orderedLane[targetIndex]] = [orderedLane[targetIndex], orderedLane[sourceIndex]];
+    await onSwap?.(source, target, orderedLane);
   };
 
   const createPdf = useCallback(async () => {
