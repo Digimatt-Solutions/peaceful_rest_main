@@ -57,7 +57,7 @@ const tidyLabel = (v: string) =>
     .map((w) => (["in", "of", "the", "and"].includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
     .join(" ");
 
-type Member = { id: string; name: string; relationship: string; memorial_id: string };
+type Member = { id: string; name: string; relationship: string; memorial_id: string; photo_url?: string | null; display_order?: number | null };
 
 const FamilyTree = () => {
   const { user } = useAuth();
@@ -142,6 +142,28 @@ const FamilyTree = () => {
     toast.success("Updated");
   };
 
+  const swapMembers = async (first: Member, second: Member) => {
+    const firstOrder = first.display_order ?? members.findIndex((member) => member.id === first.id);
+    const secondOrder = second.display_order ?? members.findIndex((member) => member.id === second.id);
+    const [firstResult, secondResult] = await Promise.all([
+      supabase.from("family_members").update({ display_order: secondOrder }).eq("id", first.id),
+      supabase.from("family_members").update({ display_order: firstOrder }).eq("id", second.id),
+    ]);
+    const error = firstResult.error || secondResult.error;
+    if (error) {
+      toast.error("The family members could not be moved. Please try again.");
+      const { data } = await supabase.from("family_members").select("*").eq("memorial_id", memorialId).order("created_at");
+      setMembers((data as Member[]) || []);
+      return;
+    }
+    setMembers((current) => current.map((member) => {
+      if (member.id === first.id) return { ...member, display_order: secondOrder };
+      if (member.id === second.id) return { ...member, display_order: firstOrder };
+      return member;
+    }));
+    toast.success("Family positions updated");
+  };
+
   return (
     <>
       <PageHeader
@@ -172,6 +194,8 @@ const FamilyTree = () => {
             deceasedName={deceased?.full_name || "Loved One"}
             deceasedPhoto={deceased?.profile_photo_url}
             members={members}
+            canReorder
+            onSwap={swapMembers}
             className="mb-10 mx-auto"
           />
 
