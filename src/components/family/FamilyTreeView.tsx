@@ -216,54 +216,17 @@ const TreeConnectors = ({ nodes, centerX }: { nodes: TreeNode[]; centerX: number
   );
 };
 
-export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className }: Props) => {
+export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className, canReorder = false, onSwap, expandedMode = false }: Props) => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<ViewState>({ x: 0, y: 0, scale: 1 });
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const lastPinch = useRef<{ distance: number; centerX: number; centerY: number } | null>(null);
+  const draggedNode = useRef<TreeNode | null>(null);
   const [view, setView] = useState<ViewState>(viewRef.current);
+  const [expanded, setExpanded] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
-  const layout = useMemo(() => {
-    const groups = new Map<number, FamilyMember[]>();
-    members.forEach((member) => {
-      const generation = relationshipGeneration(member.relationship);
-      groups.set(generation, [...(groups.get(generation) || []), member]);
-    });
-
-    const generations = Array.from(new Set([0, ...groups.keys()])).sort((a, b) => a - b);
-    const minGeneration = Math.min(...generations);
-    const maxGeneration = Math.max(...generations);
-    const rows = generations.map((generation) => {
-      const group = sortGeneration(generation, groups.get(generation) || []);
-      const count = group.length + (generation === 0 ? 1 : 0);
-      return { generation, group, width: Math.max(CARD_WIDTH, count * CARD_WIDTH + Math.max(0, count - 1) * COLUMN_GAP) };
-    });
-    const worldWidth = Math.max(720, ...rows.map((row) => row.width)) + 160;
-    const worldHeight = Math.max(560, (maxGeneration - minGeneration) * ROW_GAP + 280);
-    const centerX = worldWidth / 2;
-    const centerGenerationY = 140 + (0 - minGeneration) * ROW_GAP;
-    const nodes: TreeNode[] = [];
-
-    rows.forEach(({ generation, group }) => {
-      const rowMembers: Array<FamilyMember & { deceased?: boolean }> = generation === 0
-        ? [
-            ...group.filter((member) => /brother|sister|sibling/i.test(member.relationship) && !/in law/i.test(member.relationship)),
-            { id: "deceased-anchor", name: deceasedName, relationship: "In loving memory", photo_url: deceasedPhoto, deceased: true },
-            ...group.filter((member) => !(/brother|sister|sibling/i.test(member.relationship) && !/in law/i.test(member.relationship))),
-          ]
-        : group;
-      const rowWidth = rowMembers.length * CARD_WIDTH + Math.max(0, rowMembers.length - 1) * COLUMN_GAP;
-      const startX = centerX - rowWidth / 2 + CARD_WIDTH / 2;
-      rowMembers.forEach((member, index) => nodes.push({
-        ...member,
-        generation,
-        x: startX + index * (CARD_WIDTH + COLUMN_GAP),
-        y: centerGenerationY + generation * ROW_GAP,
-      }));
-    });
-
-    return { nodes, rows, worldWidth, worldHeight, centerX, centerGenerationY };
-  }, [deceasedName, deceasedPhoto, members]);
+  const layout = useMemo(() => createLayout(deceasedName, deceasedPhoto, members), [deceasedName, deceasedPhoto, members]);
 
   const updateView = useCallback((next: ViewState) => {
     viewRef.current = next;
@@ -329,6 +292,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
   }, [fitToScreen, zoomAt]);
 
   const pointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("[draggable='true']")) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
   };
@@ -359,12 +323,151 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
     if (pointers.current.size < 2) lastPinch.current = null;
   };
 
+  const dropOn = async (target: TreeNode) => {
+    const source = draggedNode.current;
+    draggedNode.current = null;
+    if (!source || source.id === target.id || target.deceased) return;
+    if (source.generation !== target.generation || relationshipLane(source.generation, source.relationship) !== relationshipLane(target.generation, target.relationship)) {
+      toast.error("That position is reserved for a different relationship group.");
+      return;
+    }
+    await onSwap?.(source, target);
+  };
+
+  const createPdf = useCallback(async () => {
+    setExporting(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const landscape = layout.worldWidth >= layout.worldHeight;
+      const pdf = new jsPDF({ orientation: landscape ? "landscape" : "portrait", unit: "pt", format: "a3" });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const titleHeight = 72;
+      const legendHeight = 58;
+      const scale = Math.min((pageWidth - 56) / layout.worldWidth, (pageHeight - titleHeight - legendHeight - 36) / layout.worldHeight);
+      const offsetX = (pageWidth - layout.worldWidth * scale) / 2;
+      const offsetY = titleHeight;
+      const sx = (value: number) => offsetX + value * scale;
+      const sy = (value: number) => offsetY + value * scale;
+      const anchor = layout.nodes.find((node) => node.deceased);
+
+      pdf.setTextColor(31, 31, 31);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(20);
+      pdf.text(`${deceasedName} — Family Tree`, 28, 34);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("Automatically arranged by relationship to the deceased", 28, 50);
+
+      if (anchor) {
+        pdf.setDrawColor(185, 185, 185);
+        pdf.setLineWidth(Math.max(0.6, 1.4 * scale));
+        const grouped = new Map<number, TreeNode[]>();
+        layout.nodes.forEach((node) => grouped.set(node.generation, [...(grouped.get(node.generation) || []), node]));
+        grouped.forEach((nodes, generation) => {
+          if (generation === 0) {
+            nodes.filter((node) => !node.deceased).forEach((node) => pdf.line(sx(Math.min(node.x, anchor.x) + CARD_WIDTH / 2), sy(anchor.y), sx(Math.max(node.x, anchor.x) - CARD_WIDTH / 2), sy(anchor.y)));
+            return;
+          }
+          const rowY = nodes[0]?.y;
+          if (rowY === undefined) return;
+          const toward = generation < 0 ? rowY + CARD_HEIGHT / 2 : rowY - CARD_HEIGHT / 2;
+          const bus = generation < 0 ? toward + 34 : toward - 34;
+          const xs = nodes.map((node) => node.x);
+          pdf.line(sx(Math.min(...xs, layout.centerX)), sy(bus), sx(Math.max(...xs, layout.centerX)), sy(bus));
+          pdf.line(sx(layout.centerX), sy(bus), sx(layout.centerX), sy(anchor.y + (generation < 0 ? -CARD_HEIGHT / 2 : CARD_HEIGHT / 2)));
+          nodes.forEach((node) => pdf.line(sx(node.x), sy(toward), sx(node.x), sy(bus)));
+        });
+      }
+
+      layout.rows.forEach(({ generation }) => {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(Math.max(6, 8 * scale));
+        pdf.setTextColor(110, 110, 110);
+        pdf.text(generationLabel(generation).toUpperCase(), sx(20), sy(layout.centerGenerationY + generation * ROW_GAP - CARD_HEIGHT / 2 - 13));
+      });
+
+      layout.nodes.forEach((node) => {
+        const left = sx(node.x - CARD_WIDTH / 2);
+        const top = sy(node.y - CARD_HEIGHT / 2);
+        const width = CARD_WIDTH * scale;
+        const height = CARD_HEIGHT * scale;
+        if (node.deceased) {
+          pdf.setFillColor(255, 247, 242);
+          pdf.setDrawColor(239, 91, 28);
+          pdf.setLineWidth(2);
+        } else {
+          pdf.setFillColor(255, 255, 255);
+          pdf.setDrawColor(205, 205, 205);
+          pdf.setLineWidth(0.8);
+        }
+        pdf.roundedRect(left, top, width, height, 5, 5, "FD");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(Math.max(6, 10 * scale));
+        pdf.setTextColor(31, 31, 31);
+        const nameLines = pdf.splitTextToSize(node.name, Math.max(34, width - 18));
+        pdf.text(nameLines.slice(0, 2), left + 9, top + height / 2 - 3);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(Math.max(5, 7 * scale));
+        pdf.setTextColor(node.deceased ? 239 : 100, node.deceased ? 91 : 100, node.deceased ? 28 : 100);
+        pdf.text(node.relationship.toUpperCase(), left + 9, top + height - 10);
+      });
+
+      const legendY = pageHeight - 42;
+      pdf.setFillColor(255, 247, 242);
+      pdf.setDrawColor(239, 91, 28);
+      pdf.roundedRect(28, legendY - 11, 18, 14, 3, 3, "FD");
+      pdf.setTextColor(55, 55, 55);
+      pdf.setFontSize(8);
+      pdf.text("Highlighted card: deceased anchor", 53, legendY);
+      pdf.setDrawColor(185, 185, 185);
+      pdf.line(225, legendY - 4, 255, legendY - 4);
+      pdf.text("Lines: family relationship connection", 263, legendY);
+      return pdf;
+    } finally {
+      setExporting(false);
+    }
+  }, [deceasedName, layout]);
+
+  const downloadPdf = async () => {
+    try {
+      const pdf = await createPdf();
+      pdf.save(`${deceasedName.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase()}-family-tree.pdf`);
+    } catch {
+      toast.error("The family tree PDF could not be created.");
+    }
+  };
+
+  const printTree = async () => {
+    try {
+      const pdf = await createPdf();
+      const url = URL.createObjectURL(pdf.output("blob"));
+      const frame = document.createElement("iframe");
+      frame.style.position = "fixed";
+      frame.style.width = "1px";
+      frame.style.height = "1px";
+      frame.style.opacity = "0";
+      frame.src = url;
+      frame.onload = () => {
+        frame.contentWindow?.print();
+        window.setTimeout(() => {
+          URL.revokeObjectURL(url);
+          frame.remove();
+        }, 60000);
+      };
+      document.body.appendChild(frame);
+    } catch {
+      toast.error("The print view could not be created.");
+    }
+  };
+
   return (
     <section className={cn("overflow-hidden rounded-xl border border-border bg-card", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div>
           <p className="text-sm font-semibold">Family relationships</p>
-          <p className="text-xs text-muted-foreground">{members.length + 1} people · drag to explore</p>
+          <p className="text-xs text-muted-foreground">{members.length + 1} people · {canReorder ? "drag a card onto another to swap" : "drag to explore"}</p>
         </div>
         <div className="flex items-center gap-1" aria-label="Family tree view controls">
           <Button type="button" size="icon" variant="ghost" onClick={() => zoomAt(view.scale / 1.2)} aria-label="Zoom out" title="Zoom out"><Minus /></Button>
@@ -372,12 +475,15 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
           <Button type="button" size="icon" variant="ghost" onClick={() => zoomAt(view.scale * 1.2)} aria-label="Zoom in" title="Zoom in"><Plus /></Button>
           <Button type="button" size="icon" variant="ghost" onClick={fitToScreen} aria-label="Fit tree to screen" title="Fit to screen"><Maximize2 /></Button>
           <Button type="button" size="icon" variant="ghost" onClick={resetView} aria-label="Reset view" title="Center at actual size"><LocateFixed /></Button>
+          <Button type="button" size="icon" variant="ghost" onClick={printTree} disabled={exporting} aria-label="Print family tree" title="Print"><Printer /></Button>
+          <Button type="button" size="icon" variant="ghost" onClick={downloadPdf} disabled={exporting} aria-label="Download family tree PDF" title="Download PDF"><Download /></Button>
+          {!expandedMode && <Button type="button" size="icon" variant="ghost" onClick={() => setExpanded(true)} aria-label="Expand family tree" title="Expand"><Expand /></Button>}
         </div>
       </div>
 
       <div
         ref={viewportRef}
-        className="relative h-[520px] cursor-grab select-none overflow-hidden bg-muted/20 active:cursor-grabbing sm:h-[610px]"
+        className={cn("relative cursor-grab select-none overflow-hidden bg-muted/20 active:cursor-grabbing", expandedMode ? "h-[calc(100vh-9rem)] min-h-[420px]" : "h-[520px] sm:h-[610px]")}
         style={{ touchAction: "none" }}
         onPointerDown={pointerDown}
         onPointerMove={pointerMove}
@@ -402,9 +508,37 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
             );
           })}
           <TreeConnectors nodes={layout.nodes} centerX={layout.centerX} />
-          {layout.nodes.map((node) => <NodeCard key={node.id} node={node} />)}
+          {layout.nodes.map((node) => (
+            <NodeCard
+              key={node.id}
+              node={node}
+              canReorder={canReorder}
+              onDragStart={(next) => { draggedNode.current = next; }}
+              onDrop={dropOn}
+            />
+          ))}
         </div>
       </div>
+
+      {!expandedMode && (
+        <Dialog open={expanded} onOpenChange={setExpanded}>
+          <DialogContent className="h-[94vh] w-[calc(100%-1rem)] max-w-[96vw] gap-3 overflow-hidden p-3 sm:p-5">
+            <DialogHeader className="pr-8">
+              <DialogTitle>{deceasedName}'s family tree</DialogTitle>
+              <DialogDescription>Explore the complete family tree or export a copy.</DialogDescription>
+            </DialogHeader>
+            <FamilyTreeView
+              deceasedName={deceasedName}
+              deceasedPhoto={deceasedPhoto}
+              members={members}
+              canReorder={canReorder}
+              onSwap={onSwap}
+              expandedMode
+              className="min-h-0"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </section>
   );
 };
