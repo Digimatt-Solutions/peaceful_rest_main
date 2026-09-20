@@ -57,7 +57,7 @@ const tidyLabel = (v: string) =>
     .map((w) => (["in", "of", "the", "and"].includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
     .join(" ");
 
-type Member = { id: string; name: string; relationship: string; memorial_id: string };
+type Member = { id: string; name: string; relationship: string; memorial_id: string; photo_url?: string | null; display_order?: number | null };
 
 const FamilyTree = () => {
   const { user } = useAuth();
@@ -142,6 +142,22 @@ const FamilyTree = () => {
     toast.success("Updated");
   };
 
+  const swapMembers = async (_first: Member, _second: Member, orderedLane: Member[]) => {
+    const results = await Promise.all(orderedLane.map((member, index) =>
+      supabase.from("family_members").update({ display_order: index }).eq("id", member.id),
+    ));
+    const error = results.find((result) => result.error)?.error;
+    if (error) {
+      toast.error("The family members could not be moved. Please try again.");
+      const { data } = await supabase.from("family_members").select("*").eq("memorial_id", memorialId).order("created_at");
+      setMembers((data as Member[]) || []);
+      return;
+    }
+    const orders = new Map(orderedLane.map((member, index) => [member.id, index]));
+    setMembers((current) => current.map((member) => orders.has(member.id) ? { ...member, display_order: orders.get(member.id) } : member));
+    toast.success("Family positions updated");
+  };
+
   return (
     <>
       <PageHeader
@@ -172,6 +188,8 @@ const FamilyTree = () => {
             deceasedName={deceased?.full_name || "Loved One"}
             deceasedPhoto={deceased?.profile_photo_url}
             members={members}
+            canReorder
+            onSwap={swapMembers}
             className="mb-10 mx-auto"
           />
 
