@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LocateFixed, Maximize2, Minus, Plus } from "lucide-react";
+import { Download, Expand, LocateFixed, Maximize2, Minus, Plus, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export type FamilyMember = {
   id: string;
   name: string;
   relationship: string;
   photo_url?: string | null;
+  display_order?: number | null;
 };
 
 type Props = {
@@ -15,6 +18,9 @@ type Props = {
   deceasedPhoto?: string | null;
   members: FamilyMember[];
   className?: string;
+  canReorder?: boolean;
+  onSwap?: (first: FamilyMember, second: FamilyMember) => Promise<void> | void;
+  expandedMode?: boolean;
 };
 
 type TreeNode = FamilyMember & {
@@ -56,8 +62,7 @@ const generationLabel = (generation: number) => {
   return "Great-grandparents";
 };
 
-const sortGeneration = (generation: number, nodes: FamilyMember[]) => {
-  const rank = (relationship: string) => {
+const relationshipLane = (generation: number, relationship: string) => {
     const value = relationship.toLowerCase();
     if (generation === 0) {
       if (/brother|sister|sibling/.test(value) && !/in law/.test(value)) return 0;
@@ -67,11 +72,22 @@ const sortGeneration = (generation: number, nodes: FamilyMember[]) => {
     if (/father|grandfather|son|grandson|brother|nephew|uncle/.test(value)) return 0;
     if (/mother|grandmother|daughter|granddaughter|sister|niece|aunt/.test(value)) return 2;
     return 1;
-  };
-  return [...nodes].sort((a, b) => rank(a.relationship) - rank(b.relationship) || a.name.localeCompare(b.name));
 };
 
-const NodeCard = ({ node }: { node: TreeNode }) => {
+const sortGeneration = (generation: number, nodes: FamilyMember[]) => [...nodes].sort((a, b) => {
+  const laneDifference = relationshipLane(generation, a.relationship) - relationshipLane(generation, b.relationship);
+  if (laneDifference) return laneDifference;
+  const aOrder = a.display_order ?? Number.MAX_SAFE_INTEGER;
+  const bOrder = b.display_order ?? Number.MAX_SAFE_INTEGER;
+  return aOrder - bOrder || a.name.localeCompare(b.name);
+});
+
+const NodeCard = ({ node, canReorder, onDragStart, onDrop }: {
+  node: TreeNode;
+  canReorder?: boolean;
+  onDragStart?: (node: TreeNode) => void;
+  onDrop?: (node: TreeNode) => void;
+}) => {
   const initials = node.name.split(" ").filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
 
   return (
@@ -79,8 +95,22 @@ const NodeCard = ({ node }: { node: TreeNode }) => {
       className={cn(
         "absolute flex h-28 w-[152px] -translate-x-1/2 -translate-y-1/2 items-center gap-3 rounded-xl border bg-card px-3 shadow-soft transition-shadow hover:shadow-elegant",
         node.deceased ? "z-20 border-brand-orange ring-4 ring-brand-orange/15" : "z-10 border-border",
+        canReorder && !node.deceased && "cursor-move active:opacity-60",
       )}
       style={{ left: node.x, top: node.y }}
+      draggable={canReorder && !node.deceased}
+      onDragStart={(event) => {
+        event.stopPropagation();
+        onDragStart?.(node);
+      }}
+      onDragOver={(event) => {
+        if (!node.deceased && canReorder) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onDrop?.(node);
+      }}
     >
       <div className={cn(
         "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold",
@@ -95,6 +125,48 @@ const NodeCard = ({ node }: { node: TreeNode }) => {
       </div>
     </article>
   );
+};
+
+const createLayout = (deceasedName: string, deceasedPhoto: string | null | undefined, members: FamilyMember[]) => {
+  const groups = new Map<number, FamilyMember[]>();
+  members.forEach((member) => {
+    const generation = relationshipGeneration(member.relationship);
+    groups.set(generation, [...(groups.get(generation) || []), member]);
+  });
+
+  const generations = Array.from(new Set([0, ...groups.keys()])).sort((a, b) => a - b);
+  const minGeneration = Math.min(...generations);
+  const maxGeneration = Math.max(...generations);
+  const rows = generations.map((generation) => {
+    const group = sortGeneration(generation, groups.get(generation) || []);
+    const count = group.length + (generation === 0 ? 1 : 0);
+    return { generation, group, width: Math.max(CARD_WIDTH, count * CARD_WIDTH + Math.max(0, count - 1) * COLUMN_GAP) };
+  });
+  const worldWidth = Math.max(720, ...rows.map((row) => row.width)) + 160;
+  const worldHeight = Math.max(560, (maxGeneration - minGeneration) * ROW_GAP + 280);
+  const centerX = worldWidth / 2;
+  const centerGenerationY = 140 + (0 - minGeneration) * ROW_GAP;
+  const nodes: TreeNode[] = [];
+
+  rows.forEach(({ generation, group }) => {
+    const rowMembers: Array<FamilyMember & { deceased?: boolean }> = generation === 0
+      ? [
+          ...group.filter((member) => relationshipLane(0, member.relationship) === 0),
+          { id: "deceased-anchor", name: deceasedName, relationship: "In loving memory", photo_url: deceasedPhoto, deceased: true },
+          ...group.filter((member) => relationshipLane(0, member.relationship) !== 0),
+        ]
+      : group;
+    const rowWidth = rowMembers.length * CARD_WIDTH + Math.max(0, rowMembers.length - 1) * COLUMN_GAP;
+    const startX = centerX - rowWidth / 2 + CARD_WIDTH / 2;
+    rowMembers.forEach((member, index) => nodes.push({
+      ...member,
+      generation,
+      x: startX + index * (CARD_WIDTH + COLUMN_GAP),
+      y: centerGenerationY + generation * ROW_GAP,
+    }));
+  });
+
+  return { nodes, rows, worldWidth, worldHeight, centerX, centerGenerationY };
 };
 
 const TreeConnectors = ({ nodes, centerX }: { nodes: TreeNode[]; centerX: number }) => {
