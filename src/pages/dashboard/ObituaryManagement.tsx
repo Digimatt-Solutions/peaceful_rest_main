@@ -121,7 +121,9 @@ const ObituaryManagement = () => {
       }
     }
     setLoading(true);
-    const verified = form.verification_status === "verified";
+    // A new memorial is created with two confirmed validators, so it starts verified.
+    const status = id ? (form.verification_status || "pending") : "verified";
+    const verified = status === "verified";
     const payload = {
       ...form,
       national_id: nid || null,
@@ -129,8 +131,8 @@ const ObituaryManagement = () => {
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
       // A memorial only goes public once two validators have verified it.
-      is_public: verified ? form.is_public : false,
-      verification_status: form.verification_status || "pending",
+      is_public: id && verified ? form.is_public : false,
+      verification_status: status,
     };
     const { data, error } = id
       ? await supabase.from("memorials").update(payload).eq("id", id).select().maybeSingle()
