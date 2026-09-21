@@ -105,6 +105,10 @@ const ObituaryManagement = () => {
     e.preventDefault();
     if (!user) return;
     if (!form.full_name) { toast.error("Full name is required"); return; }
+    if (!id && !draftReady) {
+      toast.error("Two validators must verify their phone number and confirm before this memorial can be created");
+      return;
+    }
     // Duplicate ID check (only when an ID is provided and it's an adult record)
     const nid = (form.national_id || "").trim();
     if (nid) {
