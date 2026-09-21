@@ -76,6 +76,14 @@ export const MemorialValidators = ({
     if (n.length < 3) return toast.error("Enter the validator's full name");
     if (p.length < 10) return toast.error("Enter a valid phone number");
     if (rows.some(r => r.phone === p)) return toast.error("This phone number is already used by another validator");
+    if (draftMode) {
+      setRows(rs => [...rs, {
+        id: `draft-${Date.now()}`, full_name: n, phone: p, otp_verified: false, verified_at: null,
+        confirmed_deceased: false, confirmed_good_faith: false, confirmed_at: null,
+      }]);
+      setName(""); setPhone("");
+      return;
+    }
     setBusy("add");
     const { error } = await supabase.from("memorial_validators").insert({
       memorial_id: memorialId, full_name: n, phone: p, created_by: user?.id ?? null,
@@ -100,28 +108,33 @@ export const MemorialValidators = ({
     setBusy(v.id);
     const { data, error } = await supabase.functions.invoke("phone-otp", { body: { action: "verify", phone: v.phone, code } });
     if (error || data?.error) { setBusy(null); return toast.error(data?.error || "That code did not match"); }
-    await supabase.from("memorial_validators")
-      .update({ otp_verified: true, verified_at: new Date().toISOString() })
+    const verifiedAt = new Date().toISOString();
+    if (draftMode) patchDraft(v.id, { otp_verified: true, verified_at: verifiedAt });
+    else await supabase.from("memorial_validators")
+      .update({ otp_verified: true, verified_at: verifiedAt })
       .eq("id", v.id);
     setBusy(null);
     setCodes(c => ({ ...c, [v.id]: "" }));
     toast.success(`${v.full_name} verified`);
-    load();
+    if (!draftMode) load();
   };
 
   const confirm = async (v: Validator) => {
     const c = checks[v.id] || { d: false, g: false };
     if (!c.d || !c.g) return toast.error("Both confirmations are required");
     setBusy(v.id);
-    await supabase.from("memorial_validators")
-      .update({ confirmed_deceased: true, confirmed_good_faith: true, confirmed_at: new Date().toISOString() })
+    const confirmedAt = new Date().toISOString();
+    if (draftMode) patchDraft(v.id, { confirmed_deceased: true, confirmed_good_faith: true, confirmed_at: confirmedAt });
+    else await supabase.from("memorial_validators")
+      .update({ confirmed_deceased: true, confirmed_good_faith: true, confirmed_at: confirmedAt })
       .eq("id", v.id);
     setBusy(null);
     toast.success("Confirmation recorded");
-    load();
+    if (!draftMode) load();
   };
 
   const remove = async (v: Validator) => {
+    if (draftMode) return setRows(rs => rs.filter(r => r.id !== v.id));
     await supabase.from("memorial_validators").delete().eq("id", v.id);
     load();
   };
