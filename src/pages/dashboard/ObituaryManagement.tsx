@@ -304,18 +304,32 @@ const ObituaryManagement = () => {
           />
         </section>
 
-        {id && (
+        {id ? (
           <MemorialValidators
             memorialId={id}
             memorialName={form.full_name}
             verificationStatus={form.verification_status || "pending"}
             onStatusChange={(status, isPublic) => setForm((f: any) => ({ ...f, verification_status: status, is_public: isPublic }))}
           />
+        ) : (
+          <MemorialValidators
+            memorialName={form.full_name}
+            verificationStatus="pending"
+            draftMode
+            onDraftChange={setDraftValidators}
+          />
         )}
 
-        <Button type="submit" disabled={loading} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+        {id && <MemorialFollowers memorialId={id} />}
+
+        <Button type="submit" disabled={loading || (!id && !draftReady)} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4 mr-2" /> {id ? "Save changes" : "Create memorial"}</>}
         </Button>
+        {!id && !draftReady && (
+          <p className="text-xs text-muted-foreground">
+            Two validators must verify their phone number and confirm this record before the memorial can be created.
+          </p>
+        )}
       </form>
 
       <aside className="rounded-2xl border border-border bg-card p-6 xl:sticky xl:top-6">
