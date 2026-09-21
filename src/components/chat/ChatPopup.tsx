@@ -336,7 +336,13 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
             >
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
             </Button>
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message…" className="h-9 flex-1 rounded-lg" autoFocus />
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a message…"
+              className="h-9 flex-1 rounded-lg bg-background text-foreground placeholder:text-muted-foreground"
+              autoFocus
+            />
             <Button type="submit" size="icon" disabled={!input.trim() || sending} className="h-9 w-9 shrink-0 rounded-lg bg-brand-orange text-white hover:bg-brand-orange/90">
               <Send className="h-4 w-4" />
             </Button>
