@@ -32,11 +32,16 @@ export const MemorialValidators = ({
   memorialName,
   verificationStatus,
   onStatusChange,
+  draftMode = false,
+  onDraftChange,
 }: {
-  memorialId: string;
+  memorialId?: string;
   memorialName: string;
   verificationStatus: string;
   onStatusChange?: (status: string, isPublic: boolean) => void;
+  /** Used before the memorial exists: validators are held in memory and saved with it. */
+  draftMode?: boolean;
+  onDraftChange?: (rows: Validator[]) => void;
 }) => {
   const { user } = useAuth();
   const [rows, setRows] = useState<Validator[]>([]);
@@ -47,6 +52,7 @@ export const MemorialValidators = ({
   const [checks, setChecks] = useState<Record<string, { d: boolean; g: boolean }>>({});
 
   const load = async () => {
+    if (draftMode || !memorialId) return;
     const { data } = await supabase
       .from("memorial_validators")
       .select("*")
@@ -55,7 +61,11 @@ export const MemorialValidators = ({
     setRows((data as Validator[]) || []);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [memorialId]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [memorialId, draftMode]);
+  useEffect(() => { if (draftMode) onDraftChange?.(rows); /* eslint-disable-next-line */ }, [rows, draftMode]);
+
+  const patchDraft = (id: string, patch: Partial<Validator>) =>
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
   const confirmedCount = rows.filter(r => r.otp_verified && r.confirmed_deceased && r.confirmed_good_faith).length;
   const ready = confirmedCount >= 2;
