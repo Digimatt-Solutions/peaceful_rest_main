@@ -567,6 +567,115 @@ export type Database = {
           },
         ]
       }
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          last_read_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          last_read_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          last_read_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_messages: {
+        Row: {
+          attachment_name: string | null
+          attachment_type: string | null
+          attachment_url: string | null
+          content: string | null
+          created_at: string
+          edited_at: string | null
+          group_id: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          content?: string | null
+          created_at?: string
+          edited_at?: string | null
+          group_id: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
+          content?: string | null
+          created_at?: string
+          edited_at?: string | null
+          group_id?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       login_attempts: {
         Row: {
           attempts: number
@@ -613,6 +722,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "memorial_admins_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_followers: {
+        Row: {
+          created_at: string
+          id: string
+          memorial_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memorial_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memorial_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_followers_memorial_id_fkey"
             columns: ["memorial_id"]
             isOneToOne: false
             referencedRelation: "memorials"
@@ -974,11 +1112,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          deleted_at: string | null
           email: string | null
           full_name: string | null
           id: string
           phone: string | null
           phone_verified: boolean
+          purged_at: string | null
           updated_at: string
         }
         Insert: {
@@ -986,11 +1126,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
           phone_verified?: boolean
+          purged_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -998,11 +1140,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
           phone_verified?: boolean
+          purged_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1207,6 +1351,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_deleted_at: { Args: { _user_id: string }; Returns: string }
       get_support_admin_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1216,10 +1361,19 @@ export type Database = {
         Returns: boolean
       }
       increment_memorial_visitor: { Args: { _id: string }; Returns: undefined }
+      is_group_admin: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_memorial_admin: {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
       }
+      purge_expired_deleted_accounts: { Args: never; Returns: number }
       super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {
