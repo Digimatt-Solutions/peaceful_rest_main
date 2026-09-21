@@ -31,6 +31,11 @@ const ObituaryManagement = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const [readFile, setReadFile] = useState<string | null>(null);
+  // Validators collected before the memorial exists; saved together with it.
+  const [draftValidators, setDraftValidators] = useState<any[]>([]);
+  const draftReady = draftValidators.filter(
+    (v) => v.otp_verified && v.confirmed_deceased && v.confirmed_good_faith
+  ).length >= 2;
 
   const readDocument = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) { toast.error("Please upload a document under 10MB"); return; }
