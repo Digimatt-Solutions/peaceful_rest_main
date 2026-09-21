@@ -357,13 +357,13 @@ const ObituaryManagement = () => {
             </li>
           ))}
         </ul>
-        <a
-          href="tel:+254116797979"
+        <Link
+          to="/funeral-services"
           className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-5 h-11 text-sm font-medium text-brand-white hover:bg-brand-orange/90 transition-colors"
         >
-          <Phone className="h-4 w-4" /> Talk to our team
-        </a>
-        <p className="mt-2 text-center text-xs text-muted-foreground">+254 116 797979 · info@makiwa.ke</p>
+          View services page <ArrowRight className="h-4 w-4" />
+        </Link>
+        <p className="mt-2 text-center text-xs text-muted-foreground">Browse packages, prices and book online.</p>
       </aside>
       </div>
     </>
