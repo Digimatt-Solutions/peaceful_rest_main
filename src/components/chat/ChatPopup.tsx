@@ -293,8 +293,8 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
                             <span className="truncate text-xs">{m.attachment_name || "Document"}</span>
                           </a>
                         ))}
-                      {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
-                      <div className={`mt-0.5 flex items-center justify-end gap-1 text-[10px] ${mine ? "opacity-90" : "text-muted-foreground"}`}>
+                      {m.content && <p className={`whitespace-pre-wrap ${mine ? "text-black" : "text-foreground"}`}>{m.content}</p>}
+                      <div className={`mt-0.5 flex items-center justify-end gap-1 text-[10px] text-black`}>
                         <span>{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                         {mine &&
                           (pending ? (

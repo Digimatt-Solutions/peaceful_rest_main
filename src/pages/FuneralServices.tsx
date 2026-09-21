@@ -12,10 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { BookOpen, Camera, Video, Music, Flower2, Phone, Check, Loader2, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { trackVisit } from "@/lib/trackVisit";
-import eulogyImg from "@/assets/flowers.jpg";
-import photoImg from "@/assets/hero-portrait.jpg";
-import streamImg from "@/assets/community.jpg";
-import candleImg from "@/assets/candle.jpg";
+import eulogyImg from "@/assets/ph6.jpg";
+import photoImg from "@/assets/ph.jpg";
+import streamImg from "@/assets/ph2.jpg";
+import candleImg from "@/assets/ph4.png";
 
 const ksh = (n: number) => `KSh ${Number(n || 0).toLocaleString()}`;
 

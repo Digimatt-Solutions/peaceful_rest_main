@@ -365,8 +365,8 @@ const Groups = () => {
                           <button onClick={() => saveEdit(m)} aria-label="Save" className="rounded p-1 hover:bg-black/10"><Check className="h-4 w-4" /></button>
                           <button onClick={() => setEditingId(null)} aria-label="Cancel" className="rounded p-1 hover:bg-black/10"><X className="h-4 w-4" /></button>
                         </div>
-                      ) : m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
-                      <div className={`mt-0.5 flex items-center justify-end gap-2 text-[10px] ${own ? "opacity-90" : "text-muted-foreground"}`}>
+                      ) : m.content && <p className={`whitespace-pre-wrap ${mine ? "text-black" : "text-foreground"}`}>{m.content}</p>}
+                      <div className={`mt-0.5 flex items-center justify-end gap-2 text-[10px] text-black`}>
                         {m.edited_at && <span>edited</span>}
                         <span>{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                         {own && m.content && isUnread(m) && editingId !== m.id && (
