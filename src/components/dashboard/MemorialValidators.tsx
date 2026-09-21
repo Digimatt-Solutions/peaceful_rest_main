@@ -265,7 +265,15 @@ export const MemorialValidators = ({
         </div>
       )}
 
-      {verificationStatus !== "verified" && (
+      {draftMode && (
+        <p className={`rounded-xl px-4 py-2 text-sm ${ready ? "bg-brand-orange/10 text-brand-orange" : "bg-muted text-muted-foreground"}`}>
+          {ready
+            ? "Both validators are confirmed — you can now create this memorial."
+            : "Two confirmed validators are required before this memorial can be created."}
+        </p>
+      )}
+
+      {!draftMode && verificationStatus !== "verified" && (
         <div className="flex flex-wrap items-center gap-3">
           <Button type="button" disabled={!ready || busy === "publish"} onClick={publish}
             className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
