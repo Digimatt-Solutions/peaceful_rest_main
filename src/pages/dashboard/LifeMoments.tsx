@@ -23,6 +23,20 @@ const LifeMoments = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+
+  // Every photo across every memory, so the viewer can run as one slideshow.
+  const slides: LightboxItem[] = items.flatMap((m) => {
+    const pics: string[] = m.photos?.length ? m.photos : (m.photo_url ? [m.photo_url] : []);
+    return pics.map((src: string, i: number) => ({
+      id: `${m.id}-${i}`,
+      src,
+      title: m.title || undefined,
+      description: m.description || undefined,
+      date: m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined,
+    }));
+  });
+  const slideStart = (memoryId: string) => Math.max(0, slides.findIndex((s) => s.id === `${memoryId}-0`));
 
   useEffect(() => {
     document.title = "Life Moments · Makiwa";
