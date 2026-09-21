@@ -20,6 +20,7 @@ import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import { FormattedText } from "@/components/FormattedText";
 import { MemorialQR } from "@/components/MemorialQR";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { FollowMemorialButton } from "@/components/memorial/FollowMemorialButton";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 
@@ -348,6 +349,8 @@ const MemorialDetail = () => {
                   <Heart className="h-4 w-4" />
                   Send condolences
                 </a>
+
+                {id && <FollowMemorialButton memorialId={id} />}
               </div>
 
               <div className="mt-12 grid grid-cols-3 gap-4 max-w-md border-t border-white/15 pt-6">

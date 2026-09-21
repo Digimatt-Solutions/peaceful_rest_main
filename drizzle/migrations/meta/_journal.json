@@ -29,6 +29,13 @@
       "when": 1789905708342,
       "tag": "0003_add_family_member_display_order",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789986096245,
+      "tag": "0004_groups_follows_soft_delete",
+      "breakpoints": true
     }
   ]
 }

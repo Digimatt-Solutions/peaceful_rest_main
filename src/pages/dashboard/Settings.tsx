@@ -52,11 +52,13 @@ const Settings = () => {
   };
 
   const deleteAccount = async () => {
-    if (!confirm("Are you absolutely sure? This cannot be undone.")) return;
     if (!user) return;
-    await supabase.from("profiles").delete().eq("id", user.id);
+    if (!confirm("Your account will be closed. You have 30 days to sign back in and restore it, after which your details are removed permanently. Continue?")) return;
+    const { error } = await supabase.from("profiles")
+      .update({ deleted_at: new Date().toISOString() } as any).eq("id", user.id);
+    if (error) return toast.error("We couldn't close your account. Please try again.");
     await signOut();
-    toast.success("Account deleted");
+    toast.success("Account closed", { description: "Sign back in within 30 days to restore it." });
     navigate("/");
   };
 
@@ -109,7 +111,10 @@ const Settings = () => {
 
         <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-7">
           <h3 className="font-serif text-xl text-destructive">Danger zone</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Permanently delete your account and all your data.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Close your account. You have 30 days to sign back in and restore it — after that your personal details are
+            permanently removed. Records we must keep for accounting and safety are retained.
+          </p>
           <Button onClick={deleteAccount} variant="outline" className="mt-4 rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">Delete account</Button>
         </section>
       </div>

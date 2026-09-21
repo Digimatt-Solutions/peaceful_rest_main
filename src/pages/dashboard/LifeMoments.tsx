@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Camera, Plus, Trash2, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { MemoryLightbox, LightboxItem } from "@/components/gallery/MemoryLightbox";
 
 const LifeMoments = () => {
   const { user } = useAuth();
@@ -22,6 +23,20 @@ const LifeMoments = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+
+  // Every photo across every memory, so the viewer can run as one slideshow.
+  const slides: LightboxItem[] = items.flatMap((m) => {
+    const pics: string[] = m.photos?.length ? m.photos : (m.photo_url ? [m.photo_url] : []);
+    return pics.map((src: string, i: number) => ({
+      id: `${m.id}-${i}`,
+      src,
+      title: m.title || undefined,
+      description: m.description || undefined,
+      date: m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined,
+    }));
+  });
+  const slideStart = (memoryId: string) => Math.max(0, slides.findIndex((s) => s.id === `${memoryId}-0`));
 
   useEffect(() => {
     document.title = "Life Moments · Makiwa";
@@ -136,14 +151,18 @@ const LifeMoments = () => {
               {items.map(m => {
                 const pics: string[] = (m.photos && m.photos.length ? m.photos : (m.photo_url ? [m.photo_url] : []));
                 return (
-                  <div key={m.id} className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-elegant transition-shadow">
+                  <div
+                    key={m.id}
+                    onClick={() => pics.length > 0 && setLightbox(slideStart(m.id))}
+                    className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden hover:shadow-elegant transition-shadow"
+                  >
                     {pics.length > 0 && (
                       <div className="relative">
                         <img src={pics[0]} alt={m.title} className="w-full h-52 object-cover" />
                         {pics.length > 1 && (
                           <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-xs">+{pics.length - 1}</span>
                         )}
-                        <button onClick={() => remove(m.id)} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 h-8 w-8 rounded-full bg-red-500/90 text-white inline-flex items-center justify-center transition-opacity">
+                        <button onClick={(e) => { e.stopPropagation(); remove(m.id); }} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 h-8 w-8 rounded-full bg-red-500/90 text-white inline-flex items-center justify-center transition-opacity">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -163,6 +182,8 @@ const LifeMoments = () => {
               })}
             </div>
           )}
+
+          <MemoryLightbox items={slides} index={lightbox} onIndexChange={setLightbox} onClose={() => setLightbox(null)} />
         </>
       )}
     </>

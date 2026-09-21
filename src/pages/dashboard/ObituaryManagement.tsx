@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard/PageHeader";
@@ -8,11 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music, Flower2, Phone } from "lucide-react";
+import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music, Flower2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
 import { MemorialValidators } from "@/components/dashboard/MemorialValidators";
+import { MemorialFollowers } from "@/components/dashboard/MemorialFollowers";
 
 const empty = {
   full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
@@ -31,6 +32,11 @@ const ObituaryManagement = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const [readFile, setReadFile] = useState<string | null>(null);
+  // Validators collected before the memorial exists; saved together with it.
+  const [draftValidators, setDraftValidators] = useState<any[]>([]);
+  const draftReady = draftValidators.filter(
+    (v) => v.otp_verified && v.confirmed_deceased && v.confirmed_good_faith
+  ).length >= 2;
 
   const readDocument = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) { toast.error("Please upload a document under 10MB"); return; }
@@ -100,6 +106,10 @@ const ObituaryManagement = () => {
     e.preventDefault();
     if (!user) return;
     if (!form.full_name) { toast.error("Full name is required"); return; }
+    if (!id && !draftReady) {
+      toast.error("Two validators must verify their phone number and confirm before this memorial can be created");
+      return;
+    }
     // Duplicate ID check (only when an ID is provided and it's an adult record)
     const nid = (form.national_id || "").trim();
     if (nid) {
@@ -112,7 +122,9 @@ const ObituaryManagement = () => {
       }
     }
     setLoading(true);
-    const verified = form.verification_status === "verified";
+    // A new memorial is created with two confirmed validators, so it starts verified.
+    const status = id ? (form.verification_status || "pending") : "verified";
+    const verified = status === "verified";
     const payload = {
       ...form,
       national_id: nid || null,
@@ -120,8 +132,8 @@ const ObituaryManagement = () => {
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
       // A memorial only goes public once two validators have verified it.
-      is_public: verified ? form.is_public : false,
-      verification_status: form.verification_status || "pending",
+      is_public: id && verified ? form.is_public : false,
+      verification_status: status,
     };
     const { data, error } = id
       ? await supabase.from("memorials").update(payload).eq("id", id).select().maybeSingle()
@@ -131,6 +143,22 @@ const ObituaryManagement = () => {
       if ((error as any).code === "23505") toast.error("This National ID is already registered for another memorial.");
       else toast.error(error.message);
       return;
+    }
+    // Store the validator audit trail alongside the new memorial.
+    if (!id && data) {
+      await supabase.from("memorial_validators").insert(
+        draftValidators.map((v: any) => ({
+          memorial_id: data.id,
+          full_name: v.full_name,
+          phone: v.phone,
+          otp_verified: v.otp_verified,
+          verified_at: v.verified_at,
+          confirmed_deceased: v.confirmed_deceased,
+          confirmed_good_faith: v.confirmed_good_faith,
+          confirmed_at: v.confirmed_at,
+          created_by: user.id,
+        }))
+      );
     }
     logActivity(id ? "memorial_update" : "memorial_create", {
       entity_type: "memorial", entity_id: (data?.id || id) as string,
@@ -277,18 +305,32 @@ const ObituaryManagement = () => {
           />
         </section>
 
-        {id && (
+        {id ? (
           <MemorialValidators
             memorialId={id}
             memorialName={form.full_name}
             verificationStatus={form.verification_status || "pending"}
             onStatusChange={(status, isPublic) => setForm((f: any) => ({ ...f, verification_status: status, is_public: isPublic }))}
           />
+        ) : (
+          <MemorialValidators
+            memorialName={form.full_name}
+            verificationStatus="pending"
+            draftMode
+            onDraftChange={setDraftValidators}
+          />
         )}
 
-        <Button type="submit" disabled={loading} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+        {id && <MemorialFollowers memorialId={id} />}
+
+        <Button type="submit" disabled={loading || (!id && !draftReady)} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4 mr-2" /> {id ? "Save changes" : "Create memorial"}</>}
         </Button>
+        {!id && !draftReady && (
+          <p className="text-xs text-muted-foreground">
+            Two validators must verify their phone number and confirm this record before the memorial can be created.
+          </p>
+        )}
       </form>
 
       <aside className="rounded-2xl border border-border bg-card p-6 xl:sticky xl:top-6">
@@ -316,13 +358,13 @@ const ObituaryManagement = () => {
             </li>
           ))}
         </ul>
-        <a
-          href="tel:+254116797979"
+        <Link
+          to="/funeral-services"
           className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-5 h-11 text-sm font-medium text-brand-white hover:bg-brand-orange/90 transition-colors"
         >
-          <Phone className="h-4 w-4" /> Talk to our team
-        </a>
-        <p className="mt-2 text-center text-xs text-muted-foreground">+254 116 797979 · info@makiwa.ke</p>
+          View services page <ArrowRight className="h-4 w-4" />
+        </Link>
+        <p className="mt-2 text-center text-xs text-muted-foreground">Browse packages, prices and book online.</p>
       </aside>
       </div>
     </>

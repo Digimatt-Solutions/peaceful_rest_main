@@ -140,6 +140,11 @@
   main select,
   main textarea {
     border-color: hsl(214 32% 89%);
+    color: hsl(var(--foreground));
+  }
+  main input::placeholder,
+  main textarea::placeholder {
+    color: hsl(var(--muted-foreground));
   }
   main input:focus-visible,
   main select:focus-visible,

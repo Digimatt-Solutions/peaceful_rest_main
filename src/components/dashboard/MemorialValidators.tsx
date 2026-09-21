@@ -32,11 +32,16 @@ export const MemorialValidators = ({
   memorialName,
   verificationStatus,
   onStatusChange,
+  draftMode = false,
+  onDraftChange,
 }: {
-  memorialId: string;
+  memorialId?: string;
   memorialName: string;
   verificationStatus: string;
   onStatusChange?: (status: string, isPublic: boolean) => void;
+  /** Used before the memorial exists: validators are held in memory and saved with it. */
+  draftMode?: boolean;
+  onDraftChange?: (rows: Validator[]) => void;
 }) => {
   const { user } = useAuth();
   const [rows, setRows] = useState<Validator[]>([]);
@@ -47,6 +52,7 @@ export const MemorialValidators = ({
   const [checks, setChecks] = useState<Record<string, { d: boolean; g: boolean }>>({});
 
   const load = async () => {
+    if (draftMode || !memorialId) return;
     const { data } = await supabase
       .from("memorial_validators")
       .select("*")
@@ -55,7 +61,11 @@ export const MemorialValidators = ({
     setRows((data as Validator[]) || []);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [memorialId]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [memorialId, draftMode]);
+  useEffect(() => { if (draftMode) onDraftChange?.(rows); /* eslint-disable-next-line */ }, [rows, draftMode]);
+
+  const patchDraft = (id: string, patch: Partial<Validator>) =>
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
   const confirmedCount = rows.filter(r => r.otp_verified && r.confirmed_deceased && r.confirmed_good_faith).length;
   const ready = confirmedCount >= 2;
@@ -66,6 +76,14 @@ export const MemorialValidators = ({
     if (n.length < 3) return toast.error("Enter the validator's full name");
     if (p.length < 10) return toast.error("Enter a valid phone number");
     if (rows.some(r => r.phone === p)) return toast.error("This phone number is already used by another validator");
+    if (draftMode) {
+      setRows(rs => [...rs, {
+        id: `draft-${Date.now()}`, full_name: n, phone: p, otp_verified: false, verified_at: null,
+        confirmed_deceased: false, confirmed_good_faith: false, confirmed_at: null,
+      }]);
+      setName(""); setPhone("");
+      return;
+    }
     setBusy("add");
     const { error } = await supabase.from("memorial_validators").insert({
       memorial_id: memorialId, full_name: n, phone: p, created_by: user?.id ?? null,
@@ -90,28 +108,33 @@ export const MemorialValidators = ({
     setBusy(v.id);
     const { data, error } = await supabase.functions.invoke("phone-otp", { body: { action: "verify", phone: v.phone, code } });
     if (error || data?.error) { setBusy(null); return toast.error(data?.error || "That code did not match"); }
-    await supabase.from("memorial_validators")
-      .update({ otp_verified: true, verified_at: new Date().toISOString() })
+    const verifiedAt = new Date().toISOString();
+    if (draftMode) patchDraft(v.id, { otp_verified: true, verified_at: verifiedAt });
+    else await supabase.from("memorial_validators")
+      .update({ otp_verified: true, verified_at: verifiedAt })
       .eq("id", v.id);
     setBusy(null);
     setCodes(c => ({ ...c, [v.id]: "" }));
     toast.success(`${v.full_name} verified`);
-    load();
+    if (!draftMode) load();
   };
 
   const confirm = async (v: Validator) => {
     const c = checks[v.id] || { d: false, g: false };
     if (!c.d || !c.g) return toast.error("Both confirmations are required");
     setBusy(v.id);
-    await supabase.from("memorial_validators")
-      .update({ confirmed_deceased: true, confirmed_good_faith: true, confirmed_at: new Date().toISOString() })
+    const confirmedAt = new Date().toISOString();
+    if (draftMode) patchDraft(v.id, { confirmed_deceased: true, confirmed_good_faith: true, confirmed_at: confirmedAt });
+    else await supabase.from("memorial_validators")
+      .update({ confirmed_deceased: true, confirmed_good_faith: true, confirmed_at: confirmedAt })
       .eq("id", v.id);
     setBusy(null);
     toast.success("Confirmation recorded");
-    load();
+    if (!draftMode) load();
   };
 
   const remove = async (v: Validator) => {
+    if (draftMode) return setRows(rs => rs.filter(r => r.id !== v.id));
     await supabase.from("memorial_validators").delete().eq("id", v.id);
     load();
   };
@@ -242,7 +265,15 @@ export const MemorialValidators = ({
         </div>
       )}
 
-      {verificationStatus !== "verified" && (
+      {draftMode && (
+        <p className={`rounded-xl px-4 py-2 text-sm ${ready ? "bg-brand-orange/10 text-brand-orange" : "bg-muted text-muted-foreground"}`}>
+          {ready
+            ? "Both validators are confirmed — you can now create this memorial."
+            : "Two confirmed validators are required before this memorial can be created."}
+        </p>
+      )}
+
+      {!draftMode && verificationStatus !== "verified" && (
         <div className="flex flex-wrap items-center gap-3">
           <Button type="button" disabled={!ready || busy === "publish"} onClick={publish}
             className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
