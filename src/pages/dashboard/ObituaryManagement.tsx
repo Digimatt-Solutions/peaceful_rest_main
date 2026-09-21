@@ -143,6 +143,22 @@ const ObituaryManagement = () => {
       else toast.error(error.message);
       return;
     }
+    // Store the validator audit trail alongside the new memorial.
+    if (!id && data) {
+      await supabase.from("memorial_validators").insert(
+        draftValidators.map((v: any) => ({
+          memorial_id: data.id,
+          full_name: v.full_name,
+          phone: v.phone,
+          otp_verified: v.otp_verified,
+          verified_at: v.verified_at,
+          confirmed_deceased: v.confirmed_deceased,
+          confirmed_good_faith: v.confirmed_good_faith,
+          confirmed_at: v.confirmed_at,
+          created_by: user.id,
+        }))
+      );
+    }
     logActivity(id ? "memorial_update" : "memorial_create", {
       entity_type: "memorial", entity_id: (data?.id || id) as string,
       description: `${id ? "Updated" : "Created"} memorial for ${form.full_name}`,
