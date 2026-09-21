@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard/PageHeader";
@@ -8,11 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music, Flower2, Phone } from "lucide-react";
+import { Loader2, Save, Trash2, FileUp, Sparkles, BookOpen, Camera, Video, Music, Flower2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
 import { MemorialValidators } from "@/components/dashboard/MemorialValidators";
+import { MemorialFollowers } from "@/components/dashboard/MemorialFollowers";
 
 const empty = {
   full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
