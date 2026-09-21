@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Camera, Plus, Trash2, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { MemoryLightbox, LightboxItem } from "@/components/gallery/MemoryLightbox";
 
 const LifeMoments = () => {
   const { user } = useAuth();
