@@ -77,24 +77,75 @@ export const DashboardLayout = () => {
       .then(({ data }) => setProfile(data));
   }, [user]);
 
-  // Condolences awaiting approval (row-level security only exposes these to admins).
+  // Pending / unread activity counts for the sidebar. Row-level security means a
+  // user only ever counts rows they are allowed to see.
   const [pendingCondolences, setPendingCondolences] = useState(0);
+  const [counts, setCounts] = useState({ groups: 0, community: 0, bookings: 0 });
+  const locationRef = useLocation();
+
   useEffect(() => {
     if (!user) return;
-    const loadPending = async () => {
-      const { count } = await supabase
-        .from("condolences")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending");
-      setPendingCondolences(count || 0);
+    let cancelled = false;
+
+    const loadCounts = async () => {
+      const seenCommunity = localStorage.getItem("pr-seen-community") || new Date(0).toISOString();
+
+      const [{ count: condolenceCount }, { data: memberships }, { count: communityCount }, { count: bookingCount }] =
+        await Promise.all([
+          supabase.from("condolences").select("id", { count: "exact", head: true }).eq("status", "pending"),
+          supabase.from("group_members").select("group_id,last_read_at").eq("user_id", user.id),
+          supabase.from("community_posts").select("id", { count: "exact", head: true }).gt("created_at", seenCommunity),
+          supabase.from("service_bookings").select("id", { count: "exact", head: true }).eq("status", "new"),
+        ]);
+
+      let groupUnread = 0;
+      const ids = (memberships || []).map((m) => m.group_id);
+      if (ids.length) {
+        const { data: msgs } = await supabase
+          .from("group_messages")
+          .select("group_id,sender_id,created_at")
+          .in("group_id", ids)
+          .order("created_at", { ascending: false })
+          .limit(300);
+        const readAt = new Map((memberships || []).map((m) => [m.group_id, m.last_read_at]));
+        groupUnread = (msgs || []).filter(
+          (m) => m.sender_id !== user.id && new Date(m.created_at) > new Date(readAt.get(m.group_id) || 0)
+        ).length;
+      }
+
+      if (cancelled) return;
+      setPendingCondolences(condolenceCount || 0);
+      setCounts({ groups: groupUnread, community: communityCount || 0, bookings: bookingCount || 0 });
     };
-    loadPending();
+
+    loadCounts();
     const ch = supabase
-      .channel("pending-condolences")
-      .on("postgres_changes", { event: "*", schema: "public", table: "condolences" }, () => loadPending())
+      .channel("sidebar-activity")
+      .on("postgres_changes", { event: "*", schema: "public", table: "condolences" }, () => loadCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "group_messages" }, () => loadCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "community_posts" }, () => loadCounts())
+      .on("postgres_changes", { event: "*", schema: "public", table: "service_bookings" }, () => loadCounts())
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [user]);
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [user, locationRef.pathname]);
+
+  // Opening a module clears its indicator.
+  useEffect(() => {
+    if (locationRef.pathname === "/dashboard/community") {
+      localStorage.setItem("pr-seen-community", new Date().toISOString());
+      setCounts((c) => ({ ...c, community: 0 }));
+    }
+    if (locationRef.pathname === "/dashboard/groups") setCounts((c) => ({ ...c, groups: 0 }));
+  }, [locationRef.pathname]);
+
+  const badgeFor = (to: string) =>
+    to === "/dashboard/messages" ? unreadMessages
+      : to === "/dashboard/condolences" ? pendingCondolences
+      : to === "/dashboard/groups" ? counts.groups
+      : to === "/dashboard/community" ? counts.community
+      : to === "/dashboard/bookings" ? counts.bookings
+      : 0;
+
 
   // Log every dashboard page visit for the activity trail (throttled per-path).
   const location = useLocation();
