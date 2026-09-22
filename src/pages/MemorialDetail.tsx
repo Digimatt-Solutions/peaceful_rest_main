@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FamilyTreeView } from "@/components/family/FamilyTreeView";
 import { MasonryGallery } from "@/components/gallery/MasonryGallery";
-import { HorizontalScrollGallery } from "@/components/gallery/HorizontalScrollGallery";
+import { MemoryMarquee } from "@/components/gallery/MemoryMarquee";
 import { Flame, MapPin, Calendar, Users, MessageCircle, Camera, Megaphone, Loader2, Heart, Share2, HeartHandshake } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -441,7 +441,7 @@ const MemorialDetail = () => {
                         )}
                       </div>
                       {m.description && <p className="text-foreground/80 mb-5 leading-relaxed max-w-3xl">{m.description}</p>}
-                      <HorizontalScrollGallery
+                      <MemoryMarquee
                         items={photos.map((src, i) => ({
                           id: `${m.id}-${i}`,
                           src,
@@ -450,6 +450,7 @@ const MemorialDetail = () => {
                           date: dateStr,
                         }))}
                       />
+
                     </div>
                   );
                 })}

@@ -53,6 +53,9 @@ const Groups = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const iconRef = useRef<HTMLInputElement>(null);
+  const [iconUploading, setIconUploading] = useState(false);
+
 
   const activeGroup = useMemo(() => groups.find((g) => g.id === activeId) || null, [groups, activeId]);
   const myRole = useMemo(
@@ -176,7 +179,34 @@ const Groups = () => {
     loadGroups();
   };
 
+  // Group icon: admins only. The update itself is authorised by row-level security.
+  const uploadGroupIcon = async (file: File) => {
+    if (!activeId || !isGroupAdmin) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Please choose an image under 5MB");
+    setIconUploading(true);
+    const path = `groups/${activeId}/icon-${Date.now()}-${file.name}`;
+    const { error: upErr } = await supabase.storage.from("memorial-media").upload(path, file);
+    if (upErr) { setIconUploading(false); return toast.error(upErr.message); }
+    const { data } = supabase.storage.from("memorial-media").getPublicUrl(path);
+    const { error } = await supabase.from("groups").update({ avatar_url: data.publicUrl }).eq("id", activeId);
+    setIconUploading(false);
+    if (error) return toast.error("You do not have permission to change this group icon");
+    toast.success("Group icon updated");
+    logActivity("update", { entity_type: "group", entity_id: activeId, description: "Updated the group icon" });
+    loadGroups();
+  };
+
+  const removeGroupIcon = async () => {
+    if (!activeId || !isGroupAdmin) return;
+    const { error } = await supabase.from("groups").update({ avatar_url: null }).eq("id", activeId);
+    if (error) return toast.error("You do not have permission to change this group icon");
+    toast.success("Group icon removed");
+    loadGroups();
+  };
+
   const deleteGroup = async () => {
+
     if (!activeId || !confirm("Delete this group and all its messages?")) return;
     const { error } = await supabase.from("groups").delete().eq("id", activeId);
     if (error) return toast.error(error.message);
@@ -261,7 +291,12 @@ const Groups = () => {
           <Button variant="outline" size="sm" className="rounded-full" onClick={() => setActiveId(null)}>
             <ArrowLeft className="h-4 w-4 mr-1" /> All groups
           </Button>
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarImage src={activeGroup.avatar_url || undefined} alt="" />
+            <AvatarFallback className="bg-brand-orange/10 text-brand-orange"><UsersRound className="h-5 w-5" /></AvatarFallback>
+          </Avatar>
           <div className="min-w-0 flex-1">
+
             <h2 className="font-serif text-2xl truncate">{activeGroup.name}</h2>
             <p className="text-xs text-muted-foreground truncate">
               {members.length} member{members.length === 1 ? "" : "s"}
@@ -280,7 +315,27 @@ const Groups = () => {
                 <div className="space-y-6">
                   {isGroupAdmin && (
                     <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-14 w-14">
+                          <AvatarImage src={activeGroup.avatar_url || undefined} alt="" />
+                          <AvatarFallback className="bg-brand-orange/10 text-brand-orange"><UsersRound className="h-6 w-6" /></AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-wrap gap-2">
+                          <input ref={iconRef} type="file" accept="image/*" className="hidden"
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadGroupIcon(f); e.target.value = ""; }} />
+                          <Button type="button" variant="outline" size="sm" className="rounded-full"
+                            disabled={iconUploading} onClick={() => iconRef.current?.click()}>
+                            {iconUploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Paperclip className="h-4 w-4 mr-1" />}
+                            {activeGroup.avatar_url ? "Replace icon" : "Upload icon"}
+                          </Button>
+                          {activeGroup.avatar_url && (
+                            <Button type="button" variant="ghost" size="sm" className="rounded-full text-muted-foreground"
+                              onClick={removeGroupIcon}>Remove</Button>
+                          )}
+                        </div>
+                      </div>
                       <div className="space-y-2"><Label>Group name</Label>
+
                         <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} /></div>
                       <div className="space-y-2"><Label>Description</Label>
                         <Textarea rows={3} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} /></div>
@@ -407,9 +462,14 @@ const Groups = () => {
   // ---------- Directory ----------
   const GroupCard = ({ g, joined }: { g: Group; joined: boolean }) => (
     <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
-        <UsersRound className="h-5 w-5" />
-      </div>
+      {g.avatar_url ? (
+        <img src={g.avatar_url} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-xl bg-muted object-cover" />
+      ) : (
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+          <UsersRound className="h-5 w-5" />
+        </div>
+      )}
+
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{g.name}</p>
         <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{g.description || "A Makiwa community group."}</p>

@@ -95,18 +95,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_notified_on: string | null
           memorial_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          last_notified_on?: string | null
           memorial_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          last_notified_on?: string | null
           memorial_id?: string
           user_id?: string
         }
