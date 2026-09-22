@@ -148,7 +148,7 @@ export const DashboardLayout = () => {
 
 
   // Log every dashboard page visit for the activity trail (throttled per-path).
-  const location = useLocation();
+  const location = locationRef;
   const lastLoggedRef = useRef<{ path: string; ts: number }>({ path: "", ts: 0 });
   useEffect(() => {
     if (!user) return;
@@ -205,7 +205,8 @@ export const DashboardLayout = () => {
             ))
           ) : visibleNav.map((item) => {
             const Icon = item.icon;
-            const badge = item.to === "/dashboard/messages" ? unreadMessages : item.to === "/dashboard/condolences" ? pendingCondolences : 0;
+            const badge = badgeFor(item.to);
+
             return (
               <NavLink
                 key={item.to}
@@ -383,7 +384,7 @@ export const DashboardLayout = () => {
             .slice(0, 5)
             .map(item => {
               const Icon = item.icon;
-              const badge = item.to === "/dashboard/messages" ? unreadMessages : item.to === "/dashboard/condolences" ? pendingCondolences : 0;
+              const badge = badgeFor(item.to);
               return (
                 <NavLink
                   key={item.to}
