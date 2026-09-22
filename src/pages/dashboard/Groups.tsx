@@ -291,7 +291,12 @@ const Groups = () => {
           <Button variant="outline" size="sm" className="rounded-full" onClick={() => setActiveId(null)}>
             <ArrowLeft className="h-4 w-4 mr-1" /> All groups
           </Button>
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarImage src={activeGroup.avatar_url || undefined} alt="" />
+            <AvatarFallback className="bg-brand-orange/10 text-brand-orange"><UsersRound className="h-5 w-5" /></AvatarFallback>
+          </Avatar>
           <div className="min-w-0 flex-1">
+
             <h2 className="font-serif text-2xl truncate">{activeGroup.name}</h2>
             <p className="text-xs text-muted-foreground truncate">
               {members.length} member{members.length === 1 ? "" : "s"}
