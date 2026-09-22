@@ -36,6 +36,13 @@
       "when": 1789986096245,
       "tag": "0004_groups_follows_soft_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790075126287,
+      "tag": "0005_anniversary_delivery_and_financial_audit",
+      "breakpoints": true
     }
   ]
 }
