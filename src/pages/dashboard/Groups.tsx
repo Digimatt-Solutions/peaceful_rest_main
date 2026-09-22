@@ -315,7 +315,27 @@ const Groups = () => {
                 <div className="space-y-6">
                   {isGroupAdmin && (
                     <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-14 w-14">
+                          <AvatarImage src={activeGroup.avatar_url || undefined} alt="" />
+                          <AvatarFallback className="bg-brand-orange/10 text-brand-orange"><UsersRound className="h-6 w-6" /></AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-wrap gap-2">
+                          <input ref={iconRef} type="file" accept="image/*" className="hidden"
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadGroupIcon(f); e.target.value = ""; }} />
+                          <Button type="button" variant="outline" size="sm" className="rounded-full"
+                            disabled={iconUploading} onClick={() => iconRef.current?.click()}>
+                            {iconUploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Paperclip className="h-4 w-4 mr-1" />}
+                            {activeGroup.avatar_url ? "Replace icon" : "Upload icon"}
+                          </Button>
+                          {activeGroup.avatar_url && (
+                            <Button type="button" variant="ghost" size="sm" className="rounded-full text-muted-foreground"
+                              onClick={removeGroupIcon}>Remove</Button>
+                          )}
+                        </div>
+                      </div>
                       <div className="space-y-2"><Label>Group name</Label>
+
                         <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} /></div>
                       <div className="space-y-2"><Label>Description</Label>
                         <Textarea rows={3} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} /></div>
