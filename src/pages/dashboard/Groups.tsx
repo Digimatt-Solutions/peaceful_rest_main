@@ -53,6 +53,9 @@ const Groups = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const iconRef = useRef<HTMLInputElement>(null);
+  const [iconUploading, setIconUploading] = useState(false);
+
 
   const activeGroup = useMemo(() => groups.find((g) => g.id === activeId) || null, [groups, activeId]);
   const myRole = useMemo(
@@ -176,7 +179,34 @@ const Groups = () => {
     loadGroups();
   };
 
+  // Group icon: admins only. The update itself is authorised by row-level security.
+  const uploadGroupIcon = async (file: File) => {
+    if (!activeId || !isGroupAdmin) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Please choose an image under 5MB");
+    setIconUploading(true);
+    const path = `groups/${activeId}/icon-${Date.now()}-${file.name}`;
+    const { error: upErr } = await supabase.storage.from("memorial-media").upload(path, file);
+    if (upErr) { setIconUploading(false); return toast.error(upErr.message); }
+    const { data } = supabase.storage.from("memorial-media").getPublicUrl(path);
+    const { error } = await supabase.from("groups").update({ avatar_url: data.publicUrl }).eq("id", activeId);
+    setIconUploading(false);
+    if (error) return toast.error("You do not have permission to change this group icon");
+    toast.success("Group icon updated");
+    logActivity("update", { entity_type: "group", entity_id: activeId, description: "Updated the group icon" });
+    loadGroups();
+  };
+
+  const removeGroupIcon = async () => {
+    if (!activeId || !isGroupAdmin) return;
+    const { error } = await supabase.from("groups").update({ avatar_url: null }).eq("id", activeId);
+    if (error) return toast.error("You do not have permission to change this group icon");
+    toast.success("Group icon removed");
+    loadGroups();
+  };
+
   const deleteGroup = async () => {
+
     if (!activeId || !confirm("Delete this group and all its messages?")) return;
     const { error } = await supabase.from("groups").delete().eq("id", activeId);
     if (error) return toast.error(error.message);
