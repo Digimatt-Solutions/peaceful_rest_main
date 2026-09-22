@@ -584,8 +584,9 @@ const Community = () => {
                   <article key={b.id} className="group rounded-xl overflow-hidden border border-border/70 bg-background hover:shadow-md transition-shadow">
                     {b.image_url && (
                       <img src={b.image_url} alt="" loading="lazy" onClick={() => setPreviewImage(b.image_url)}
-                        className="w-full h-52 cursor-pointer object-cover" />
+                        className="w-full h-52 cursor-pointer bg-muted object-contain" />
                     )}
+
                     <div className="p-3">
                       <h4 className="font-serif text-sm font-medium leading-tight line-clamp-2">{b.title}</h4>
                       {b.body && b.body.trim() && b.body !== " " && (
@@ -628,7 +629,7 @@ const Community = () => {
             <Textarea placeholder="Write the post…" rows={6} value={blogForm.body} onChange={(e) => setBlogForm({ ...blogForm, body: e.target.value })} />
             {blogForm.image_url && (
               <div className="relative inline-block">
-                <img src={blogForm.image_url} alt="" className="h-32 rounded-lg object-cover" />
+                <img src={blogForm.image_url} alt="" className="h-32 rounded-lg bg-muted object-contain" />
                 <button onClick={() => setBlogForm({ ...blogForm, image_url: "" })} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-foreground/80 text-background inline-flex items-center justify-center">
                   <X className="h-3.5 w-3.5" />
                 </button>
