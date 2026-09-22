@@ -462,9 +462,14 @@ const Groups = () => {
   // ---------- Directory ----------
   const GroupCard = ({ g, joined }: { g: Group; joined: boolean }) => (
     <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
-        <UsersRound className="h-5 w-5" />
-      </div>
+      {g.avatar_url ? (
+        <img src={g.avatar_url} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-xl bg-muted object-cover" />
+      ) : (
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+          <UsersRound className="h-5 w-5" />
+        </div>
+      )}
+
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{g.name}</p>
         <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{g.description || "A Makiwa community group."}</p>
