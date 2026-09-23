@@ -205,36 +205,30 @@ const MemorialDetail = () => {
     }
     setStkStatus("Enter your M-Pesa PIN on your phone to complete the payment.");
     toast.success("Check your phone for the M-Pesa prompt");
-    const checkoutId = data.checkout_request_id;
-    let attempts = 0;
-    const poll = async () => {
-      attempts++;
-      const { data: s } = await supabase.functions.invoke("mpesa-status", { body: { checkout_request_id: checkoutId } });
-      if (s?.paid) {
-        setStkStatus(""); setDonating(false); setDonateOpen(null);
+    watchMpesaPayment(data.checkout_request_id, {
+      onResult: async (o) => {
+        setStkStatus(""); setDonating(false);
+        if (!o.paid) return toast.error(o.message || "Payment was not completed");
+        setDonateOpen(null);
         toast.success("Payment received. Thank you!");
         await refreshFundsAfterPayment();
-        if (s.donation_id) {
-          const { data: don } = await supabase.from("donations").select("*").eq("id", s.donation_id).maybeSingle();
-          if (don && don.status === "paid") {
-            const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
-            setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
-            setReceiptOpen(true);
-          }
-        }
-        return;
-      }
-      if (s && !s.pending && s.result_code) {
+        await showReceiptFor(o.donation_id);
+      },
+      onTimeout: () => {
         setStkStatus(""); setDonating(false);
-        return toast.error(s.result_desc || "Payment was not completed");
-      }
-      if (attempts >= 30) {
-        setStkStatus(""); setDonating(false);
-        return toast.message("Still waiting on M-Pesa. It will update once confirmed.");
-      }
-      setTimeout(poll, 3000);
-    };
-    setTimeout(poll, 4000);
+        toast.message("Still waiting on M-Pesa. It will update once confirmed.");
+      },
+    });
+  };
+
+  /** Opens the printable receipt once a contribution is confirmed as paid. */
+  const showReceiptFor = async (donationId?: string | null) => {
+    if (!donationId) return;
+    const { data: don } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+    if (!don || don.status !== "paid") return;
+    const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
+    setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
+    setReceiptOpen(true);
   };
 
 
