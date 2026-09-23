@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookHeart, Plus, ArrowUpRight, Eye, EyeOff, Search } from "lucide-react";
+import { BookHeart, Plus, ArrowUpRight, Eye, EyeOff, Search, BellRing } from "lucide-react";
 import { format } from "date-fns";
 import { NewMemorialDialog } from "@/components/dashboard/NewMemorialDialog";
 
