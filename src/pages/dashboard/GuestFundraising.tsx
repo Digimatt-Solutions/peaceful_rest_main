@@ -13,6 +13,7 @@ import { HeartHandshake, Receipt, Search, Printer, Download, Wallet, Users } fro
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { takePaystackReference, verifyPaystack } from "@/lib/payments";
+import { saveDonationReceipt } from "@/lib/receipts";
 
 const ksh = (n: number) => `KSh ${Number(n || 0).toLocaleString()}`;
 
