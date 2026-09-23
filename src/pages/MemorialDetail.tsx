@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ import { FormattedText } from "@/components/FormattedText";
 import { MemorialQR } from "@/components/MemorialQR";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { FollowMemorialButton } from "@/components/memorial/FollowMemorialButton";
+import { takePaystackReference, verifyPaystack, watchMpesaPayment } from "@/lib/payments";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 
