@@ -73,10 +73,13 @@ const GuestFundraising = () => {
         if (outcome.donation_id && user) {
           const { data: don } = await supabase.from("donations").select("*").eq("id", outcome.donation_id).maybeSingle();
           if (don?.status === "paid") {
-            await saveDonationReceipt({
-              ...don,
-              fundraiser_title: funds.find(f => f.id === don.fundraiser_id)?.title,
-            });
+            const { data: fr } = await supabase.from("fundraisers").select("title, memorial_id").eq("id", don.fundraiser_id).maybeSingle();
+            let memorial_name: string | undefined;
+            if (fr?.memorial_id) {
+              const { data: mm } = await supabase.from("memorials").select("full_name").eq("id", fr.memorial_id).maybeSingle();
+              memorial_name = mm?.full_name;
+            }
+            await saveDonationReceipt({ ...don, fundraiser_title: fr?.title, memorial_name });
           }
         }
       } else {
