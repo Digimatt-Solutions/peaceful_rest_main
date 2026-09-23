@@ -166,7 +166,7 @@ const FuneralServices = () => {
       <section className="border-b border-brand-black/10 py-20 lg:py-28">
         {/* Welcome marquee */}
         <div className="mb-12 overflow-hidden border-y border-brand-black/10 bg-brand-orange/5 py-3">
-          <div className="flex w-max animate-marquee-x gap-12 whitespace-nowrap hover:[animation-play-state:paused] motion-reduce:animate-none">
+          <div className="flex w-max animate-marquee-x gap-4 whitespace-nowrap pl-4 hover:[animation-play-state:paused] motion-reduce:animate-none">
             {[0, 1].map(i => (
               <p key={i} className="font-sans text-sm font-medium tracking-wide text-foreground/80 sm:text-base">
                 Welcome to Makiwa - Where Families Honor Their Loved Ones and Remember With Grace. Our services include Hardcopy Eulogy Design, Photography &amp; Live Streaming, death announcement and official condolences, life moments gallery, Anniversary Reminders, Family tree and easy sharing via qr codes
