@@ -58,6 +58,19 @@ const GuestFundraising = () => {
     load();
   }, [load]);
 
+  // Confirm a Paystack contribution as soon as the donor returns from payment.
+  useEffect(() => {
+    const reference = takePaystackReference();
+    if (!reference) return;
+    (async () => {
+      const outcome = await verifyPaystack(reference);
+      if (outcome.paid) toast.success(outcome.message!);
+      else toast.error(outcome.message!);
+      load();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const totalGiven = useMemo(
     () => myDonations.filter(d => d.status === "paid").reduce((s, d) => s + Number(d.amount || 0), 0),
     [myDonations]
