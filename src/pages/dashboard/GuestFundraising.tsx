@@ -13,6 +13,7 @@ import { HeartHandshake, Receipt, Search, Printer, Download, Wallet, Users } fro
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { takePaystackReference, verifyPaystack } from "@/lib/payments";
+import { saveDonationReceipt } from "@/lib/receipts";
 
 const ksh = (n: number) => `KSh ${Number(n || 0).toLocaleString()}`;
 
@@ -66,12 +67,28 @@ const GuestFundraising = () => {
     if (!reference) return;
     (async () => {
       const outcome = await verifyPaystack(reference);
-      if (outcome.paid) toast.success(outcome.message!);
-      else toast.error(outcome.message!);
+      if (outcome.paid) {
+        toast.success(outcome.message!);
+        // Store the receipt against the guest's account so it appears below.
+        if (outcome.donation_id && user) {
+          const { data: don } = await supabase.from("donations").select("*").eq("id", outcome.donation_id).maybeSingle();
+          if (don?.status === "paid") {
+            const { data: fr } = await supabase.from("fundraisers").select("title, memorial_id").eq("id", don.fundraiser_id).maybeSingle();
+            let memorial_name: string | undefined;
+            if (fr?.memorial_id) {
+              const { data: mm } = await supabase.from("memorials").select("full_name").eq("id", fr.memorial_id).maybeSingle();
+              memorial_name = mm?.full_name;
+            }
+            await saveDonationReceipt({ ...don, fundraiser_title: fr?.title, memorial_name });
+          }
+        }
+      } else {
+        toast.error(outcome.message!);
+      }
       load();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const totalGiven = useMemo(
     () => myDonations.filter(d => d.status === "paid").reduce((s, d) => s + Number(d.amount || 0), 0),
