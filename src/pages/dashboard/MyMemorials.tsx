@@ -16,6 +16,7 @@ const MyMemorials = () => {
   const isAdmin = role === "super_admin" || role === "memorial_admin";
   const navigate = useNavigate();
   const [memorials, setMemorials] = useState<any[]>([]);
+  const [following, setFollowing] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
@@ -24,8 +25,14 @@ const MyMemorials = () => {
     setLoading(true);
     // Admins care for their own memorials; everyone else can browse all published ones.
     const q = supabase.from("memorials").select("*").order("created_at", { ascending: false });
-    const { data } = isAdmin ? await q.eq("created_by", user.id) : await q;
-    setMemorials(data || []);
+    const [{ data }, { data: follows }] = await Promise.all([
+      isAdmin ? q.eq("created_by", user.id) : q,
+      supabase.from("memorial_followers").select("memorial_id").eq("user_id", user.id),
+    ]);
+    const followed = new Set((follows || []).map(f => f.memorial_id));
+    setFollowing(followed);
+    // Memorials the person follows come first so their saved list is easy to find.
+    setMemorials((data || []).sort((a, b) => Number(followed.has(b.id)) - Number(followed.has(a.id))));
     setLoading(false);
   }, [user, isAdmin]);
 
