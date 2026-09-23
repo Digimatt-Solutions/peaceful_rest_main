@@ -66,12 +66,25 @@ const GuestFundraising = () => {
     if (!reference) return;
     (async () => {
       const outcome = await verifyPaystack(reference);
-      if (outcome.paid) toast.success(outcome.message!);
-      else toast.error(outcome.message!);
+      if (outcome.paid) {
+        toast.success(outcome.message!);
+        // Store the receipt against the guest's account so it appears below.
+        if (outcome.donation_id && user) {
+          const { data: don } = await supabase.from("donations").select("*").eq("id", outcome.donation_id).maybeSingle();
+          if (don?.status === "paid") {
+            await saveDonationReceipt({
+              ...don,
+              fundraiser_title: funds.find(f => f.id === don.fundraiser_id)?.title,
+            });
+          }
+        }
+      } else {
+        toast.error(outcome.message!);
+      }
       load();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const totalGiven = useMemo(
     () => myDonations.filter(d => d.status === "paid").reduce((s, d) => s + Number(d.amount || 0), 0),
