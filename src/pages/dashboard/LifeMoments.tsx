@@ -109,8 +109,14 @@ const LifeMoments = () => {
 
   return (
     <>
-      <PageHeader title="Life Moments" subtitle="A timeline of cherished photos and memories." />
-      {memorials.length === 0 ? <EmptyState icon={Camera} title="Create a memorial first" /> : (
+      <PageHeader title="Life Moments" subtitle={isMourner ? "Photos and memories from the memorials you follow." : "A timeline of cherished photos and memories."} />
+      {memorials.length === 0 ? (
+        <EmptyState
+          icon={Camera}
+          title={isMourner ? "No memorials followed yet" : "Create a memorial first"}
+          description={isMourner ? "Follow a memorial to see the moments shared there." : undefined}
+        />
+      ) : (
         <>
           <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
             <div className="max-w-sm w-full sm:w-auto flex-1 min-w-[220px]">
