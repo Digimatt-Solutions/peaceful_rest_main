@@ -15,6 +15,7 @@ import { MemoryLightbox, LightboxItem } from "@/components/gallery/MemoryLightbo
 
 const LifeMoments = () => {
   const { user } = useAuth();
+  const { isMourner, loading: roleLoading } = useUserRole();
   const [memorials, setMemorials] = useState<any[]>([]);
   const [memorialId, setMemorialId] = useState("");
   const [items, setItems] = useState<any[]>([]);
