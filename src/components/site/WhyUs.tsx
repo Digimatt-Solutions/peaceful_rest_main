@@ -101,9 +101,11 @@ export const WhyUs = () => {
             for the stories <em className="not-italic text-brand-orange">that matter most.</em>
           </h2>
           <p className="mt-6 text-muted-foreground text-lg leading-relaxed max-w-xl">
-            Built with bereavement counselors, funeral directors, and grieving
-            families across Africa and beyond - every feature has a purpose: to
-            make remembering easier, and grief a little less lonely.
+            Built for Kenyan families and communities, 
+            Makiwa makes it easier to honour loved ones, bring people together, 
+            and keep their memories alive, from the first announcement to the final farewell 
+            and the years of remembrance that follow.
+
           </p>
 
           <div className="mt-10 grid sm:grid-cols-2 gap-x-8 gap-y-7">

@@ -163,15 +163,39 @@ const FuneralServices = () => {
       </section>
 
       {/* Services */}
-      <section className="border-b border-brand-black/10 py-20 lg:py-28">
+      <section className="border-b border-brand-black/10 pb-16 lg:pb-20">
         {/* Welcome marquee */}
-        <div className="mb-12 overflow-hidden border-y border-brand-black/10 bg-brand-orange/5 py-3">
-          <div className="flex w-max animate-marquee-x gap-4 whitespace-nowrap pl-4 hover:[animation-play-state:paused] motion-reduce:animate-none">
-            {[0, 1].map(i => (
-              <p key={i} className="font-sans text-sm font-medium tracking-wide text-foreground/80 sm:text-base">
-                Welcome to Makiwa - Where Families Honor Their Loved Ones and Remember With Grace. Our services include Hardcopy Eulogy Design, Photography &amp; Live Streaming, death announcement and official condolences, life moments gallery, Anniversary Reminders, Family tree and easy sharing via qr codes
-              </p>
-            ))}
+        <div className="mb-12 overflow-hidden border-y border-white/10 bg-gradient-to-r from-black via-zinc-950 to-black py-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+          <div className="relative">
+            {/* Subtle glossy highlight */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-transparent" />
+
+            <div className="flex w-max animate-marquee-x whitespace-nowrap hover:[animation-play-state:paused] motion-reduce:animate-none">
+              {[0, 1].map((i) => (
+                <p
+                  key={i}
+                  className="px-6 font-sans text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:px-8 sm:text-base"
+                >
+                  WELCOME TO MAKIWA
+                  <span className="mx-4 text-white/50">•</span>
+                  WHERE FAMILIES HONOR THEIR LOVED ONES AND REMEMBER WITH GRACE
+                  <span className="mx-4 text-white/50">•</span>
+                  HARDCOPY EULOGY DESIGN
+                  <span className="mx-4 text-white/50">•</span>
+                  PHOTOGRAPHY & LIVE STREAMING
+                  <span className="mx-4 text-white/50">•</span>
+                  DEATH ANNOUNCEMENTS & OFFICIAL CONDOLENCES
+                  <span className="mx-4 text-white/50">•</span>
+                  LIFE MOMENTS GALLERY
+                  <span className="mx-4 text-white/50">•</span>
+                  ANNIVERSARY REMINDERS
+                  <span className="mx-4 text-white/50">•</span>
+                  FAMILY TREE
+                  <span className="mx-4 text-white/50">•</span>
+                  EASY SHARING VIA QR CODES
+                </p>
+              ))}
+            </div>
           </div>
         </div>
         <div className="container-luxe">

@@ -52,82 +52,105 @@ const features = [
 
 export const Services = () => {
   return (
-    <section id="services" className="organic-divider relative overflow-hidden border-b border-brand-black/10 bg-secondary py-24 lg:py-32">
+    <section
+      id="services"
+      className="organic-divider relative overflow-hidden border-b border-brand-black/10 bg-secondary py-14 lg:pt-32"
+    >
       <div className="container-luxe">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-end mb-14 lg:mb-20">
+        {/* Section Header */}
+        <div className="mb-14 grid items-end gap-12 lg:mb-20 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
-            <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-orange">
               What Makiwa Offers
             </span>
-            <h2 className="mt-4 font-serif text-4xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
-              Every tool a family needs <br className="hidden sm:block" />
+
+            <h2 className="mt-4 font-serif text-4xl font-medium leading-[1.05] tracking-tight lg:text-6xl">
+              Every tool a family needs
+              <br className="hidden sm:block" />
               to honor, gather and remember.
             </h2>
           </div>
+
           <div className="lg:col-span-5">
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <p className="text-lg leading-relaxed text-muted-foreground">
               From the first announcement to the lasting memorial, Makiwa brings
               everything together - eulogies, condolences, fundraising and
               shareable QR codes - in one calm, dignified place.
             </p>
+
             <Link
               to="/funeral-services"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-sm font-semibold text-brand-black transition-all hover:gap-3 hover:bg-brand-orange/90"
             >
-              Funeral program services <ArrowUpRight className="h-4 w-4" />
+              Funeral program services
+              <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        {/* Editorial feature row */}
-        <div className="grid lg:grid-cols-12 gap-6 mb-6">
-          <div className="no-card group relative aspect-[16/10] overflow-hidden rounded-lg border border-brand-black/10 lg:col-span-7 lg:h-[440px] lg:aspect-auto">
+        {/* Featured Editorial Row */}
+        <div className="mb-6 grid gap-6 lg:grid-cols-12">
+          <div className="no-card group relative aspect-[16/10] overflow-hidden rounded-lg border border-brand-black/10 lg:col-span-7 lg:aspect-auto lg:h-[440px]">
             <img
               src={FEATURE_IMG}
               alt="A memorial gathering"
-              className="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-[1500ms] group-hover:scale-105"
               loading="lazy"
             />
+
             <div className="absolute inset-0 bg-gradient-to-t from-brand-black/90 via-brand-black/30 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 text-brand-white">
+
+            <div className="absolute bottom-0 left-0 right-0 p-8 text-brand-white lg:p-10">
               <div className="hidden lg:block">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-brand-orange flex items-center gap-2">
-                <Flame className="h-3 w-3" /> Featured
-              </span>
+                <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-brand-orange">
+                  <Flame className="h-3 w-3" />
+                  Featured
+                </span>
 
-              <h3 className="mt-3 font-serif text-3xl lg:text-4xl font-medium max-w-md leading-tight">
-                A complete digital memorial, designed with grace.
-              </h3>
+                <h3 className="mt-3 max-w-md font-serif text-3xl font-medium leading-tight lg:text-4xl">
+                  A complete digital memorial, designed with grace.
+                </h3>
 
-              <p className="mt-3 max-w-md text-brand-white/75 text-sm leading-relaxed">
-                Build a private or public tribute, invite the community, and
-                keep their story alive across generations.
-              </p>
-            </div>
+                <p className="mt-3 max-w-md text-sm leading-relaxed text-brand-white/75">
+                  Build a private or public tribute, invite the community, and
+                  keep their story alive across generations.
+                </p>
+              </div>
+
               <a
                 href="#memorials"
-                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold tracking-wide hover:gap-3 transition-all"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold tracking-wide transition-all hover:gap-3"
               >
-                Explore memorials <ArrowUpRight className="h-4 w-4" />
+                Explore memorials
+                <ArrowUpRight className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          <div className="lg:col-span-5 grid sm:grid-cols-2 lg:grid-cols-1 gap-6">
-            {features.slice(0, 2).map((s) => {
-              const Icon = s.icon;
+          {/* Featured Services */}
+          <div className="grid gap-6 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+            {features.slice(0, 2).map((service) => {
+              const Icon = service.icon;
+
               return (
                 <div
-                  key={s.name}
+                  key={service.name}
                   className="no-card flex min-h-[210px] flex-col justify-between rounded-lg border border-brand-black/10 bg-cream p-7 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30 lg:flex-1 lg:p-8"
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-full border border-brand-orange/35 bg-brand-orange/10">
-                    <Icon className="h-5 w-5 text-brand-black" strokeWidth={2} />
+                    <Icon
+                      className="h-5 w-5 text-brand-black"
+                      strokeWidth={2}
+                    />
                   </div>
+
                   <div className="mt-6">
-                    <h3 className="font-serif text-2xl font-medium">{s.name}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                      {s.desc}
+                    <h3 className="font-serif text-2xl font-medium">
+                      {service.name}
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {service.desc}
                     </p>
                   </div>
                 </div>
@@ -136,24 +159,84 @@ export const Services = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
-          {features.slice(2).map((s) => {
-            const Icon = s.icon;
+        {/* Remaining Services */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          {features.slice(2).map((service) => {
+            const Icon = service.icon;
+
             return (
               <div
-                key={s.name}
+                key={service.name}
                 className="no-card group relative rounded-lg border border-brand-black/10 bg-cream p-7 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-orange/35 bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange/15">
-                  <Icon className="h-5 w-5 text-brand-black" strokeWidth={2} />
+                  <Icon
+                    className="h-5 w-5 text-brand-black"
+                    strokeWidth={2}
+                  />
                 </div>
-                <h3 className="mt-5 font-serif text-xl font-semibold">{s.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  {s.desc}
+
+                <h3 className="mt-5 font-serif text-xl font-semibold">
+                  {service.name}
+                </h3>
+
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {service.desc}
                 </p>
               </div>
             );
           })}
+        </div>
+
+        {/* Premium Marquee */}
+        <div className="mt-16 overflow-hidden rounded-md border-y border-white/10 bg-gradient-to-r from-black via-zinc-950 to-black py-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)] lg:mt-20">
+          <div className="relative">
+            {/* Subtle glossy highlight */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-transparent" />
+
+            <div className="flex w-max animate-marquee-x whitespace-nowrap hover:[animation-play-state:paused] motion-reduce:animate-none">
+              {[0, 1].map((i) => (
+                <p
+                  key={i}
+                  className="px-6 font-sans text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:px-8 sm:text-base"
+                >
+                  WELCOME TO MAKIWA
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  WHERE FAMILIES HONOR THEIR LOVED ONES AND REMEMBER WITH GRACE
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  HARDCOPY EULOGY DESIGN
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  PHOTOGRAPHY & LIVE STREAMING
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  DEATH ANNOUNCEMENTS & OFFICIAL CONDOLENCES
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  LIFE MOMENTS GALLERY
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  ANNIVERSARY REMINDERS
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  FAMILY TREE
+
+                  <span className="mx-4 text-white/50">•</span>
+
+                  EASY SHARING VIA QR CODES
+                </p>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
