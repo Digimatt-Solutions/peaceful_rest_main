@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { MemoryLightbox, LightboxItem } from "@/components/gallery/MemoryLightbo
 
 const LifeMoments = () => {
   const { user } = useAuth();
+  const { isMourner, loading: roleLoading } = useUserRole();
   const [memorials, setMemorials] = useState<any[]>([]);
   const [memorialId, setMemorialId] = useState("");
   const [items, setItems] = useState<any[]>([]);
@@ -40,11 +42,22 @@ const LifeMoments = () => {
 
   useEffect(() => {
     document.title = "Life Moments · Makiwa";
-    if (!user) return;
-    supabase.from("memorials").select("id,full_name").eq("created_by", user.id).then(({ data }) => {
-      setMemorials(data || []); if (data?.[0]) setMemorialId(data[0].id);
-    });
-  }, [user]);
+    if (!user || roleLoading) return;
+    (async () => {
+      // Mourners browse the moments of the memorials they follow; admins manage their own.
+      let ids: string[] = [];
+      if (isMourner) {
+        const { data: fl } = await supabase.from("memorial_followers").select("memorial_id").eq("user_id", user.id);
+        ids = (fl || []).map(f => f.memorial_id);
+        if (ids.length === 0) { setMemorials([]); return; }
+      }
+      let q = supabase.from("memorials").select("id,full_name");
+      q = isMourner ? q.in("id", ids) : q.eq("created_by", user.id);
+      const { data } = await q;
+      setMemorials(data || []);
+      if (data?.[0]) setMemorialId(data[0].id);
+    })();
+  }, [user, isMourner, roleLoading]);
 
   useEffect(() => {
     if (!memorialId) return;
@@ -96,8 +109,14 @@ const LifeMoments = () => {
 
   return (
     <>
-      <PageHeader title="Life Moments" subtitle="A timeline of cherished photos and memories." />
-      {memorials.length === 0 ? <EmptyState icon={Camera} title="Create a memorial first" /> : (
+      <PageHeader title="Life Moments" subtitle={isMourner ? "Photos and memories from the memorials you follow." : "A timeline of cherished photos and memories."} />
+      {memorials.length === 0 ? (
+        <EmptyState
+          icon={Camera}
+          title={isMourner ? "No memorials followed yet" : "Create a memorial first"}
+          description={isMourner ? "Follow a memorial to see the moments shared there." : undefined}
+        />
+      ) : (
         <>
           <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
             <div className="max-w-sm w-full sm:w-auto flex-1 min-w-[220px]">
@@ -106,6 +125,7 @@ const LifeMoments = () => {
                 <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            {!isMourner && (
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
@@ -143,6 +163,7 @@ const LifeMoments = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            )}
           </div>
 
 
@@ -162,9 +183,11 @@ const LifeMoments = () => {
                         {pics.length > 1 && (
                           <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-xs">+{pics.length - 1}</span>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); remove(m.id); }} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 h-8 w-8 rounded-full bg-red-500/90 text-white inline-flex items-center justify-center transition-opacity">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {!isMourner && (
+                          <button onClick={(e) => { e.stopPropagation(); remove(m.id); }} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 h-8 w-8 rounded-full bg-red-500/90 text-white inline-flex items-center justify-center transition-opacity">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     )}
                     <div className="p-4">
