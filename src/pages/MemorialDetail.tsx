@@ -164,6 +164,37 @@ const MemorialDetail = () => {
     setFundraisers(fr || []);
   };
 
+  // Every photo uploaded to this memorial's life moments, newest first.
+  const memoryPhotos = useMemo(() => (
+    memories.flatMap((m: any) => {
+      const photos: string[] = [
+        ...(Array.isArray(m.photos) ? m.photos.filter(Boolean) : []),
+        ...(m.photo_url && !(Array.isArray(m.photos) && m.photos.includes(m.photo_url)) ? [m.photo_url] : []),
+      ];
+      const dateStr = m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined;
+      return photos.map((src, i) => ({
+        id: `${m.id}-${i}`, src, title: m.title || undefined, description: m.description || undefined, date: dateStr,
+      }));
+    })
+  ), [memories]);
+
+  // Paystack sends the donor back here after paying - confirm it in the same session.
+  useEffect(() => {
+    const reference = takePaystackReference();
+    if (!reference) return;
+    (async () => {
+      const outcome = await verifyPaystack(reference);
+      if (outcome.paid) {
+        toast.success(outcome.message!);
+        await refreshFundsAfterPayment();
+        await showReceiptFor(outcome.donation_id);
+      } else {
+        toast.error(outcome.message!);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memorial?.full_name]);
+
   const startPaystackDonation = async (fundraiserId: string) => {
     const amt = Number(donateForm.amount);
     if (!amt || amt <= 0) return toast.error("Enter a valid amount");
