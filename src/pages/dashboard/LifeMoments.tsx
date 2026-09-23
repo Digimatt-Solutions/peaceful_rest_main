@@ -125,6 +125,7 @@ const LifeMoments = () => {
                 <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            {!isMourner && (
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
