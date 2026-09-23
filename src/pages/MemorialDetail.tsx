@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ import { FormattedText } from "@/components/FormattedText";
 import { MemorialQR } from "@/components/MemorialQR";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { FollowMemorialButton } from "@/components/memorial/FollowMemorialButton";
+import { takePaystackReference, verifyPaystack, watchMpesaPayment } from "@/lib/payments";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 
@@ -163,6 +164,37 @@ const MemorialDetail = () => {
     setFundraisers(fr || []);
   };
 
+  // Every photo uploaded to this memorial's life moments, newest first.
+  const memoryPhotos = useMemo(() => (
+    memories.flatMap((m: any) => {
+      const photos: string[] = [
+        ...(Array.isArray(m.photos) ? m.photos.filter(Boolean) : []),
+        ...(m.photo_url && !(Array.isArray(m.photos) && m.photos.includes(m.photo_url)) ? [m.photo_url] : []),
+      ];
+      const dateStr = m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined;
+      return photos.map((src, i) => ({
+        id: `${m.id}-${i}`, src, title: m.title || undefined, description: m.description || undefined, date: dateStr,
+      }));
+    })
+  ), [memories]);
+
+  // Paystack sends the donor back here after paying - confirm it in the same session.
+  useEffect(() => {
+    const reference = takePaystackReference();
+    if (!reference) return;
+    (async () => {
+      const outcome = await verifyPaystack(reference);
+      if (outcome.paid) {
+        toast.success(outcome.message!);
+        await refreshFundsAfterPayment();
+        await showReceiptFor(outcome.donation_id);
+      } else {
+        toast.error(outcome.message!);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memorial?.full_name]);
+
   const startPaystackDonation = async (fundraiserId: string) => {
     const amt = Number(donateForm.amount);
     if (!amt || amt <= 0) return toast.error("Enter a valid amount");
@@ -204,36 +236,30 @@ const MemorialDetail = () => {
     }
     setStkStatus("Enter your M-Pesa PIN on your phone to complete the payment.");
     toast.success("Check your phone for the M-Pesa prompt");
-    const checkoutId = data.checkout_request_id;
-    let attempts = 0;
-    const poll = async () => {
-      attempts++;
-      const { data: s } = await supabase.functions.invoke("mpesa-status", { body: { checkout_request_id: checkoutId } });
-      if (s?.paid) {
-        setStkStatus(""); setDonating(false); setDonateOpen(null);
+    watchMpesaPayment(data.checkout_request_id, {
+      onResult: async (o) => {
+        setStkStatus(""); setDonating(false);
+        if (!o.paid) return toast.error(o.message || "Payment was not completed");
+        setDonateOpen(null);
         toast.success("Payment received. Thank you!");
         await refreshFundsAfterPayment();
-        if (s.donation_id) {
-          const { data: don } = await supabase.from("donations").select("*").eq("id", s.donation_id).maybeSingle();
-          if (don && don.status === "paid") {
-            const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
-            setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
-            setReceiptOpen(true);
-          }
-        }
-        return;
-      }
-      if (s && !s.pending && s.result_code) {
+        await showReceiptFor(o.donation_id);
+      },
+      onTimeout: () => {
         setStkStatus(""); setDonating(false);
-        return toast.error(s.result_desc || "Payment was not completed");
-      }
-      if (attempts >= 30) {
-        setStkStatus(""); setDonating(false);
-        return toast.message("Still waiting on M-Pesa. It will update once confirmed.");
-      }
-      setTimeout(poll, 3000);
-    };
-    setTimeout(poll, 4000);
+        toast.message("Still waiting on M-Pesa. It will update once confirmed.");
+      },
+    });
+  };
+
+  /** Opens the printable receipt once a contribution is confirmed as paid. */
+  const showReceiptFor = async (donationId?: string | null) => {
+    if (!donationId) return;
+    const { data: don } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+    if (!don || don.status !== "paid") return;
+    const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
+    setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
+    setReceiptOpen(true);
   };
 
 
@@ -418,42 +444,11 @@ const MemorialDetail = () => {
           </section>
 
           {/* Memories gallery */}
-          {memories.length > 0 && (
+          {memoryPhotos.length > 0 && (
             <section>
               <SectionTitle icon={Camera} eyebrow="Life Moments" title="A gallery of cherished memories" />
-              <div className="mt-8 space-y-10">
-                {memories.map((m) => {
-                  const photos: string[] = [
-                    ...(Array.isArray(m.photos) ? m.photos.filter(Boolean) : []),
-                    ...(m.photo_url && !(Array.isArray(m.photos) && m.photos.includes(m.photo_url)) ? [m.photo_url] : []),
-                  ];
-                  if (photos.length === 0) return null;
-                  const dateStr = m.memory_date ? format(new Date(m.memory_date), "MMMM d, yyyy") : undefined;
-                  return (
-                    <div key={m.id}>
-                      <div className="mb-4 flex items-baseline justify-between gap-4 flex-wrap">
-                        <div>
-                          {m.title && <h4 className="font-serif text-2xl">{m.title}</h4>}
-                          {dateStr && <p className="text-xs uppercase tracking-widest text-brand-orange mt-1">{dateStr}</p>}
-                        </div>
-                        {photos.length > 1 && (
-                          <span className="text-xs text-muted-foreground">{photos.length} photos</span>
-                        )}
-                      </div>
-                      {m.description && <p className="text-foreground/80 mb-5 leading-relaxed max-w-3xl">{m.description}</p>}
-                      <MemoryMarquee
-                        items={photos.map((src, i) => ({
-                          id: `${m.id}-${i}`,
-                          src,
-                          title: m.title,
-                          description: m.description,
-                          date: dateStr,
-                        }))}
-                      />
-
-                    </div>
-                  );
-                })}
+              <div className="mt-8">
+                <MemoryMarquee items={memoryPhotos} />
               </div>
             </section>
           )}

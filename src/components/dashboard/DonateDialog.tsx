@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { saveDonationReceipt } from "@/lib/receipts";
+import { watchMpesaPayment } from "@/lib/payments";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -103,28 +104,18 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
     }
     setStatus("Enter your M-Pesa PIN on your phone to complete the payment.");
     toast.success("Check your phone for the M-Pesa prompt");
-    let attempts = 0;
-    const poll = async () => {
-      attempts++;
-      const { data: s } = await supabase.functions.invoke("mpesa-status", {
-        body: { checkout_request_id: data.checkout_request_id },
-      });
-      if (s?.paid) {
+    watchMpesaPayment(data.checkout_request_id, {
+      onResult: (o) => {
         setBusy(false); setStatus("");
+        if (!o.paid) return toast.error(o.message || "The payment was not completed");
         toast.success("Payment received. Your receipt has been saved to your account.");
-        return finish(s.donation_id, amt);
-      }
-      if (s && !s.pending && s.result_code) {
+        finish(o.donation_id || undefined, amt);
+      },
+      onTimeout: () => {
         setBusy(false); setStatus("");
-        return toast.error(s.result_desc || "The payment was not completed");
-      }
-      if (attempts >= 30) {
-        setBusy(false); setStatus("");
-        return toast.message("Still waiting on M-Pesa. Your contribution will appear once confirmed.");
-      }
-      setTimeout(poll, 3000);
-    };
-    setTimeout(poll, 4000);
+        toast.message("Still waiting on M-Pesa. Your contribution will appear once confirmed.");
+      },
+    });
   };
 
   const payPaystack = async () => {

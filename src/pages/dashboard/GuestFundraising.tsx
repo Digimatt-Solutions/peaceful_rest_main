@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { DonateDialog, DonateTarget } from "@/components/dashboard/DonateDialog";
 import { HeartHandshake, Receipt, Search, Printer, Download, Wallet, Users } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { takePaystackReference, verifyPaystack } from "@/lib/payments";
 
 const ksh = (n: number) => `KSh ${Number(n || 0).toLocaleString()}`;
 
@@ -57,6 +59,19 @@ const GuestFundraising = () => {
     document.title = "Fundraising · Makiwa";
     load();
   }, [load]);
+
+  // Confirm a Paystack contribution as soon as the donor returns from payment.
+  useEffect(() => {
+    const reference = takePaystackReference();
+    if (!reference) return;
+    (async () => {
+      const outcome = await verifyPaystack(reference);
+      if (outcome.paid) toast.success(outcome.message!);
+      else toast.error(outcome.message!);
+      load();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const totalGiven = useMemo(
     () => myDonations.filter(d => d.status === "paid").reduce((s, d) => s + Number(d.amount || 0), 0),

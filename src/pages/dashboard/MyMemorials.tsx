@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookHeart, Plus, ArrowUpRight, Eye, EyeOff, Search } from "lucide-react";
+import { BookHeart, Plus, ArrowUpRight, Eye, EyeOff, Search, BellRing } from "lucide-react";
 import { format } from "date-fns";
 import { NewMemorialDialog } from "@/components/dashboard/NewMemorialDialog";
 
@@ -16,6 +16,7 @@ const MyMemorials = () => {
   const isAdmin = role === "super_admin" || role === "memorial_admin";
   const navigate = useNavigate();
   const [memorials, setMemorials] = useState<any[]>([]);
+  const [following, setFollowing] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
@@ -24,8 +25,14 @@ const MyMemorials = () => {
     setLoading(true);
     // Admins care for their own memorials; everyone else can browse all published ones.
     const q = supabase.from("memorials").select("*").order("created_at", { ascending: false });
-    const { data } = isAdmin ? await q.eq("created_by", user.id) : await q;
-    setMemorials(data || []);
+    const [{ data }, { data: follows }] = await Promise.all([
+      isAdmin ? q.eq("created_by", user.id) : q,
+      supabase.from("memorial_followers").select("memorial_id").eq("user_id", user.id),
+    ]);
+    const followed = new Set((follows || []).map(f => f.memorial_id));
+    setFollowing(followed);
+    // Memorials the person follows come first so their saved list is easy to find.
+    setMemorials((data || []).sort((a, b) => Number(followed.has(b.id)) - Number(followed.has(a.id))));
     setLoading(false);
   }, [user, isAdmin]);
 
@@ -89,11 +96,15 @@ const MyMemorials = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><BookHeart className="h-10 w-10 text-brand-orange/40" /></div>
                 )}
-                {isAdmin && (
+                {isAdmin ? (
                   <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-white/95 backdrop-blur">
                     {m.is_public ? <><Eye className="h-3 w-3" /> Public</> : <><EyeOff className="h-3 w-3" /> Private</>}
                   </span>
-                )}
+                ) : following.has(m.id) ? (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-orange text-brand-white">
+                    <BellRing className="h-3 w-3" /> Following
+                  </span>
+                ) : null}
               </div>
               <div className="p-5">
                 <h3 className="font-serif text-xl">{m.full_name}</h3>
