@@ -163,6 +163,7 @@ const LifeMoments = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            )}
           </div>
 
 
