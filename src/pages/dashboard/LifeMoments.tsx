@@ -40,11 +40,22 @@ const LifeMoments = () => {
 
   useEffect(() => {
     document.title = "Life Moments · Makiwa";
-    if (!user) return;
-    supabase.from("memorials").select("id,full_name").eq("created_by", user.id).then(({ data }) => {
-      setMemorials(data || []); if (data?.[0]) setMemorialId(data[0].id);
-    });
-  }, [user]);
+    if (!user || roleLoading) return;
+    (async () => {
+      // Mourners browse the moments of the memorials they follow; admins manage their own.
+      let ids: string[] = [];
+      if (isMourner) {
+        const { data: fl } = await supabase.from("memorial_followers").select("memorial_id").eq("user_id", user.id);
+        ids = (fl || []).map(f => f.memorial_id);
+        if (ids.length === 0) { setMemorials([]); return; }
+      }
+      let q = supabase.from("memorials").select("id,full_name");
+      q = isMourner ? q.in("id", ids) : q.eq("created_by", user.id);
+      const { data } = await q;
+      setMemorials(data || []);
+      if (data?.[0]) setMemorialId(data[0].id);
+    })();
+  }, [user, isMourner, roleLoading]);
 
   useEffect(() => {
     if (!memorialId) return;
