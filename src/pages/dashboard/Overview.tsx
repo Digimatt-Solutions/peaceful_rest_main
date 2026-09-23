@@ -67,9 +67,15 @@ const Overview = () => {
 
   const loadData = async () => {
     if (!user) return;
-    // memorials scoped by role
+    // memorials scoped by role — mourners see the memorials they follow
+    let followedIds: string[] = [];
+    if (isMourner) {
+      const { data: fl } = await supabase.from("memorial_followers").select("memorial_id").eq("user_id", user.id);
+      followedIds = (fl || []).map(f => f.memorial_id);
+    }
     let mq = supabase.from("memorials").select("id,full_name,visitor_count,created_at,profile_photo_url");
-    if (!isSuperAdmin) mq = mq.eq("created_by", user.id);
+    if (isMourner) mq = mq.in("id", followedIds.length ? followedIds : ["00000000-0000-0000-0000-000000000000"]);
+    else if (!isSuperAdmin) mq = mq.eq("created_by", user.id);
     const { data: mems } = await mq;
     const memIds = (mems || []).map(m => m.id);
     const memorialVisits = (mems || []).reduce((s, m) => s + (m.visitor_count || 0), 0);
