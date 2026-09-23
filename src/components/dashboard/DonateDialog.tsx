@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
 import { saveDonationReceipt } from "@/lib/receipts";
+import { watchMpesaPayment } from "@/lib/payments";
 import { DonationReceipt } from "@/components/dashboard/DonationReceipt";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
