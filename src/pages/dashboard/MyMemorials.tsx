@@ -96,11 +96,15 @@ const MyMemorials = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><BookHeart className="h-10 w-10 text-brand-orange/40" /></div>
                 )}
-                {isAdmin && (
+                {isAdmin ? (
                   <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-white/95 backdrop-blur">
                     {m.is_public ? <><Eye className="h-3 w-3" /> Public</> : <><EyeOff className="h-3 w-3" /> Private</>}
                   </span>
-                )}
+                ) : following.has(m.id) ? (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-orange text-brand-white">
+                    <BellRing className="h-3 w-3" /> Following
+                  </span>
+                ) : null}
               </div>
               <div className="p-5">
                 <h3 className="font-serif text-xl">{m.full_name}</h3>
