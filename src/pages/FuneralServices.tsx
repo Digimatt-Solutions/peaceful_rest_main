@@ -20,19 +20,31 @@ import candleImg from "@/assets/ph4.png";
 const ksh = (n: number) => `KSh ${Number(n || 0).toLocaleString()}`;
 
 const DESIGNS = [
-  { id: "classic", name: "Classic", desc: "Clean typography, black and white photos.", base: 130, perPage: 10 },
-  { id: "elegant", name: "Elegant Colour", desc: "Full colour pages with soft floral borders.", base: 190, perPage: 14 },
-  { id: "premium", name: "Premium Gloss", desc: "Heavy gloss cover, colour spreads, gold accents.", base: 260, perPage: 18 },
+  { id: "glossy", name: "Glossy", desc: "Shiny, vibrant finish." },
+  { id: "matte", name: "Matte", desc: "Smooth, non-reflective finish." },
 ];
 
-const PAGE_CHOICES = [8, 12, 16, 20, 24, 28];
+const PAGE_CHOICES = [8, 12, 16, 20];
+
+// From the price list: design = KSh 1,000 per page (8 pages = 8,000 … 20 pages = 20,000)
+const DESIGN_PER_PAGE = 1000;
+// Printing per copy: [100–400, 500–1000, 2000–5000]
+const PRINT_RATES: Record<number, [number, number, number]> = {
+  8: [160, 101.4, 51.8],
+  12: [240, 153.2, 138.2],
+  16: [320, 193.4, 175],
+  20: [400, 234.6, 211.8],
+};
+const printRate = (pages: number, qty: number) => {
+  const r = PRINT_RATES[pages];
+  if (qty >= 100 && qty <= 400) return r[0];
+  if (qty >= 500 && qty <= 1000) return r[1];
+  if (qty >= 2000 && qty <= 5000) return r[2];
+  return null;
+};
 
 const EXTRAS = [
-  { id: "lamination", label: "Laminated cover", perCopy: 15, flat: 0 },
-  { id: "ribbon", label: "Ribbon binding", perCopy: 25, flat: 0 },
-  { id: "retouch", label: "Photo restoration & retouch", perCopy: 0, flat: 1500 },
-  { id: "express", label: "Express 24-hour delivery", perCopy: 0, flat: 3000 },
-  { id: "delivery", label: "Delivery within Nairobi", perCopy: 0, flat: 1000 },
+  { id: "delivery", label: "Delivery" },
 ];
 
 const SERVICES = [
@@ -91,13 +103,12 @@ const FuneralServices = () => {
   const chosenDesign = DESIGNS.find(d => d.id === design)!;
 
   const pricing = useMemo(() => {
-    const extraPages = Math.max(0, pages - 8);
-    const perCopyExtras = EXTRAS.filter(e => extras.includes(e.id)).reduce((s, e) => s + e.perCopy, 0);
-    const flat = EXTRAS.filter(e => extras.includes(e.id)).reduce((s, e) => s + e.flat, 0);
-    const unit = chosenDesign.base + extraPages * chosenDesign.perPage + perCopyExtras;
     const qty = Math.max(0, Number(quantity) || 0);
-    return { unit, flat, total: unit * qty + flat, qty };
-  }, [chosenDesign, pages, quantity, extras]);
+    const rate = printRate(pages, qty);
+    const design = DESIGN_PER_PAGE * pages;
+    const printing = rate ? Math.round(rate * qty * 100) / 100 : 0;
+    return { qty, rate, design, printing, unit: rate || 0, total: design + printing };
+  }, [pages, quantity]);
 
   const toggleExtra = (id: string) =>
     setExtras(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
@@ -106,7 +117,7 @@ const FuneralServices = () => {
     if (!form.customer_name.trim()) return toast.error("Please enter your name");
     if (!/^[0-9+\s-]{9,15}$/.test(form.phone.trim())) return toast.error("Please enter a valid phone number");
     if (form.email && !/^\S+@\S+\.\S+$/.test(form.email.trim())) return toast.error("Please enter a valid email");
-    if (pricing.qty < 10) return toast.error("Minimum order is 10 copies");
+    if (!pricing.rate) return toast.error("Please choose 100–400, 500–1,000 or 2,000–5,000 copies");
     setSaving(true);
     const { error } = await supabase.from("service_bookings").insert({
       user_id: user?.id ?? null,
@@ -114,7 +125,11 @@ const FuneralServices = () => {
       design: chosenDesign.name,
       pages,
       quantity: pricing.qty,
-      options: { extras: EXTRAS.filter(e => extras.includes(e.id)).map(e => e.label) },
+      options: {
+        extras: EXTRAS.filter(e => extras.includes(e.id)).map(e => `${e.label} (depending on location)`),
+        design_charge: pricing.design,
+        printing_cost: pricing.printing,
+      },
       unit_price: pricing.unit,
       total_amount: pricing.total,
       customer_name: form.customer_name.trim().slice(0, 120),
@@ -250,21 +265,27 @@ const FuneralServices = () => {
           <div className="mt-12 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="space-y-8 rounded-lg border border-brand-black/10 bg-cream p-6 shadow-soft lg:p-8">
               <div>
-                <h3 className="font-serif text-xl">1. Choose a design</h3>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <h3 className="font-serif text-xl">1. Choose a finish design</h3>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {DESIGNS.map(d => (
                     <button key={d.id} type="button" onClick={() => setDesign(d.id)}
                       className={`rounded-xl border-2 p-4 text-left transition ${design === d.id ? "border-brand-orange bg-brand-orange/5" : "border-brand-black/10 hover:border-brand-orange/40"}`}>
                       <p className="font-semibold">{d.name}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{d.desc}</p>
-                      <p className="mt-2 text-xs font-semibold text-brand-orange">from {ksh(d.base)} / copy</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-serif text-xl">2. Number of pages</h3>
+                <h3 className="font-serif text-xl">2. Design charge per page</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {ksh(DESIGN_PER_PAGE)} per page — {pages} pages = <span className="font-semibold text-foreground">{ksh(pricing.design)}</span>
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-xl">3. Number of pages</h3>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {PAGE_CHOICES.map(p => (
                     <button key={p} type="button" onClick={() => setPages(p)}
@@ -276,23 +297,25 @@ const FuneralServices = () => {
               </div>
 
               <div>
-                <h3 className="font-serif text-xl">3. Copies needed</h3>
+                <h3 className="font-serif text-xl">4. Copies needed</h3>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Input type="number" min={10} step={10} value={quantity}
+                  <Input type="number" min={100} max={5000} step={50} value={quantity}
                     onChange={(e) => setQuantity(Number(e.target.value))}
                     className="w-36 rounded-xl" />
-                  <div className="flex gap-2">
-                    {[50, 100, 200, 300].map(q => (
+                  <div className="flex flex-wrap gap-2">
+                    {[100, 200, 300, 400, 500, 1000, 2000].map(q => (
                       <button key={q} type="button" onClick={() => setQuantity(q)}
                         className="rounded-full border border-brand-black/15 px-3 py-1.5 text-xs hover:border-brand-orange/50">{q}</button>
                     ))}
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Minimum order is 10 copies.</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Printing per copy for {pages} pages: 100–400 copies {ksh(PRINT_RATES[pages][0])} · 500–1,000 copies {ksh(PRINT_RATES[pages][1])} · 2,000–5,000 copies {ksh(PRINT_RATES[pages][2])}
+                </p>
               </div>
 
               <div>
-                <h3 className="font-serif text-xl">4. Optional extras</h3>
+                <h3 className="font-serif text-xl">5. Optional extras</h3>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {EXTRAS.map(e => (
                     <label key={e.id}
@@ -300,9 +323,7 @@ const FuneralServices = () => {
                       <input type="checkbox" className="mt-1" checked={extras.includes(e.id)} onChange={() => toggleExtra(e.id)} />
                       <span>
                         <span className="block font-medium">{e.label}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {e.perCopy ? `+${ksh(e.perCopy)} per copy` : `+${ksh(e.flat)} once`}
-                        </span>
+                        <span className="text-xs text-muted-foreground">Depending on location</span>
                       </span>
                     </label>
                   ))}
@@ -315,17 +336,23 @@ const FuneralServices = () => {
               <div className="rounded-lg border border-brand-orange/30 bg-cream p-6 shadow-soft">
                 <h3 className="font-serif text-xl">Your estimate</h3>
                 <dl className="mt-4 space-y-2 text-sm">
-                  <div className="flex justify-between"><dt className="text-muted-foreground">Design</dt><dd className="font-medium">{chosenDesign.name}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Finish</dt><dd className="font-medium">{chosenDesign.name}</dd></div>
                   <div className="flex justify-between"><dt className="text-muted-foreground">Pages</dt><dd className="font-medium">{pages}</dd></div>
                   <div className="flex justify-between"><dt className="text-muted-foreground">Copies</dt><dd className="font-medium">{pricing.qty}</dd></div>
-                  <div className="flex justify-between"><dt className="text-muted-foreground">Price per copy</dt><dd className="font-medium">{ksh(pricing.unit)}</dd></div>
-                  {pricing.flat > 0 && (
-                    <div className="flex justify-between"><dt className="text-muted-foreground">One-off extras</dt><dd className="font-medium">{ksh(pricing.flat)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Design charge</dt><dd className="font-medium">{ksh(pricing.design)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Printing per copy</dt><dd className="font-medium">{pricing.rate ? ksh(pricing.rate) : "—"}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Printing cost</dt><dd className="font-medium">{pricing.rate ? ksh(pricing.printing) : "—"}</dd></div>
+                  {extras.includes("delivery") && (
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Delivery</dt><dd className="font-medium">Depending on location</dd></div>
                   )}
                 </dl>
+                {!pricing.rate && (
+                  <p className="mt-3 text-xs text-destructive">Printing prices are available for 100–400, 500–1,000 and 2,000–5,000 copies.</p>
+                )}
                 <div className="mt-5 border-t border-brand-black/10 pt-4">
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Total</p>
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Final total</p>
                   <p className="font-serif text-3xl">{ksh(pricing.total)}</p>
+                  {extras.includes("delivery") && <p className="text-xs text-muted-foreground">plus delivery, depending on location</p>}
                 </div>
                 <Button onClick={() => setOpen(true)}
                   className="mt-5 h-12 w-full rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90">
