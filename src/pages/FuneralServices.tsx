@@ -70,10 +70,10 @@ const EXTRA_SERVICES = [
 
 const FuneralServices = () => {
   const { user } = useAuth();
-  const [design, setDesign] = useState(DESIGNS[1].id);
+  const [design, setDesign] = useState(DESIGNS[0].id);
   const [pages, setPages] = useState(16);
   const [quantity, setQuantity] = useState(100);
-  const [extras, setExtras] = useState<string[]>(["lamination"]);
+  const [extras, setExtras] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
