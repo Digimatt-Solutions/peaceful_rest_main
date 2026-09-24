@@ -20,7 +20,7 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import logoMark from "@/assets/makiwa-mark.png";
-import logoText from "@/assets/makiwa-logo-dark.png";
+import logoText from "@/assets/makiwa-logo-black.png";
 import logoTextLight from "@/assets/makiwa-logo-light.png";
 
 type NavItem = { to: string; label: string; icon: any; end?: boolean; roles?: string[] };
