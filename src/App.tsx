@@ -50,6 +50,15 @@ const FontModeManager = () => {
   return null;
 };
 
+// Reset scroll position whenever the route changes so each page opens at the top.
+const ScrollReset = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -59,6 +68,7 @@ const App = () => (
         <ThemeProvider>
           <AuthProvider>
             <FontModeManager />
+            <ScrollReset />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />

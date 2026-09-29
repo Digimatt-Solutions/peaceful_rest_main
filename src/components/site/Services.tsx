@@ -131,12 +131,12 @@ export const Services = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
             {features.slice(0, 2).map((service) => {
               const Icon = service.icon;
+              const isEulogy = service.name === "Eulogy & Obituary Design";
+              const cardClass =
+                "no-card flex min-h-[210px] flex-col justify-between rounded-lg border border-brand-black/10 bg-cream p-7 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30 lg:flex-1 lg:p-8";
 
-              return (
-                <div
-                  key={service.name}
-                  className="no-card flex min-h-[210px] flex-col justify-between rounded-lg border border-brand-black/10 bg-cream p-7 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:border-brand-orange/30 lg:flex-1 lg:p-8"
-                >
+              const inner = (
+                <>
                   <div className="flex h-12 w-12 items-center justify-center rounded-full border border-brand-orange/35 bg-brand-orange/10">
                     <Icon
                       className="h-5 w-5 text-brand-black"
@@ -153,6 +153,21 @@ export const Services = () => {
                       {service.desc}
                     </p>
                   </div>
+                </>
+              );
+
+              return isEulogy ? (
+                <Link
+                  key={service.name}
+                  to="/funeral-services"
+                  className={cardClass}
+                  aria-label="Eulogy & Obituary Design - view funeral program services"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div key={service.name} className={cardClass}>
+                  {inner}
                 </div>
               );
             })}
