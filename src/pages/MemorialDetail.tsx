@@ -21,6 +21,7 @@ import { FormattedText } from "@/components/FormattedText";
 import { MemorialQR } from "@/components/MemorialQR";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { FollowMemorialButton } from "@/components/memorial/FollowMemorialButton";
+import { ShareMemorialMenu } from "@/components/memorial/ShareMemorialMenu";
 import { takePaystackReference, verifyPaystack, watchMpesaPayment } from "@/lib/payments";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -352,21 +353,7 @@ const MemorialDetail = () => {
               )}
 
               <div className="mt-8 lg:mt-10 flex flex-wrap gap-2 sm:gap-3">
-                <Button
-                  onClick={async () => {
-                    const url = window.location.href;
-                    if (navigator.share) {
-                      try { await navigator.share({ title: memorial.full_name, url }); } catch {}
-                    } else {
-                      await navigator.clipboard.writeText(url);
-                      toast.success("Link copied to clipboard");
-                    }
-                  }}
-                  className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 sm:px-4 shadow-lg font-bold"
-                >
-                  <Share2 className="h-4 w-4" />
-                  Share memorial
-                </Button>
+                <ShareMemorialMenu name={memorial.full_name} description={memorial.short_tribute} />
 
                 <a
                   href="#condolence"
