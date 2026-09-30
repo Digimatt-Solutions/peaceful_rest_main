@@ -43,6 +43,13 @@
       "when": 1790075126287,
       "tag": "0005_anniversary_delivery_and_financial_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790777816077,
+      "tag": "0006_memorial_follower_count",
+      "breakpoints": true
     }
   ]
 }

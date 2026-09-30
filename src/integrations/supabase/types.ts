@@ -1376,6 +1376,10 @@ export type Database = {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
       }
+      memorial_follower_count: {
+        Args: { _memorial_id: string }
+        Returns: number
+      }
       purge_expired_deleted_accounts: { Args: never; Returns: number }
       super_admin_exists: { Args: never; Returns: boolean }
     }

@@ -136,9 +136,10 @@ const Auth = () => {
   };
 
 
+  const nextPath = () => { const r = searchParams.get("redirect"); return r && r.startsWith("/") && !r.startsWith("//") ? r : "/dashboard"; };
   useEffect(() => {
     document.title = "Sign In · Makiwa";
-    if (user) navigate("/dashboard", { replace: true });
+    if (user) navigate(nextPath(), { replace: true });
   }, [user, navigate]);
 
   // If the platform has no super administrator yet, send visitors to the one-time setup form.
@@ -208,7 +209,7 @@ const Auth = () => {
 
     // Auto-confirm is enabled: the account is live, go straight in.
     toast.success("Welcome to Makiwa");
-    navigate("/dashboard");
+    navigate(nextPath());
   };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -265,7 +266,7 @@ const Auth = () => {
     } catch {}
     setLoading(false);
     toast.success("Welcome back");
-    navigate("/dashboard");
+    navigate(nextPath());
   };
 
 
@@ -366,7 +367,7 @@ const Auth = () => {
                             });
                           } catch {}
                           toast.success("Signed in with fingerprint");
-                          navigate("/dashboard");
+                          navigate(nextPath());
                         } catch (err: any) {
                           toast.error(err?.message ? friendlyError(err.message) : "We could not read your fingerprint. Please try again.");
                         } finally {
