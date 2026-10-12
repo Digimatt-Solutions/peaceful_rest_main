@@ -1,7 +1,6 @@
 import defaultMemorialPhoto from "@/assets/candle.jpg";
-
-export const memorialInvitation = (fullName: string) =>
-  `Join us in honoring the life and times of ${fullName}.`;
+import { memorialInvitation } from "./memorialInvitation";
+export { memorialInvitation } from "./memorialInvitation";
 
 export const memorialShareData = (id: string, fullName: string, origin = window.location.origin) => ({
   title: fullName,

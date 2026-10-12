@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { memorialPreviewImage, memorialShareData } from "@/lib/memorialSharing";
 
-// Client-side metadata only. Social crawlers require server-rendered hosting.
+// Netlify injects matching tags into the original HTML for social crawlers.
 export const MemorialMetadata = ({ id, name, photo }: { id: string; name: string; photo?: string | null }) => {
   const { title, text, url } = memorialShareData(id, name);
   const image = memorialPreviewImage(photo);
@@ -10,6 +10,7 @@ export const MemorialMetadata = ({ id, name, photo }: { id: string; name: string
       <title>{title}</title>
       <meta name="description" content={text} />
       <link rel="canonical" href={url} />
+      <link rel="icon" href={image} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={text} />
       <meta property="og:site_name" content="Makiwa" />

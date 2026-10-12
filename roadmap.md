@@ -1,7 +1,8 @@
 # Makiwa roadmap
 
 - [x] Unify memorial invitations and page metadata across all sharing entry points
-- [ ] Serve personalized memorial metadata to social crawlers (blocked: classic hosting requires an approved TanStack Start upgrade; client-side metadata cannot satisfy WhatsApp/Facebook crawlers)
+- [x] Add Netlify delivery of personalized memorial photos, titles, invitations, and page icons at unchanged memorial URLs
+- [ ] Activate and verify personalized previews on makiwa.netlify.app (blocked: deploy updated source to Netlify with its existing public app connection variables available to Edge Functions)
 
 - [x] Groups module (create, join, leave, admin moderation, messages, attachments, RLS-enforced membership)
 - [x] 30-day account deletion with restore window and anonymisation after expiry
