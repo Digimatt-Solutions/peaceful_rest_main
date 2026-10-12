@@ -105,19 +105,33 @@ const Auth = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpBusy, setOtpBusy] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
   const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = setInterval(() => setOtpCooldown(c => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [otpCooldown > 0]);
 
   const phoneVerified = !!verifiedPhone && verifiedPhone === phone.trim();
 
   const sendCode = async () => {
     if (phone.trim().length < 9) { toast.error("Enter your phone number first"); return; }
+    if (otpCooldown > 0) { toast.info("Please wait while we process your previous request before requesting another code."); return; }
     setOtpBusy(true);
+    toast.info("Your verification code is being sent. This may take a moment.");
     const { data, error } = await supabase.functions.invoke("phone-otp", {
       body: { action: "send", phone: phone.trim() },
     });
     setOtpBusy(false);
-    if (error || data?.error) { toast.error(data?.error || "Could not send the code. Please try again."); return; }
+    if (error || data?.error) {
+      if (data?.retry_after) setOtpCooldown(Number(data.retry_after));
+      toast.error(data?.error || "We could not send the verification SMS right now. Please try again shortly.");
+      return;
+    }
     setOtpSent(true);
+    setOtpCooldown(Number(data?.cooldown) || 60);
     toast.success("A 6-digit code has been sent to your phone");
   };
 
