@@ -22,6 +22,7 @@ import { MemorialQR } from "@/components/MemorialQR";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { FollowMemorialButton } from "@/components/memorial/FollowMemorialButton";
 import { ShareMemorialMenu } from "@/components/memorial/ShareMemorialMenu";
+import { MemorialMetadata } from "@/components/memorial/MemorialMetadata";
 import { takePaystackReference, verifyPaystack, watchMpesaPayment } from "@/lib/payments";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -92,7 +93,6 @@ const MemorialDetail = () => {
       setFundraisers(fr.data || []);
       setLoading(false);
       if (m.data) {
-        document.title = `${m.data.full_name} · Makiwa`;
         supabase.rpc("increment_memorial_visitor", { _id: id }).then(() => {});
       }
     });
@@ -264,16 +264,6 @@ const MemorialDetail = () => {
   };
 
 
-  const share = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      await navigator.share({ title: memorial.full_name, url }).catch(() => {});
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard");
-    }
-  };
-
   if (loading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
@@ -353,7 +343,8 @@ const MemorialDetail = () => {
               )}
 
               <div className="mt-8 lg:mt-10 flex flex-wrap gap-2 sm:gap-3">
-                <ShareMemorialMenu name={memorial.full_name} description={memorial.short_tribute} />
+                <MemorialMetadata id={memorial.id} name={memorial.full_name} photo={memorial.profile_photo_url} />
+                <ShareMemorialMenu memorialId={memorial.id} name={memorial.full_name} />
 
                 <a
                   href="#condolence"

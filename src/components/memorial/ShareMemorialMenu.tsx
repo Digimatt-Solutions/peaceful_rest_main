@@ -4,11 +4,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Share2, Link2, MessageCircle, Facebook, Instagram, Linkedin, Twitter, Smartphone } from "lucide-react";
 import { toast } from "sonner";
+import { memorialShareData } from "@/lib/memorialSharing";
 
 /** Share a memorial via WhatsApp, Facebook, Instagram, LinkedIn, X or a copied link. */
-export const ShareMemorialMenu = ({ name, description }: { name: string; description?: string | null }) => {
-  const url = `${window.location.origin}${window.location.pathname}`;
-  const text = `In loving memory of ${name}${description ? ` - ${description}` : ""}`;
+export const ShareMemorialMenu = ({ memorialId, name }: { memorialId: string; name: string }) => {
+  const { url, text } = memorialShareData(memorialId, name);
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(text);
 

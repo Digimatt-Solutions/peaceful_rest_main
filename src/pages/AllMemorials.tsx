@@ -28,6 +28,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { trackVisit } from "@/lib/trackVisit";
+import { shareMemorialLink } from "@/lib/memorialSharing";
 
 type Memorial = {
   id: string;
@@ -162,20 +163,10 @@ const AllMemorials = () => {
   const shareMemorial = async (e: React.MouseEvent, m: Memorial) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${window.location.origin}/memorial/${m.id}`;
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `In memory of ${m.full_name}`,
-          text: m.short_tribute || "Visit this memorial on Makiwa",
-          url,
-        });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast.success("Memorial link copied");
-      }
-    } catch {
-      /* ignore */
+      if (await shareMemorialLink(m.id, m.full_name) === "copied") toast.success("Memorial link copied");
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("Unable to share this memorial. Please try again.");
     }
   };
 
