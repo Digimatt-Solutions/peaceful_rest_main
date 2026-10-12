@@ -487,6 +487,11 @@ const Auth = () => {
                 {otpSent && !phoneVerified && (
                   <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-3 space-y-2">
                     <Label htmlFor="su-otp" className="text-xs">Enter the 6-digit code sent to {phone}</Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      {otpCooldown > 0
+                        ? `Your verification code is being sent. This may take a moment. You can request a new code in ${otpCooldown}s.`
+                        : "If you haven't received your code, you can request a new one now."}
+                    </p>
                     <div className="flex gap-2">
                       <Input
                         id="su-otp"
