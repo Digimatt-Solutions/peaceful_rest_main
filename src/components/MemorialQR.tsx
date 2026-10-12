@@ -3,6 +3,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, QrCode } from "lucide-react";
 import { toast } from "sonner";
+import { memorialShareData, shareMemorialLink } from "@/lib/memorialSharing";
 
 type Props = {
   memorialId: string;
@@ -13,7 +14,7 @@ type Props = {
 
 export const MemorialQR = ({ memorialId, memorialName, size = 180, compact = false }: Props) => {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const url = `${window.location.origin}/memorial/${memorialId}`;
+  const { url } = memorialShareData(memorialId, memorialName);
 
   const download = () => {
     const canvas = wrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
@@ -22,7 +23,8 @@ export const MemorialQR = ({ memorialId, memorialName, size = 180, compact = fal
     const pad = 32;
     padded.width = canvas.width + pad * 2;
     padded.height = canvas.height + pad * 2 + 48;
-    const ctx = padded.getContext("2d")!;
+    const ctx = padded.getContext("2d");
+    if (!ctx) return;
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, padded.width, padded.height);
     ctx.drawImage(canvas, pad, pad);
@@ -38,11 +40,10 @@ export const MemorialQR = ({ memorialId, memorialName, size = 180, compact = fal
   };
 
   const share = async () => {
-    if (navigator.share) {
-      await navigator.share({ title: memorialName, url }).catch(() => {});
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success("Memorial link copied");
+    try {
+      if (await shareMemorialLink(memorialId, memorialName) === "copied") toast.success("Memorial link copied");
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("Unable to share this memorial. Please try again.");
     }
   };
 
