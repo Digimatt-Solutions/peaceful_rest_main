@@ -239,8 +239,8 @@ export const MemorialValidators = ({
 
               {!v.otp_verified && (
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" className="rounded-full" disabled={busy === v.id} onClick={() => sendCode(v)}>
-                    {busy === v.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send code"}
+                  <Button type="button" variant="outline" className="rounded-full" disabled={busy === v.id || (cooldowns[v.id] || 0) > 0} onClick={() => sendCode(v)}>
+                    {busy === v.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (cooldowns[v.id] || 0) > 0 ? `Resend code in ${cooldowns[v.id]}s` : "Send code"}
                   </Button>
                   <Input
                     inputMode="numeric" maxLength={6} placeholder="6-digit code"
