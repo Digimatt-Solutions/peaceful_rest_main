@@ -105,19 +105,33 @@ const Auth = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpBusy, setOtpBusy] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
   const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = setInterval(() => setOtpCooldown(c => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [otpCooldown > 0]);
 
   const phoneVerified = !!verifiedPhone && verifiedPhone === phone.trim();
 
   const sendCode = async () => {
     if (phone.trim().length < 9) { toast.error("Enter your phone number first"); return; }
+    if (otpCooldown > 0) { toast.info("Please wait while we process your previous request before requesting another code."); return; }
     setOtpBusy(true);
+    toast.info("Your verification code is being sent. This may take a moment.");
     const { data, error } = await supabase.functions.invoke("phone-otp", {
       body: { action: "send", phone: phone.trim() },
     });
     setOtpBusy(false);
-    if (error || data?.error) { toast.error(data?.error || "Could not send the code. Please try again."); return; }
+    if (error || data?.error) {
+      if (data?.retry_after) setOtpCooldown(Number(data.retry_after));
+      toast.error(data?.error || "We could not send the verification SMS right now. Please try again shortly.");
+      return;
+    }
     setOtpSent(true);
+    setOtpCooldown(Number(data?.cooldown) || 60);
     toast.success("A 6-digit code has been sent to your phone");
   };
 
@@ -461,9 +475,9 @@ const Auth = () => {
                           <CheckCircle2 className="h-4 w-4" /> Verified
                         </span>
                       ) : (
-                        <Button type="button" variant="outline" onClick={sendCode} disabled={otpBusy}
+                        <Button type="button" variant="outline" onClick={sendCode} disabled={otpBusy || otpCooldown > 0}
                           className="h-10 shrink-0 rounded-xl border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-3 text-xs">
-                          {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend" : "Send Code"}
+                          {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpCooldown > 0 ? `Resend code in ${otpCooldown}s` : otpSent ? "Resend" : "Send Code"}
                         </Button>
                       )}
                     </div>
@@ -473,6 +487,11 @@ const Auth = () => {
                 {otpSent && !phoneVerified && (
                   <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/5 p-3 space-y-2">
                     <Label htmlFor="su-otp" className="text-xs">Enter the 6-digit code sent to {phone}</Label>
+                    <p className="text-[11px] text-muted-foreground">
+                      {otpCooldown > 0
+                        ? `Your verification code is being sent. This may take a moment. You can request a new code in ${otpCooldown}s.`
+                        : "If you haven't received your code, you can request a new one now."}
+                    </p>
                     <div className="flex gap-2">
                       <Input
                         id="su-otp"

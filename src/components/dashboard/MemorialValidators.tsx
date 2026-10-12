@@ -50,6 +50,23 @@ export const MemorialValidators = ({
   const [busy, setBusy] = useState<string | null>(null);
   const [codes, setCodes] = useState<Record<string, string>>({});
   const [checks, setChecks] = useState<Record<string, { d: boolean; g: boolean }>>({});
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setCooldowns(c => {
+        const next: Record<string, number> = {};
+        let changed = false;
+        for (const [k, v] of Object.entries(c)) {
+          if (v > 1) { next[k] = v - 1; changed = true; }
+          else if (v === 1) changed = true;
+          else next[k] = v;
+        }
+        return changed ? next : c;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const load = async () => {
     if (draftMode || !memorialId) return;
@@ -95,10 +112,16 @@ export const MemorialValidators = ({
   };
 
   const sendCode = async (v: Validator) => {
+    if ((cooldowns[v.id] || 0) > 0) return toast.info("Please wait while we process your previous request before requesting another code.");
     setBusy(v.id);
+    toast.info("Your verification code is being sent. This may take a moment.");
     const { data, error } = await supabase.functions.invoke("phone-otp", { body: { action: "send", phone: v.phone } });
     setBusy(null);
-    if (error || data?.error) return toast.error(data?.error || "We couldn't send the code. Please try again.");
+    if (error || data?.error) {
+      if (data?.retry_after) setCooldowns(c => ({ ...c, [v.id]: Number(data.retry_after) }));
+      return toast.error(data?.error || "We could not send the verification SMS right now. Please try again shortly.");
+    }
+    setCooldowns(c => ({ ...c, [v.id]: Number(data?.cooldown) || 60 }));
     toast.success(`Code sent to ${v.phone}`);
   };
 
@@ -216,8 +239,8 @@ export const MemorialValidators = ({
 
               {!v.otp_verified && (
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" className="rounded-full" disabled={busy === v.id} onClick={() => sendCode(v)}>
-                    {busy === v.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send code"}
+                  <Button type="button" variant="outline" className="rounded-full" disabled={busy === v.id || (cooldowns[v.id] || 0) > 0} onClick={() => sendCode(v)}>
+                    {busy === v.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (cooldowns[v.id] || 0) > 0 ? `Resend code in ${cooldowns[v.id]}s` : "Send code"}
                   </Button>
                   <Input
                     inputMode="numeric" maxLength={6} placeholder="6-digit code"
