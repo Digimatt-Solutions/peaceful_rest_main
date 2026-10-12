@@ -476,7 +476,9 @@ const Auth = () => {
                         </span>
                       ) : (
                         <Button type="button" variant="outline" onClick={sendCode} disabled={otpBusy || otpCooldown > 0}
-                          className="h-10 shrink-0 rounded-xl border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-3 text-xs">
+                          className={`h-10 shrink-0 rounded-xl px-3 text-xs font-semibold disabled:opacity-100 ${otpCooldown > 0
+                            ? "border-brand-orange bg-brand-orange text-brand-white shadow-glow"
+                            : "border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10"}`}>
                           {otpBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : otpCooldown > 0 ? `Resend code in ${otpCooldown}s` : otpSent ? "Resend" : "Send Code"}
                         </Button>
                       )}
