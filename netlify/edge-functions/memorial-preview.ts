@@ -16,6 +16,8 @@ export default async function memorialPreview(request: Request, context: EdgeCon
   const publicKey = env?.get("VITE_SUPABASE_PUBLISHABLE_KEY") || env?.get("VITE_SUPABASE_ANON_KEY");
   if (!backendUrl || !publicKey) return context.next();
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
   try {
     const query = new URL("/rest/v1/memorials", backendUrl);
     query.searchParams.set("select", "full_name,profile_photo_url");
@@ -24,7 +26,7 @@ export default async function memorialPreview(request: Request, context: EdgeCon
     query.searchParams.set("limit", "1");
     const result = await fetch(query, {
       headers: { apikey: publicKey, Authorization: `Bearer ${publicKey}` },
-      signal: AbortSignal.timeout(4000),
+      signal: controller.signal,
     });
     if (!result.ok) return context.next();
     const memorials: PublicMemorialPreview[] = await result.json();
@@ -43,5 +45,7 @@ export default async function memorialPreview(request: Request, context: EdgeCon
   } catch {
     // A delayed/unavailable public lookup must never prevent opening the memorial.
     return context.next();
+  } finally {
+    clearTimeout(timeout);
   }
 }
