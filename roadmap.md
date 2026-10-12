@@ -1,7 +1,7 @@
 # Makiwa roadmap
 
-- [ ] Unify memorial invitations and page metadata across all sharing entry points
-- [ ] Serve personalized memorial metadata to social crawlers (requires server-rendered hosting)
+- [x] Unify memorial invitations and page metadata across all sharing entry points
+- [ ] Serve personalized memorial metadata to social crawlers (blocked: classic hosting requires an approved TanStack Start upgrade; client-side metadata cannot satisfy WhatsApp/Facebook crawlers)
 
 - [x] Groups module (create, join, leave, admin moderation, messages, attachments, RLS-enforced membership)
 - [x] 30-day account deletion with restore window and anonymisation after expiry
