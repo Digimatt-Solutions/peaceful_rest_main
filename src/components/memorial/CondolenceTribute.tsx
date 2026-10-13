@@ -1,48 +1,51 @@
 import { useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Heart, MessageCircle, Share2, Loader2, Send, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Loader2, Send, Trash2 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmojiPicker, insertAtCursor } from "./EmojiPicker";
+import { ShareMemorialMenu } from "./ShareMemorialMenu";
 import defaultProfile from "@/assets/default-profile.png.asset.json";
 
 export const avatarOf = (url?: string | null) => url || defaultProfile.url;
 
-type Comment = { id: string; user_id: string; body: string; created_at: string };
+type Comment = { id: string; user_id: string | null; guest_name?: string | null; body: string; created_at: string };
 
-export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId, memorialUrl, onChange }: {
-  c: any; avatar?: string | null; likes: { user_id: string }[]; comments: Comment[];
+export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId, memorialUrl, memorialId, memorialName, onChange }: {
+  c: any; avatar?: string | null; likes: { user_id: string | null }[]; comments: Comment[];
   profiles: Record<string, { full_name: string | null; avatar_url: string | null }>;
-  userId: string | null; memorialUrl: string; onChange: () => void;
+  userId: string | null; memorialUrl: string; memorialId: string; memorialName: string; onChange: () => void;
 }) => {
-  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [reply, setReply] = useState("");
+  const [guestName, setGuestName] = useState("");
   const [busy, setBusy] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
   const liked = !!userId && likes.some((l) => l.user_id === userId);
-  const needAuth = () => { toast.error("Please sign in to interact with tributes."); };
 
   const toggleLike = async () => {
-    if (!userId) return needAuth();
-    const q = liked
+    const q = liked && userId
       ? supabase.from("condolence_likes" as any).delete().eq("condolence_id", c.id).eq("user_id", userId)
-      : supabase.from("condolence_likes" as any).insert({ condolence_id: c.id, user_id: userId });
+      : supabase.from("condolence_likes" as any).insert({ condolence_id: c.id, ...(userId ? { user_id: userId } : {}) });
     const { error } = await q;
     if (error) return toast.error(error.message);
     onChange();
   };
 
   const sendReply = async () => {
-    if (!userId) return needAuth();
     const body = reply.trim();
     if (!body) return;
     if (body.length > 1000) return toast.error("Reply is too long");
+    const name = guestName.trim();
+    if (!userId && !name) return toast.error("Please add your name so the family knows who is replying.");
     setBusy(true);
-    const { error } = await supabase.from("condolence_comments" as any).insert({ condolence_id: c.id, user_id: userId, body });
+    const { error } = await supabase.from("condolence_comments" as any).insert({
+      condolence_id: c.id, body,
+      ...(userId ? { user_id: userId } : { guest_name: name }),
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
     setReply("");
