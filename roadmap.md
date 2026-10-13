@@ -11,3 +11,8 @@
 - [x] Messages/Inbox input text visibility fix
 - [x] Obituary Management: two-validator verification gates the Create Memorial button
 - [x] Obituary Management sidebar links to the services page
+
+- [x] Life Moments: every role can add; owner or super admin approves before it goes live
+- [x] Default tribute profile picture stored in the app
+- [x] Memorial page hides the family tree until a relationship exists
+- [x] Super admin Memorials: "My memorials" plus "All memorials" from other admins, editable in Obituary Management
