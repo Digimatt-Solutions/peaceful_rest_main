@@ -39,9 +39,15 @@ export const ShareMemorialMenu = ({ memorialId, name, urlOverride, textOverride,
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 shadow-lg font-bold">
-          <Share2 className="h-4 w-4" /> Share memorial
-        </Button>
+        {compact ? (
+          <button className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted text-muted-foreground ml-auto text-sm">
+            <Share2 className="h-4 w-4" /> Share
+          </button>
+        ) : (
+          <Button className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 shadow-lg font-bold">
+            <Share2 className="h-4 w-4" /> Share memorial
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-52 rounded-xl">
         {items.map(({ label, icon: Icon, run }) => (
