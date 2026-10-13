@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmojiPicker, insertAtCursor } from "./EmojiPicker";
 import { ShareMemorialMenu } from "./ShareMemorialMenu";
-import defaultProfile from "@/assets/default-profile.png.asset.json";
+import defaultProfile from "@/assets/default-profile.png";
 
 export const avatarOf = (url?: string | null) => url || defaultProfile.url;
 
