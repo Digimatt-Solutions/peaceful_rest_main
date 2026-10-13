@@ -470,7 +470,8 @@ const MemorialDetail = () => {
             </section>
           )}
 
-          {/* Family tree */}
+          {/* Family tree: hidden until at least one relationship is added */}
+          {family.length > 0 && (
           <section>
             <SectionTitle icon={Users} eyebrow="Family" title="The family tree" />
             <div className="mt-8">
@@ -481,6 +482,7 @@ const MemorialDetail = () => {
               />
             </div>
           </section>
+          )}
 
           {/* Memories gallery */}
           {(memoryPhotos.length > 0 || memoryVideos.length > 0) && (
