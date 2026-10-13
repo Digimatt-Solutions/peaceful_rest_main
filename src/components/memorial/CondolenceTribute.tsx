@@ -10,7 +10,7 @@ import { EmojiPicker, insertAtCursor } from "./EmojiPicker";
 import { ShareMemorialMenu } from "./ShareMemorialMenu";
 import defaultProfile from "@/assets/default-profile.png";
 
-export const avatarOf = (url?: string | null) => url || defaultProfile.url;
+export const avatarOf = (url?: string | null) => url || defaultProfile;
 
 type Comment = { id: string; user_id: string | null; guest_name?: string | null; body: string; created_at: string };
 
