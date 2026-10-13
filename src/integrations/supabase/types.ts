@@ -307,22 +307,25 @@ export type Database = {
           body: string
           condolence_id: string
           created_at: string
+          guest_name: string | null
           id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           body: string
           condolence_id: string
           created_at?: string
+          guest_name?: string | null
           id?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           body?: string
           condolence_id?: string
           created_at?: string
+          guest_name?: string | null
           id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -339,19 +342,19 @@ export type Database = {
           condolence_id: string
           created_at: string
           id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           condolence_id: string
           created_at?: string
           id?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           condolence_id?: string
           created_at?: string
           id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
