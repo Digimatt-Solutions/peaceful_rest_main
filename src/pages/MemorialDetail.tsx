@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CondolenceTribute } from "@/components/memorial/CondolenceTribute";
+import { EmojiPicker, insertAtCursor } from "@/components/memorial/EmojiPicker";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -52,12 +54,21 @@ const MemorialDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [condMsg, setCondMsg] = useState("");
+  const [condFile, setCondFile] = useState<File | null>(null);
+  const [condMediaTitle, setCondMediaTitle] = useState("");
+  const [cLikes, setCLikes] = useState<any[]>([]);
+  const [cComments, setCComments] = useState<any[]>([]);
+  const [profileMap, setProfileMap] = useState<Record<string, any>>({});
+  const msgRef = useRef<HTMLTextAreaElement>(null);
 
   // Prefill the contribution form with the signed-in visitor's own details.
   useEffect(() => {
     let cancelled = false;
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user || cancelled) return;
+      setUserId(user.id);
       supabase.from("profiles").select("full_name,phone,email").eq("id", user.id).maybeSingle()
         .then(({ data }) => {
           if (cancelled) return;
@@ -98,26 +109,68 @@ const MemorialDetail = () => {
     });
   }, [id]);
 
+  // Likes, replies and contributor profile pictures for the visible tributes.
+  const loadInteractions = async () => {
+    const ids = condolences.map(c => c.id);
+    if (ids.length === 0) { setCLikes([]); setCComments([]); return; }
+    const [l, r] = await Promise.all([
+      supabase.from("condolence_likes" as any).select("condolence_id,user_id").in("condolence_id", ids),
+      supabase.from("condolence_comments" as any).select("*").in("condolence_id", ids).order("created_at", { ascending: true }),
+    ]);
+    const likes = (l.data as any[]) || [];
+    const comments = (r.data as any[]) || [];
+    setCLikes(likes); setCComments(comments);
+    const uids = [...new Set([...condolences.map(c => c.user_id), ...comments.map(c => c.user_id)].filter(Boolean))];
+    if (uids.length) {
+      const { data } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", uids);
+      setProfileMap(Object.fromEntries((data || []).map(p => [p.id, p])));
+    }
+  };
+  useEffect(() => { loadInteractions(); }, [condolences]);
+
   const submitCondolence = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const parsed = condolenceSchema.safeParse({
       name: fd.get("name"),
       relationship: fd.get("relationship") || undefined,
-      message: fd.get("message"),
+      message: condMsg,
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
+    if (condFile) {
+      const isVideo = condFile.type.startsWith("video/");
+      if (!isVideo && !condFile.type.startsWith("image/")) return toast.error("Please attach a photo or video");
+      if (condFile.size > (isVideo ? 50 : 10) * 1024 * 1024) return toast.error(isVideo ? "Videos must be under 50MB" : "Photos must be under 10MB");
+      if (!condMediaTitle.trim()) return toast.error("Please add a brief title for your life moment");
+    }
     setSubmitting(true);
+    let media: { media_url: string; media_type: string; media_title: string } | null = null;
+    if (condFile && userId) {
+      const isVideo = condFile.type.startsWith("video/");
+      const path = `${userId}/memories/${Date.now()}-${condFile.name.replace(/[^\w.-]/g, "_")}`;
+      const up = await supabase.storage.from("memorial-media").upload(path, condFile, { contentType: condFile.type });
+      if (up.error) { setSubmitting(false); toast.error(up.error.message); return; }
+      const url = supabase.storage.from("memorial-media").getPublicUrl(path).data.publicUrl;
+      media = { media_url: url, media_type: isVideo ? "video" : "image", media_title: condMediaTitle.trim().slice(0, 80) };
+      const { data: mem, error: memErr } = await (supabase as any).from("memories").insert({
+        memorial_id: id, user_id: userId, title: media.media_title,
+        photo_url: url, photos: isVideo ? [] : [url], media_type: media.media_type,
+      }).select().maybeSingle();
+      if (memErr) toast.error(memErr.message); else if (mem) setMemories(m => [mem, ...m]);
+    }
     const { error } = await supabase.from("condolences").insert({
       memorial_id: id,
+      user_id: userId,
       name: parsed.data.name,
       relationship: parsed.data.relationship,
       message: parsed.data.message,
       status: "pending",
-    });
+      ...(media || {}),
+    } as any);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
-    (e.target as HTMLFormElement).reset();
+    form.reset(); setCondMsg(""); setCondFile(null); setCondMediaTitle("");
     toast.success("Thank you. Your condolence was submitted and will appear once verified by an admin.");
   };
 
@@ -166,8 +219,9 @@ const MemorialDetail = () => {
   };
 
   // Every photo uploaded to this memorial's life moments, newest first.
+  const memoryVideos = useMemo(() => memories.filter((m: any) => m.media_type === "video" && m.photo_url), [memories]);
   const memoryPhotos = useMemo(() => (
-    memories.flatMap((m: any) => {
+    memories.filter((m: any) => m.media_type !== "video").flatMap((m: any) => {
       const photos: string[] = [
         ...(Array.isArray(m.photos) ? m.photos.filter(Boolean) : []),
         ...(m.photo_url && !(Array.isArray(m.photos) && m.photos.includes(m.photo_url)) ? [m.photo_url] : []),
@@ -422,12 +476,20 @@ const MemorialDetail = () => {
           </section>
 
           {/* Memories gallery */}
-          {memoryPhotos.length > 0 && (
+          {(memoryPhotos.length > 0 || memoryVideos.length > 0) && (
             <section>
               <SectionTitle icon={Camera} eyebrow="Life Moments" title="A gallery of cherished memories" />
-              <div className="mt-8">
-                <MemoryMarquee items={memoryPhotos} />
-              </div>
+              {memoryPhotos.length > 0 && <div className="mt-8"><MemoryMarquee items={memoryPhotos} /></div>}
+              {memoryVideos.length > 0 && (
+                <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {memoryVideos.map((v: any) => (
+                    <figure key={v.id} className="rounded-2xl overflow-hidden border border-border bg-card">
+                      <video src={v.photo_url} controls preload="metadata" className="w-full aspect-video object-cover bg-muted" />
+                      {v.title && <figcaption className="px-3 py-2 text-sm font-medium">{v.title}</figcaption>}
+                    </figure>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -569,7 +631,22 @@ const MemorialDetail = () => {
                 <div className="space-y-2"><Label htmlFor="c-name">Your name</Label><Input id="c-name" name="name" required className="rounded-xl" /></div>
                 <div className="space-y-2"><Label htmlFor="c-rel">Relationship <span className="text-muted-foreground font-normal">(optional)</span></Label><Input id="c-rel" name="relationship" placeholder="Friend, colleague, neighbor…" className="rounded-xl" /></div>
               </div>
-              <div className="space-y-2"><Label htmlFor="c-msg">Your message</Label><Textarea id="c-msg" name="message" rows={4} required className="rounded-xl" placeholder="Share a memory or word of comfort…" /></div>
+              <div className="space-y-2">
+                <Label htmlFor="c-msg">Your message</Label>
+                <Textarea ref={msgRef} id="c-msg" name="message" rows={4} required value={condMsg} onChange={(e) => setCondMsg(e.target.value)} className="rounded-xl" placeholder="Share a memory or word of comfort…" />
+                <EmojiPicker onPick={(em) => setCondMsg((v) => insertAtCursor(msgRef.current, v, em))} />
+              </div>
+              <div className="rounded-2xl border border-dashed border-border p-4 space-y-3">
+                <p className="text-sm font-medium">Add a life moment <span className="text-muted-foreground font-normal">(optional photo or short video)</span></p>
+                {userId ? (
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <Input type="file" accept="image/*,video/*" onChange={(e) => setCondFile(e.target.files?.[0] || null)} className="rounded-xl" />
+                    <Input value={condMediaTitle} onChange={(e) => setCondMediaTitle(e.target.value)} maxLength={80} placeholder="Brief title, e.g. Graduation day" className="rounded-xl" />
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground"><Link to={`/auth?redirect=${encodeURIComponent(`/memorial/${id}`)}`} className="text-brand-orange underline">Sign in</Link> to attach a photo or video.</p>
+                )}
+              </div>
               <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
               </Button>
@@ -580,21 +657,13 @@ const MemorialDetail = () => {
               {condolences.length === 0 ? (
                 <p className="text-sm text-muted-foreground italic">Be the first to share a message of comfort.</p>
               ) : condolences.map(c => (
-                <div key={c.id} className={`rounded-2xl border p-6 ${c.is_pinned ? "border-brand-orange/40 bg-brand-orange/[0.03]" : "border-border bg-card"}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center font-serif text-sm">
-                      {c.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{c.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {c.relationship ? `${c.relationship} · ` : ""}{format(new Date(c.created_at), "MMM d, yyyy")}
-                      </p>
-                    </div>
-                    {c.is_pinned && <span className="text-[10px] uppercase tracking-widest text-brand-orange font-semibold">Pinned</span>}
-                  </div>
-                  <p className="mt-4 text-foreground/85 leading-relaxed whitespace-pre-line">{c.message}</p>
-                </div>
+                <CondolenceTribute
+                  key={c.id} c={c} avatar={c.user_id ? profileMap[c.user_id]?.avatar_url : null}
+                  likes={cLikes.filter(l => l.condolence_id === c.id)}
+                  comments={cComments.filter(r => r.condolence_id === c.id)}
+                  profiles={profileMap} userId={userId} memorialUrl={`${window.location.origin}/memorial/${id}`}
+                  onChange={loadInteractions}
+                />
               ))}
             </div>
           </section>
