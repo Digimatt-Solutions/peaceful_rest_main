@@ -666,6 +666,7 @@ const MemorialDetail = () => {
                   likes={cLikes.filter(l => l.condolence_id === c.id)}
                   comments={cComments.filter(r => r.condolence_id === c.id)}
                   profiles={profileMap} userId={userId} memorialUrl={`${window.location.origin}/memorial/${id}`}
+                  memorialId={id!} memorialName={memorial.full_name}
                   onChange={loadInteractions}
                 />
               ))}

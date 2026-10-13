@@ -7,8 +7,12 @@ import { toast } from "sonner";
 import { memorialShareData } from "@/lib/memorialSharing";
 
 /** Share a memorial via WhatsApp, Facebook, Instagram, LinkedIn, X or a copied link. */
-export const ShareMemorialMenu = ({ memorialId, name }: { memorialId: string; name: string }) => {
-  const { url, text } = memorialShareData(memorialId, name);
+export const ShareMemorialMenu = ({ memorialId, name, urlOverride, textOverride, compact }: {
+  memorialId: string; name: string; urlOverride?: string; textOverride?: string; compact?: boolean;
+}) => {
+  const base = memorialShareData(memorialId, name);
+  const url = urlOverride || base.url;
+  const text = textOverride || base.text;
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(text);
 
@@ -35,9 +39,15 @@ export const ShareMemorialMenu = ({ memorialId, name }: { memorialId: string; na
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 shadow-lg font-bold">
-          <Share2 className="h-4 w-4" /> Share memorial
-        </Button>
+        {compact ? (
+          <button className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted text-muted-foreground ml-auto text-sm">
+            <Share2 className="h-4 w-4" /> Share
+          </button>
+        ) : (
+          <Button className="rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 border-2 border-brand-orange h-11 sm:h-12 px-4 shadow-lg font-bold">
+            <Share2 className="h-4 w-4" /> Share memorial
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-52 rounded-xl">
         {items.map(({ label, icon: Icon, run }) => (
