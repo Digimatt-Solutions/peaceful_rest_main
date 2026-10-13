@@ -58,6 +58,7 @@ const MemorialDetail = () => {
   const [condMsg, setCondMsg] = useState("");
   const [condFile, setCondFile] = useState<File | null>(null);
   const [condMediaTitle, setCondMediaTitle] = useState("");
+  const [condFileKey, setCondFileKey] = useState(0);
   const [cLikes, setCLikes] = useState<any[]>([]);
   const [cComments, setCComments] = useState<any[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, any>>({});
@@ -91,7 +92,7 @@ const MemorialDetail = () => {
     Promise.all([
       supabase.from("memorials").select("*").eq("id", id).maybeSingle(),
       supabase.from("family_members").select("*").eq("memorial_id", id),
-      supabase.from("memories").select("*").eq("memorial_id", id).order("memory_date", { ascending: false }),
+      supabase.from("memories").select("*").eq("memorial_id", id).eq("status", "approved").order("memory_date", { ascending: false }),
       supabase.from("condolences").select("*").eq("memorial_id", id).in("status", ["approved", "pinned"]).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("announcements").select("*").eq("memorial_id", id).order("created_at", { ascending: false }),
       supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).eq("status", "approved").order("created_at", { ascending: false }),
