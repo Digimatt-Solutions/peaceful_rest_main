@@ -50,6 +50,13 @@
       "when": 1790777816077,
       "tag": "0006_memorial_follower_count",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791870523714,
+      "tag": "0007_condolence_interactions",
+      "breakpoints": true
     }
   ]
 }
