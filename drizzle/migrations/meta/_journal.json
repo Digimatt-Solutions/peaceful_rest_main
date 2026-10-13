@@ -71,6 +71,13 @@
       "when": 1791871076546,
       "tag": "0009_guest_condolence_likes_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791874915591,
+      "tag": "0010_life_moment_approvals_super_admin_memorials",
+      "breakpoints": true
     }
   ]
 }
