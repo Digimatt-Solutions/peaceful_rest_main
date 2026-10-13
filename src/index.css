@@ -51,6 +51,7 @@
     --gradient-warm: linear-gradient(135deg, hsl(19 90% 54%) 0%, hsl(28 95% 60%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(0 0% 0% / 0.85) 0%, hsl(0 0% 0% / 0.55) 60%, hsl(0 0% 0% / 0.85) 100%);
     --gradient-fade-up: linear-gradient(180deg, transparent 0%, hsl(0 0% 0% / 0.9) 100%);
+    --mask-memory-edges: linear-gradient(to right, transparent, hsl(0 0% 0%) 1%, hsl(0 0% 0%) 99%, transparent);
 
     /* Elevation-first shadows for the SaaS card system */
     --shadow-elegant: 0 12px 32px -12px hsl(215 25% 27% / 0.12);
@@ -196,6 +197,18 @@
 }
 
 @layer utilities {
+  .memory-marquee {
+    mask-image: var(--mask-memory-edges);
+    -webkit-mask-image: var(--mask-memory-edges);
+  }
+  @media (max-width: 639px) {
+    .memorial-detail .container-luxe {
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
   .container-luxe {
     @apply mx-auto max-w-7xl px-6 lg:px-10;
   }

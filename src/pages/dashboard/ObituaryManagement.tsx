@@ -14,10 +14,11 @@ import { logActivity } from "@/lib/activity";
 import { MemorialQR } from "@/components/MemorialQR";
 import { MemorialValidators } from "@/components/dashboard/MemorialValidators";
 import { MemorialFollowers } from "@/components/dashboard/MemorialFollowers";
+import { MemorialPoster } from "@/components/memorial/MemorialPoster";
 
 const empty = {
   full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
-  cover_photo_url: "", profile_photo_url: "", biography: "",
+  cover_photo_url: "", profile_photo_url: "", poster_photo_url: "", biography: "",
   burial_details: "", service_schedule: "", venue: "", location: "",
   map_url: "", program_pdf_url: "", short_tribute: "", is_public: false, verification_status: "pending",
 };
@@ -82,7 +83,7 @@ const ObituaryManagement = () => {
     document.title = "Obituary Management · Makiwa";
     if (id) {
       supabase.from("memorials").select("*").eq("id", id).maybeSingle().then(({ data }) => {
-        if (data) setForm({ ...data, date_of_birth: data.date_of_birth || "", date_of_death: data.date_of_death || "" });
+        if (data) setForm({ ...data, poster_photo_url: data.poster_photo_url || "", date_of_birth: data.date_of_birth || "", date_of_death: data.date_of_death || "" });
       });
     } else {
       setForm(empty);
@@ -93,6 +94,10 @@ const ObituaryManagement = () => {
 
   const upload = async (file: File, field: string) => {
     if (!user) return;
+    if (field === "poster_photo_url" && !file.type.startsWith("image/")) {
+      toast.error("Please choose an image for the poster");
+      return;
+    }
     setUploading(field);
     const path = `${user.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("memorial-media").upload(path, file);
@@ -280,6 +285,22 @@ const ObituaryManagement = () => {
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
+          <h3 className="font-serif text-xl">Memorial poster</h3>
+          <div className="space-y-2">
+            <Label htmlFor="memorial-poster">Upload poster</Label>
+            <Input id="memorial-poster" type="file" accept="image/*" disabled={uploading === "poster_photo_url"}
+              onChange={(e) => { const file = e.target.files?.[0]; if (file) upload(file, "poster_photo_url"); e.target.value = ""; }} />
+          </div>
+          {uploading === "poster_photo_url" && <p role="status" className="flex items-center gap-2 text-sm text-brand-orange"><Loader2 className="h-4 w-4 animate-spin" /> Uploading poster…</p>}
+          {form.poster_photo_url && <>
+            <MemorialPoster src={form.poster_photo_url} name={form.full_name} />
+            <Button type="button" variant="outline" onClick={() => setForm((f: any) => ({ ...f, poster_photo_url: "" }))} disabled={uploading === "poster_photo_url"}>
+              <Trash2 className="h-4 w-4 mr-2" /> Remove poster
+            </Button>
+          </>}
+        </section>
+
+        <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Biography & service</h3>
           <div className="space-y-2"><Label>Biography</Label><Textarea rows={6} value={form.biography} onChange={handle("biography")} placeholder="Share their story…" /></div>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -324,7 +345,7 @@ const ObituaryManagement = () => {
 
         {id && <MemorialFollowers memorialId={id} />}
 
-        <Button type="submit" disabled={loading || (!id && !draftReady)} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+        <Button type="submit" disabled={loading || uploading !== null || (!id && !draftReady)} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4 mr-2" /> {id ? "Save changes" : "Create memorial"}</>}
         </Button>
         {!id && !draftReady && (

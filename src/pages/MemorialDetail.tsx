@@ -25,6 +25,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { FollowMemorialButton } from "@/components/memorial/FollowMemorialButton";
 import { ShareMemorialMenu } from "@/components/memorial/ShareMemorialMenu";
 import { MemorialMetadata } from "@/components/memorial/MemorialMetadata";
+import { MemorialPoster } from "@/components/memorial/MemorialPoster";
 import { takePaystackReference, verifyPaystack, watchMpesaPayment } from "@/lib/payments";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -351,7 +352,7 @@ const MemorialDetail = () => {
   const upcomingEvents = announcements.filter(a => a.event_date && new Date(a.event_date) >= new Date());
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="memorial-detail min-h-screen bg-background">
       <Navbar />
 
       {/* Hero */}
@@ -471,6 +472,10 @@ const MemorialDetail = () => {
           )}
 
           {/* Family tree: hidden until at least one relationship is added */}
+          {memorial.poster_photo_url && <div className="lg:hidden">
+            <MemorialPoster src={memorial.poster_photo_url} name={memorial.full_name} />
+          </div>}
+
           {family.length > 0 && (
           <section>
             <SectionTitle icon={Users} eyebrow="Family" title="The family tree" />
@@ -678,6 +683,9 @@ const MemorialDetail = () => {
 
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 self-start space-y-6">
+          {memorial.poster_photo_url && <div className="hidden lg:block">
+            <MemorialPoster src={memorial.poster_photo_url} name={memorial.full_name} />
+          </div>}
           <div className="rounded-2xl border border-border bg-card p-6">
             <p className="text-xs uppercase tracking-widest text-muted-foreground">At a glance</p>
             <dl className="mt-4 space-y-3 text-sm">
