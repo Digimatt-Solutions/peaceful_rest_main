@@ -302,12 +302,76 @@ export type Database = {
         }
         Relationships: []
       }
+      condolence_comments: {
+        Row: {
+          body: string
+          condolence_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          condolence_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          condolence_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condolence_comments_condolence_id_fkey"
+            columns: ["condolence_id"]
+            isOneToOne: false
+            referencedRelation: "condolences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      condolence_likes: {
+        Row: {
+          condolence_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          condolence_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          condolence_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condolence_likes_condolence_id_fkey"
+            columns: ["condolence_id"]
+            isOneToOne: false
+            referencedRelation: "condolences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       condolences: {
         Row: {
           country: string | null
           created_at: string
           id: string
           is_pinned: boolean
+          media_title: string | null
+          media_type: string | null
+          media_url: string | null
           memorial_id: string
           message: string
           name: string
@@ -320,6 +384,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_pinned?: boolean
+          media_title?: string | null
+          media_type?: string | null
+          media_url?: string | null
           memorial_id: string
           message: string
           name: string
@@ -332,6 +399,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_pinned?: boolean
+          media_title?: string | null
+          media_type?: string | null
+          media_url?: string | null
           memorial_id?: string
           message?: string
           name?: string
@@ -891,6 +961,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          media_type: string
           memorial_id: string
           memory_date: string | null
           photo_url: string | null
@@ -902,6 +973,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          media_type?: string
           memorial_id: string
           memory_date?: string | null
           photo_url?: string | null
@@ -913,6 +985,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          media_type?: string
           memorial_id?: string
           memory_date?: string | null
           photo_url?: string | null
