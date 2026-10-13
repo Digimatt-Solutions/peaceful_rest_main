@@ -107,7 +107,7 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{p?.full_name || r.guest_name || "Guest"}</p>
                     <span className="text-[11px] text-muted-foreground">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</span>
-                    {r.user_id === userId && (
+                    {r.user_id && r.user_id === userId && (
                       <button onClick={() => removeReply(r.id)} aria-label="Delete reply" className="ml-auto text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                     )}
                   </div>
