@@ -7,8 +7,12 @@ import { toast } from "sonner";
 import { memorialShareData } from "@/lib/memorialSharing";
 
 /** Share a memorial via WhatsApp, Facebook, Instagram, LinkedIn, X or a copied link. */
-export const ShareMemorialMenu = ({ memorialId, name }: { memorialId: string; name: string }) => {
-  const { url, text } = memorialShareData(memorialId, name);
+export const ShareMemorialMenu = ({ memorialId, name, urlOverride, textOverride, compact }: {
+  memorialId: string; name: string; urlOverride?: string; textOverride?: string; compact?: boolean;
+}) => {
+  const base = memorialShareData(memorialId, name);
+  const url = urlOverride || base.url;
+  const text = textOverride || base.text;
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(text);
 
