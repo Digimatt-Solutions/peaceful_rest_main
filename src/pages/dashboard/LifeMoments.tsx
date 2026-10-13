@@ -9,26 +9,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Camera, Plus, Trash2, X, Loader2 } from "lucide-react";
+import { Camera, Plus, Trash2, X, Loader2, Check, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { MemoryLightbox, LightboxItem } from "@/components/gallery/MemoryLightbox";
 
 const LifeMoments = () => {
   const { user } = useAuth();
-  const { isMourner, loading: roleLoading } = useUserRole();
+  const { isMourner, isSuperAdmin, loading: roleLoading } = useUserRole();
   const [memorials, setMemorials] = useState<any[]>([]);
   const [memorialId, setMemorialId] = useState("");
   const [items, setItems] = useState<any[]>([]);
   const [form, setForm] = useState({ title: "", description: "", memory_date: "" });
   const [photos, setPhotos] = useState<string[]>([]);
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
   // Every photo across every memory, so the viewer can run as one slideshow.
-  const slides: LightboxItem[] = items.flatMap((m) => {
+  const current = memorials.find((m) => m.id === memorialId);
+  // Only the memorial owner or a super admin can publish moments directly or approve others'.
+  const canApprove = !!user && (isSuperAdmin || current?.created_by === user.id);
+  const isVideo = (m: any) => m.media_type === "video";
+  const slides: LightboxItem[] = items.filter((m) => !isVideo(m)).flatMap((m) => {
     const pics: string[] = m.photos?.length ? m.photos : (m.photo_url ? [m.photo_url] : []);
     return pics.map((src: string, i: number) => ({
       id: `${m.id}-${i}`,
@@ -51,13 +56,14 @@ const LifeMoments = () => {
         ids = (fl || []).map(f => f.memorial_id);
         if (ids.length === 0) { setMemorials([]); return; }
       }
-      let q = supabase.from("memorials").select("id,full_name");
-      q = isMourner ? q.in("id", ids) : q.eq("created_by", user.id);
+      let q = supabase.from("memorials").select("id,full_name,created_by").order("full_name");
+      if (isMourner) q = q.in("id", ids);
+      else if (!isSuperAdmin) q = q.eq("created_by", user.id);
       const { data } = await q;
       setMemorials(data || []);
       if (data?.[0]) setMemorialId(data[0].id);
     })();
-  }, [user, isMourner, roleLoading]);
+  }, [user, isMourner, isSuperAdmin, roleLoading]);
 
   useEffect(() => {
     if (!memorialId) return;
@@ -69,7 +75,12 @@ const LifeMoments = () => {
     if (!user) return;
     setUploading(true);
     const urls: string[] = [];
-    for (const file of Array.from(files)) {
+    const list = Array.from(files);
+    const video = list.some((f) => f.type.startsWith("video/"));
+    if (video && (list.length > 1 || photos.length > 0)) { setUploading(false); return toast.error("Add one video on its own, or photos only"); }
+    if (list.some((f) => f.size > (f.type.startsWith("video/") ? 50 : 10) * 1024 * 1024)) { setUploading(false); return toast.error("Photos must be under 10MB and videos under 50MB"); }
+    setMediaType(video ? "video" : "image");
+    for (const file of list) {
       const path = `${user.id}/memories/${Date.now()}-${file.name}`;
       const { error } = await supabase.storage.from("memorial-media").upload(path, file);
       if (error) { toast.error(error.message); continue; }
@@ -82,21 +93,31 @@ const LifeMoments = () => {
 
   const add = async () => {
     if (!user || !memorialId || !form.title) return toast.error("Title required");
-    if (photos.length === 0) return toast.error("Add at least one photo");
+    if (photos.length === 0) return toast.error("Add at least one photo or video");
     setSaving(true);
     const { data, error } = await (supabase as any).from("memories").insert({
       memorial_id: memorialId, user_id: user.id,
       title: form.title, description: form.description,
       photo_url: photos[0], photos,
       memory_date: form.memory_date || null,
+      media_type: mediaType,
+      status: canApprove ? "approved" : "pending",
     }).select().maybeSingle();
     setSaving(false);
     if (error) return toast.error(error.message);
     setItems([data, ...items]);
     setForm({ title: "", description: "", memory_date: "" });
     setPhotos([]);
+    setMediaType("image");
     setDialogOpen(false);
-    toast.success("Memory added");
+    toast.success(canApprove ? "Memory added" : "Memory submitted. It will go live once the memorial owner or an administrator approves it.");
+  };
+
+  const approve = async (id: string) => {
+    const { error } = await supabase.from("memories").update({ status: "approved" }).eq("id", id);
+    if (error) return toast.error(error.message);
+    setItems(items.map(i => i.id === id ? { ...i, status: "approved" } : i));
+    toast.success("Approved and now live");
   };
 
   const remove = async (id: string) => {
@@ -125,7 +146,7 @@ const LifeMoments = () => {
                 <SelectContent>{memorials.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            {!isMourner && (
+            {(
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
@@ -134,18 +155,21 @@ const LifeMoments = () => {
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle className="font-serif text-2xl">Share a moment</DialogTitle></DialogHeader>
+                {!canApprove && <p className="text-sm text-muted-foreground -mt-2">Your photos or video will appear once the memorial owner or an administrator approves them.</p>}
                 <div className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} /></div>
                     <div className="space-y-2"><Label>Date</Label><Input type="date" value={form.memory_date} onChange={(e) => setForm({...form, memory_date: e.target.value})} /></div>
                     <div className="space-y-2 sm:col-span-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} /></div>
                     <div className="space-y-2 sm:col-span-2">
-                      <Label>Photos <span className="text-xs text-muted-foreground font-normal">(add multiple)</span></Label>
+                      <Label>Photos or video <span className="text-xs text-muted-foreground font-normal">(several photos, or one video)</span></Label>
                       {photos.length > 0 && (
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-2">
                           {photos.map((url, i) => (
                             <div key={i} className="relative group">
-                              <img src={url} alt="" className="h-24 w-full rounded-lg object-cover" />
+                              {mediaType === "video"
+                                ? <video src={url} className="h-24 w-full rounded-lg object-cover bg-muted" />
+                                : <img src={url} alt="" className="h-24 w-full rounded-lg object-cover" />}
                               <button onClick={() => setPhotos(p => p.filter((_, idx) => idx !== i))} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-black/80 text-white inline-flex items-center justify-center">
                                 <X className="h-3.5 w-3.5" />
                               </button>
@@ -153,7 +177,7 @@ const LifeMoments = () => {
                           ))}
                         </div>
                       )}
-                      <Input type="file" accept="image/*" multiple onChange={(e) => e.target.files && uploadFiles(e.target.files)} disabled={uploading} />
+                      <Input type="file" accept="image/*,video/*" multiple onChange={(e) => e.target.files && uploadFiles(e.target.files)} disabled={uploading} />
                       {uploading && <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Uploading…</p>}
                     </div>
                   </div>
@@ -174,16 +198,23 @@ const LifeMoments = () => {
                 return (
                   <div
                     key={m.id}
-                    onClick={() => pics.length > 0 && setLightbox(slideStart(m.id))}
+                    onClick={() => pics.length > 0 && !isVideo(m) && setLightbox(slideStart(m.id))}
                     className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden hover:shadow-elegant transition-shadow"
                   >
                     {pics.length > 0 && (
                       <div className="relative">
-                        <img src={pics[0]} alt={m.title} className="w-full h-52 object-cover" />
+                        {isVideo(m)
+                          ? <video src={pics[0]} controls preload="metadata" onClick={(e) => e.stopPropagation()} className="w-full h-52 object-cover bg-muted" />
+                          : <img src={pics[0]} alt={m.title} className="w-full h-52 object-cover" />}
+                        {m.status === "pending" && (
+                          <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-orange text-brand-white text-xs font-semibold">
+                            <Clock className="h-3 w-3" /> Pending approval
+                          </span>
+                        )}
                         {pics.length > 1 && (
                           <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-xs">+{pics.length - 1}</span>
                         )}
-                        {!isMourner && (
+                        {(canApprove || m.user_id === user?.id) && (
                           <button onClick={(e) => { e.stopPropagation(); remove(m.id); }} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 h-8 w-8 rounded-full bg-red-500/90 text-white inline-flex items-center justify-center transition-opacity">
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -194,6 +225,12 @@ const LifeMoments = () => {
                       <h4 className="font-serif text-lg">{m.title}</h4>
                       {m.memory_date && <p className="text-xs text-muted-foreground mt-0.5">{format(new Date(m.memory_date), "MMMM d, yyyy")}</p>}
                       {m.description && <p className="text-sm text-foreground/80 mt-2 line-clamp-3">{m.description}</p>}
+                      {canApprove && m.status === "pending" && (
+                        <div className="mt-3 flex gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Button size="sm" onClick={() => approve(m.id)} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90"><Check className="h-4 w-4 mr-1" /> Approve</Button>
+                          <Button size="sm" variant="outline" onClick={() => remove(m.id)} className="rounded-full">Reject</Button>
+                        </div>
+                      )}
                       {pics.length > 1 && (
                         <div className="mt-3 flex gap-1.5 overflow-x-auto">
                           {pics.slice(1).map((u, i) => <img key={i} src={u} alt="" className="h-12 w-12 rounded object-cover shrink-0" />)}
