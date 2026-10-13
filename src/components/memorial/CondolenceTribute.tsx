@@ -99,13 +99,13 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
       {open && (
         <div className="mt-3 space-y-3">
           {comments.map((r) => {
-            const p = profiles[r.user_id];
+            const p = r.user_id ? profiles[r.user_id] : null;
             return (
               <div key={r.id} className="flex gap-2.5">
                 <img src={avatarOf(p?.avatar_url)} alt="" className="h-8 w-8 rounded-full object-cover bg-muted shrink-0" />
                 <div className="flex-1 min-w-0 rounded-2xl bg-muted/60 px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate">{p?.full_name || "Makiwa member"}</p>
+                    <p className="text-sm font-medium truncate">{p?.full_name || r.guest_name || "Guest"}</p>
                     <span className="text-[11px] text-muted-foreground">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</span>
                     {r.user_id === userId && (
                       <button onClick={() => removeReply(r.id)} aria-label="Delete reply" className="ml-auto text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
@@ -116,7 +116,10 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
               </div>
             );
           })}
-          {userId ? (
+          <div className="space-y-2">
+            {!userId && (
+              <Input value={guestName} onChange={(e) => setGuestName(e.target.value)} maxLength={80} placeholder="Your name" className="rounded-2xl h-9 max-w-xs" />
+            )}
             <div className="flex items-end gap-1.5">
               <EmojiPicker onPick={(e) => setReply((v) => insertAtCursor(ref.current, v, e))} />
               <Textarea ref={ref} value={reply} onChange={(e) => setReply(e.target.value)} rows={1} maxLength={1000} placeholder="Write a reply…" className="rounded-2xl min-h-[40px] flex-1" />
@@ -124,9 +127,7 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
-          ) : (
-            <p className="text-xs text-muted-foreground"><Link to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} className="text-brand-orange underline">Sign in</Link> to reply.</p>
-          )}
+          </div>
         </div>
       )}
     </div>
