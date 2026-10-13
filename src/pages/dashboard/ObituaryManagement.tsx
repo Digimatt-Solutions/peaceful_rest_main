@@ -128,7 +128,8 @@ const ObituaryManagement = () => {
     const payload = {
       ...form,
       national_id: nid || null,
-      created_by: user.id,
+      // Editing keeps the original owner (super admins can edit others' memorials).
+      created_by: id ? (form.created_by || user.id) : user.id,
       date_of_birth: form.date_of_birth || null,
       date_of_death: form.date_of_death || null,
       // A memorial only goes public once two validators have verified it.
