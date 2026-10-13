@@ -1,0 +1,1 @@
+ALTER TABLE public.memorials ADD COLUMN IF NOT EXISTS poster_photo_url text;

@@ -18,7 +18,7 @@ export const MemoryMarquee = ({ items }: { items: MarqueeItem[] }) => {
 
   return (
     <>
-      <div className="group relative overflow-hidden -mx-2 px-2 [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+      <div className="memory-marquee group relative overflow-hidden -mx-2 px-2">
         <div
           className="flex w-max gap-4 animate-marquee-x group-hover:[animation-play-state:paused] motion-reduce:animate-none motion-reduce:overflow-x-auto"
           style={{ animationDuration: `${duration}s` }}

@@ -1,5 +1,8 @@
 # Makiwa roadmap
 
+- [x] Add obituary poster uploads and portrait placement on desktop/mobile
+- [x] Soften Life Moments edges and apply compact mobile memorial margins
+
 - [x] Unify memorial invitations and page metadata across all sharing entry points
 - [x] Add Netlify delivery of personalized memorial photos, titles, invitations, and page icons at unchanged memorial URLs
 - [ ] Activate and verify personalized previews on makiwa.netlify.app (blocked: deploy updated source to Netlify with its existing public app connection variables available to Edge Functions)

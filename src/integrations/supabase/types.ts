@@ -900,6 +900,7 @@ export type Database = {
           location: string | null
           map_url: string | null
           national_id: string | null
+          poster_photo_url: string | null
           profile_photo_url: string | null
           program_pdf_url: string | null
           service_schedule: string | null
@@ -924,6 +925,7 @@ export type Database = {
           location?: string | null
           map_url?: string | null
           national_id?: string | null
+          poster_photo_url?: string | null
           profile_photo_url?: string | null
           program_pdf_url?: string | null
           service_schedule?: string | null
@@ -948,6 +950,7 @@ export type Database = {
           location?: string | null
           map_url?: string | null
           national_id?: string | null
+          poster_photo_url?: string | null
           profile_photo_url?: string | null
           program_pdf_url?: string | null
           service_schedule?: string | null
