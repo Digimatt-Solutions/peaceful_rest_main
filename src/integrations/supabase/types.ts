@@ -958,6 +958,7 @@ export type Database = {
       }
       memories: {
         Row: {
+          condolence_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -966,10 +967,12 @@ export type Database = {
           memory_date: string | null
           photo_url: string | null
           photos: string[]
+          status: string
           title: string | null
           user_id: string | null
         }
         Insert: {
+          condolence_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -978,10 +981,12 @@ export type Database = {
           memory_date?: string | null
           photo_url?: string | null
           photos?: string[]
+          status?: string
           title?: string | null
           user_id?: string | null
         }
         Update: {
+          condolence_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -990,10 +995,18 @@ export type Database = {
           memory_date?: string | null
           photo_url?: string | null
           photos?: string[]
+          status?: string
           title?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "memories_condolence_id_fkey"
+            columns: ["condolence_id"]
+            isOneToOne: false
+            referencedRelation: "condolences"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "memories_memorial_id_fkey"
             columns: ["memorial_id"]

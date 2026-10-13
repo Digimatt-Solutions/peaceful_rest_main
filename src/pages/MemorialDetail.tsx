@@ -58,6 +58,7 @@ const MemorialDetail = () => {
   const [condMsg, setCondMsg] = useState("");
   const [condFile, setCondFile] = useState<File | null>(null);
   const [condMediaTitle, setCondMediaTitle] = useState("");
+  const [condFileKey, setCondFileKey] = useState(0);
   const [cLikes, setCLikes] = useState<any[]>([]);
   const [cComments, setCComments] = useState<any[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, any>>({});
@@ -91,7 +92,7 @@ const MemorialDetail = () => {
     Promise.all([
       supabase.from("memorials").select("*").eq("id", id).maybeSingle(),
       supabase.from("family_members").select("*").eq("memorial_id", id),
-      supabase.from("memories").select("*").eq("memorial_id", id).order("memory_date", { ascending: false }),
+      supabase.from("memories").select("*").eq("memorial_id", id).eq("status", "approved").order("memory_date", { ascending: false }),
       supabase.from("condolences").select("*").eq("memorial_id", id).in("status", ["approved", "pinned"]).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("announcements").select("*").eq("memorial_id", id).order("created_at", { ascending: false }),
       supabase.from("fundraisers").select("*").eq("memorial_id", id).eq("is_active", true).eq("status", "approved").order("created_at", { ascending: false }),
@@ -145,21 +146,19 @@ const MemorialDetail = () => {
       if (!condMediaTitle.trim()) return toast.error("Please add a brief title for your life moment");
     }
     setSubmitting(true);
+    const condolenceId = crypto.randomUUID();
     let media: { media_url: string; media_type: string; media_title: string } | null = null;
-    if (condFile && userId) {
+    if (condFile) {
       const isVideo = condFile.type.startsWith("video/");
-      const path = `${userId}/memories/${Date.now()}-${condFile.name.replace(/[^\w.-]/g, "_")}`;
+      const folder = userId ? `${userId}/memories` : `guest/${id}`;
+      const path = `${folder}/${Date.now()}-${condFile.name.replace(/[^\w.-]/g, "_")}`;
       const up = await supabase.storage.from("memorial-media").upload(path, condFile, { contentType: condFile.type });
       if (up.error) { setSubmitting(false); toast.error(up.error.message); return; }
       const url = supabase.storage.from("memorial-media").getPublicUrl(path).data.publicUrl;
       media = { media_url: url, media_type: isVideo ? "video" : "image", media_title: condMediaTitle.trim().slice(0, 80) };
-      const { data: mem, error: memErr } = await (supabase as any).from("memories").insert({
-        memorial_id: id, user_id: userId, title: media.media_title,
-        photo_url: url, photos: isVideo ? [] : [url], media_type: media.media_type,
-      }).select().maybeSingle();
-      if (memErr) toast.error(memErr.message); else if (mem) setMemories(m => [mem, ...m]);
     }
     const { error } = await supabase.from("condolences").insert({
+      id: condolenceId,
       memorial_id: id,
       user_id: userId,
       name: parsed.data.name,
@@ -168,9 +167,17 @@ const MemorialDetail = () => {
       status: "pending",
       ...(media || {}),
     } as any);
+    if (error) { setSubmitting(false); toast.error(error.message); return; }
+    if (media) {
+      // Held as pending; it becomes public when an admin approves the condolence.
+      const { error: memErr } = await (supabase as any).from("memories").insert({
+        memorial_id: id, user_id: userId, title: media.media_title, condolence_id: condolenceId, status: "pending",
+        photo_url: media.media_url, photos: media.media_type === "video" ? [] : [media.media_url], media_type: media.media_type,
+      });
+      if (memErr) toast.error(memErr.message);
+    }
     setSubmitting(false);
-    if (error) { toast.error(error.message); return; }
-    form.reset(); setCondMsg(""); setCondFile(null); setCondMediaTitle("");
+    form.reset(); setCondMsg(""); setCondFile(null); setCondMediaTitle(""); setCondFileKey(k => k + 1);
     toast.success("Thank you. Your condolence was submitted and will appear once verified by an admin.");
   };
 
@@ -638,14 +645,11 @@ const MemorialDetail = () => {
               </div>
               <div className="rounded-2xl border border-dashed border-border p-4 space-y-3">
                 <p className="text-sm font-medium">Add a life moment <span className="text-muted-foreground font-normal">(optional photo or short video)</span></p>
-                {userId ? (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <Input type="file" accept="image/*,video/*" onChange={(e) => setCondFile(e.target.files?.[0] || null)} className="rounded-xl" />
-                    <Input value={condMediaTitle} onChange={(e) => setCondMediaTitle(e.target.value)} maxLength={80} placeholder="Brief title, e.g. Graduation day" className="rounded-xl" />
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground"><Link to={`/auth?redirect=${encodeURIComponent(`/memorial/${id}`)}`} className="text-brand-orange underline">Sign in</Link> to attach a photo or video.</p>
-                )}
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Input key={condFileKey} type="file" accept="image/*,video/*" onChange={(e) => setCondFile(e.target.files?.[0] || null)} className="rounded-xl" />
+                  <Input value={condMediaTitle} onChange={(e) => setCondMediaTitle(e.target.value)} maxLength={80} placeholder="Brief title, e.g. Graduation day" className="rounded-xl" />
+                </div>
+                <p className="text-xs text-muted-foreground">Life moments appear in the gallery once approved by the memorial admin.</p>
               </div>
               <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
