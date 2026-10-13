@@ -58,14 +58,8 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
     onChange();
   };
 
-  const share = async () => {
-    const url = `${memorialUrl}#tribute-${c.id}`;
-    const text = `${c.name}: "${c.message.slice(0, 140)}${c.message.length > 140 ? "…" : ""}"`;
-    try {
-      if (navigator.share) await navigator.share({ title: "Makiwa tribute", text, url });
-      else { await navigator.clipboard.writeText(url); toast.success("Tribute link copied"); }
-    } catch (e: any) { if (e?.name !== "AbortError") toast.error("Could not share"); }
-  };
+  const tributeUrl = `${memorialUrl}#tribute-${c.id}`;
+  const tributeText = `${c.name}: "${c.message.slice(0, 140)}${c.message.length > 140 ? "…" : ""}"`;
 
   return (
     <div id={`tribute-${c.id}`} className={`rounded-2xl border p-5 sm:p-6 ${c.is_pinned ? "border-brand-orange/40 bg-brand-orange/[0.03]" : "border-border bg-card"}`}>
@@ -99,9 +93,7 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
         <button onClick={() => setOpen((o) => !o)} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted text-muted-foreground">
           <MessageCircle className="h-4 w-4" /> {comments.length} {comments.length === 1 ? "reply" : "replies"}
         </button>
-        <button onClick={share} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted text-muted-foreground ml-auto">
-          <Share2 className="h-4 w-4" /> Share
-        </button>
+        <ShareMemorialMenu memorialId={memorialId} name={memorialName} urlOverride={tributeUrl} textOverride={tributeText} compact />
       </div>
 
       {open && (
