@@ -1,9 +1,16 @@
 import defaultMemorialPhoto from "@/assets/candle.jpg";
-import { memorialInvitation } from "./memorialInvitation";
-export { memorialInvitation } from "./memorialInvitation";
+import { MAKIWA_DESCRIPTION, memorialInvitation } from "./memorialInvitation";
+export { MAKIWA_DESCRIPTION, memorialInvitation } from "./memorialInvitation";
+
+// Page-specific share metadata so every shared Makiwa link introduces the platform.
+export const siteShareData = (origin = window.location.origin) => ({
+  title: "Makiwa - Honouring Lives, Preserving Memories",
+  text: MAKIWA_DESCRIPTION,
+  url: origin,
+});
 
 export const memorialShareData = (id: string, fullName: string, origin = window.location.origin) => ({
-  title: fullName,
+  title: `${fullName} | Makiwa`,
   text: memorialInvitation(fullName),
   url: new URL(`/memorial/${encodeURIComponent(id)}`, origin).href,
 });
