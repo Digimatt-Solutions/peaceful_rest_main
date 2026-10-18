@@ -115,7 +115,7 @@ const About = () => (
             <div className="overflow-hidden rounded-2xl border border-brand-white/15 shadow-elegant">
               <img src={candleImg} alt="A hand holding a lit memorial candle at dusk" className="aspect-[4/5] w-full object-cover" loading="eager" />
             </div>
-            <div className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-brand-white/15 bg-brand-black/90 p-5 backdrop-blur sm:block">
+            <div className="no-card absolute -bottom-6 -left-6 hidden rounded-2xl border border-brand-white/15 bg-brand-black/90 p-5 backdrop-blur sm:block">
               <p className="font-serif text-lg leading-snug max-w-[220px]">“When we speak of them, they are near.”</p>
             </div>
           </div>
@@ -158,13 +158,13 @@ const About = () => (
     <section className="py-24 lg:py-32 bg-brand-black text-brand-white relative overflow-hidden">
       <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-white/10" />
       <div className="container-luxe grid md:grid-cols-2 gap-8">
-        <div className="rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
+        <div className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
           <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our mission</span>
           <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
             To help every family honour their loved ones with dignity and preserve their legacies for the generations that follow.
           </p>
         </div>
-        <div className="rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
+        <div className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
           <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our vision</span>
           <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
             A world where meaningful digital remembrance is accessible to every family, and no life story is ever lost.
@@ -275,7 +275,7 @@ const About = () => (
           {values.map((v) => {
             const Icon = v.icon;
             return (
-              <div key={v.title} className="rounded-2xl border border-brand-white/15 bg-brand-white/5 p-6 backdrop-blur transition-colors duration-500 hover:border-brand-orange/50">
+              <div key={v.title} className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-6 backdrop-blur transition-colors duration-500 hover:border-brand-orange/50">
                 <Icon className="h-6 w-6 text-brand-orange" />
                 <h3 className="mt-4 font-semibold">{v.title}</h3>
                 <p className="mt-2 text-sm text-brand-white/70 leading-relaxed">{v.desc}</p>
