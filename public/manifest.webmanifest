@@ -1,7 +1,7 @@
 {
   "name": "Makiwa",
   "short_name": "Makiwa",
-  "description": "Helping Families Honor & Remember",
+  "description": "A digital memorial platform helping families Honor, Remember & preserve legacies of their loved ones",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

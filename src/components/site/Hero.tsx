@@ -82,7 +82,7 @@ export const Hero = () => {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-6 lg:pr-8">
             <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase text-brand-orange sm:mb-6">A place for every story</p>
-            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl text-brand-black font-medium leading-[0.98] tracking-tight">
+            <h1 className="font-serif font-semibold text-5xl sm:text-6xl lg:text-7xl text-brand-black leading-[0.88] tracking-tight">              
               Honoring Lives.
               <br />
               Sharing Memories.

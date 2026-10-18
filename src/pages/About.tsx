@@ -11,7 +11,7 @@ import { Footer } from "@/components/site/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { Button } from "@/components/ui/button";
 import { MAKIWA_DESCRIPTION } from "@/lib/memorialSharing";
-import elderImg from "@/assets/why-african-elder.jpg";
+import elderImg from "@/assets/auth.jpg";
 import familyImg from "@/assets/why-african-family.jpg";
 import candleImg from "@/assets/why-african-candle.jpg";
 import sunsetImg from "@/assets/why-sunset-reflection.jpg";
@@ -122,7 +122,7 @@ const About = () => (
     </section>
 
     {/* Our story */}
-    <section className="paper-section py-24 lg:py-32 border-b border-brand-black/10">
+    <section className="paper-section py-14 lg:py-20 border-b border-brand-black/10">
       <div className="container-luxe grid lg:grid-cols-12 gap-14 items-center">
         <div className="lg:col-span-5">
           <div className="overflow-hidden rounded-2xl border border-brand-black/10 shadow-elegant">
@@ -131,21 +131,26 @@ const About = () => (
         </div>
         <div className="lg:col-span-7">
           <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
-            <span className="h-2 w-2 rounded-full bg-brand-orange" /> Our story & purpose
+            <span className="h-2 w-2 rounded-full bg-brand-orange" /> About Makiwa
           </span>
           <h2 className="mt-5 font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
             Because every life deserves a place to be remembered.
           </h2>
           <div className="mt-6 space-y-4 text-muted-foreground leading-relaxed max-w-2xl">
             <p>
-              When a loved one passes, families face so much at once: spreading the word, coordinating the service,
-              gathering contributions, and holding on to the stories and photographs that keep a person close.
-              Too often, those memories scatter across chat threads and fade with time.
+              Makiwa is a digital memorial platform created to bring remembrance, connection, and support together in one meaningful space. 
+              It enables families to honour their loved ones through personalised memorial pages, obituaries, condolences, tributes, 
+              photo and video galleries, fundraising, funeral programs, and other memorial services that help bring people together during difficult times.
             </p>
             <p>
-              Makiwa exists to change that. We give each family a meaningful digital space for remembrance,
-              connection, and support: one place where the obituary lives, where condolences gather, where
-              contributions are recorded with care, and where memories remain long after the farewell.
+              Our purpose extends beyond the farewell. Makiwa helps families, friends, and communities preserve the stories, 
+              milestones, and memories that make every life unique. By creating a lasting digital space for remembrance, 
+              we make it easier to share love, celebrate legacies, support one another, and ensure that the lives that touched us are never forgotten.
+            </p>
+            <p>
+              Through accessible digital tools, Makiwa also helps families keep important memorial information organised and shareable, 
+              allowing relatives and friends near and far to participate in honouring a loved one. Whether sharing a tribute, 
+              contributing to a fundraiser, revisiting cherished photographs, or remembering a special anniversary, people can remain connected through a common space dedicated to celebrating life.
             </p>
           </div>
         </div>
@@ -153,24 +158,19 @@ const About = () => (
     </section>
 
     {/* Mission & vision */}
-    <section className="py-24 lg:py-32 relative overflow-hidden">
+    <section className="py-14 lg:py-16 relative overflow-hidden">
       <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-orange/15" />
       <div className="container-luxe">
         <div className="max-w-2xl mx-auto text-center">
-          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
-            <span className="h-2 w-2 rounded-full bg-brand-orange" /> Mission & vision
-          </span>
-          <h2 className="mt-5 font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
-            What guides every page we help a family create.
-          </h2>
+
         </div>
-        <div className="mt-14 grid md:grid-cols-2 gap-8">
+        <div className=" grid md:grid-cols-2 gap-8">
           <div className="group rounded-2xl border border-brand-black/10 bg-card p-8 lg:p-10 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
               <Target className="h-6 w-6 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
             </div>
             <span className="mt-6 block text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our mission</span>
-            <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
+            <p className="mt-4 font-serif font-medium text-2xl lg:text-2xl leading-snug">
               To help every family honour their loved ones with dignity and preserve their legacies for the generations that follow.
             </p>
           </div>
@@ -179,7 +179,7 @@ const About = () => (
               <Eye className="h-6 w-6 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
             </div>
             <span className="mt-6 block text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our vision</span>
-            <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
+            <p className="mt-4 font-serif font-medium text-2xl lg:text-2xl leading-snug">
               A world where meaningful digital remembrance is accessible to every family, and no life story is ever lost.
             </p>
           </div>
@@ -187,36 +187,8 @@ const About = () => (
       </div>
     </section>
 
-    {/* What Makiwa offers */}
-    <section className="paper-section py-24 lg:py-32 border-b border-brand-black/10">
-      <div className="container-luxe">
-        <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
-            <span className="h-2 w-2 rounded-full bg-brand-orange" /> What Makiwa offers
-          </span>
-          <h2 className="mt-5 font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
-            Everything a family needs, in one gentle place.
-          </h2>
-        </div>
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div key={s.title} className="group rounded-2xl border border-brand-black/10 bg-card p-6 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
-                  <Icon className="h-5 w-5 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
-                </div>
-                <h3 className="mt-5 font-semibold text-base leading-snug">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-
     {/* How it works */}
-    <section className="py-24 lg:py-32">
+    <section className="py-14 lg:py-16">
       <div className="container-luxe">
         <div className="max-w-2xl">
           <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
@@ -239,7 +211,7 @@ const About = () => (
     </section>
 
     {/* Why choose Makiwa */}
-    <section className="paper-section py-24 lg:py-32 border-y border-brand-black/10">
+    <section className="paper-section py-14 lg:py-14 border-y border-brand-black/10">
       <div className="container-luxe grid lg:grid-cols-12 gap-14 items-center">
         <div className="lg:col-span-7">
           <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
@@ -273,37 +245,8 @@ const About = () => (
       </div>
     </section>
 
-    {/* Values */}
-    <section className="py-24 lg:py-32 relative overflow-hidden">
-      <div aria-hidden className="absolute -left-28 -bottom-28 h-80 w-80 rounded-full border border-brand-orange/15" />
-      <div className="container-luxe">
-        <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
-            <span className="h-2 w-2 rounded-full bg-brand-orange" /> Our values
-          </span>
-          <h2 className="mt-5 font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
-            The principles behind every page.
-          </h2>
-        </div>
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {values.map((v) => {
-            const Icon = v.icon;
-            return (
-              <div key={v.title} className="group rounded-2xl border border-brand-black/10 bg-card p-6 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
-                  <Icon className="h-5 w-5 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
-                </div>
-                <h3 className="mt-4 font-semibold">{v.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{v.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-
     {/* A lasting legacy */}
-    <section className="paper-section py-24 lg:py-32 border-b border-brand-black/10">
+    <section className="paper-section py-14 lg:py-14 border-b border-brand-black/10">
       <div className="container-luxe grid lg:grid-cols-12 gap-14 items-center">
         <div className="lg:col-span-5 order-2 lg:order-1">
           <div className="overflow-hidden rounded-2xl border border-brand-black/10 shadow-elegant">
@@ -318,9 +261,14 @@ const About = () => (
             So future generations know the people who shaped their lives.
           </h2>
           <p className="mt-6 max-w-2xl text-muted-foreground leading-relaxed">
-            A photograph, a story told at the graveside, a tribute from an old friend: these fragments become a family's
-            inheritance. Makiwa gathers them into one permanent place, so a grandchild not yet born can one day read
-            the condolences, see the photographs, and understand the life that came before them.
+           Every life leaves behind a story worth telling, a legacy worth celebrating, and memories that deserve to endure. 
+           Photographs, personal stories, heartfelt tributes, and messages from friends and family become treasured pieces of a person's history. 
+           Makiwa brings these memories together in one meaningful digital space, helping families preserve the moments, relationships, and experiences that defined their loved ones. 
+          </p>
+          <p className="mt-4 max-w-2xl text-muted-foreground leading-relaxed">
+          Beyond commemorating a life, Makiwa creates an opportunity for families to pass their heritage from one generation to the next. 
+          Through memorial pages, photographs, condolences, and shared stories, future generations can discover the people who shaped their families, 
+          understand their roots, and appreciate the values and experiences that continue to influence their lives.
           </p>
         </div>
       </div>

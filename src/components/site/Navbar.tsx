@@ -9,8 +9,8 @@ import logo from "@/assets/makiwa-logo-light.png";
 const links = [
   { label: "Home", href: "#home" },
   { label: "About Us", href: "/about", route: true },
-  { label: "Memorials", href: "#memorials" },
-  { label: "Services", href: "#services" },
+  { label: "Memorials", href: "/memorials", route: true },
+  { label: "Services", href: "/funeral-services", route: true },
   { label: "Contact", href: "#contact" },
 ];
 

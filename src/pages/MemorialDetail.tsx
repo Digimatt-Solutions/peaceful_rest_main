@@ -682,7 +682,7 @@ const MemorialDetail = () => {
         </div>
 
         {/* Sidebar */}
-        <aside className="lg:sticky lg:top-24 self-start space-y-6">
+        <aside className="lg:sticky lg:top-20 self-start space-y-6">
           {memorial.poster_photo_url && <div className="hidden lg:block">
             <MemorialPoster src={memorial.poster_photo_url} name={memorial.full_name} />
           </div>}
