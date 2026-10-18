@@ -347,29 +347,6 @@ const About = () => (
       </div>
     </section>
 
-    {/* Closing CTA */}
-    <section className="relative overflow-hidden bg-brand-black py-24 lg:py-32 text-brand-white">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-brand-orange/10 to-transparent" />
-      <div aria-hidden className="absolute -right-24 top-10 h-72 w-72 rounded-full border border-brand-white/10" />
-      <div className="container-luxe relative text-center">
-        <Flame className="mx-auto h-8 w-8 text-brand-orange" />
-        <h2 className="mx-auto mt-6 max-w-3xl font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
-          Begin honouring a life today.
-        </h2>
-        <p className="mx-auto mt-5 max-w-xl text-brand-white/75 leading-relaxed">
-          Explore memorials, create a lasting tribute for someone you love, or reach out and let our team walk with you.
-        </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Button asChild className="rounded-full bg-brand-orange px-7 text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
-            <Link to="/auth?tab=create-account">Create a Memorial <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-          </Button>
-          <Button asChild variant="ghost" className="rounded-full px-7 text-brand-white border border-brand-white/40 hover:bg-brand-white/10 hover:text-brand-white">
-            <a href="mailto:info@makiwa.ke">Contact the Team</a>
-          </Button>
-        </div>
-      </div>
-    </section>
-
     <Footer />
     <ScrollToTop />
   </main>
