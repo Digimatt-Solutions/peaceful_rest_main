@@ -7,7 +7,8 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => (
 })[character] ?? character);
 
 export function memorialPreviewHtml(html: string, memorial: PublicMemorialPreview, pageUrl: string) {
-  const title = escapeHtml(memorial.full_name);
+  const name = escapeHtml(memorial.full_name);
+  const title = `${name} | Makiwa`;
   const description = escapeHtml(memorialInvitation(memorial.full_name));
   const canonical = new URL(pageUrl);
   canonical.search = "";
@@ -44,9 +45,9 @@ export function memorialPreviewHtml(html: string, memorial: PublicMemorialPrevie
     ];
     if (photo) tags.push(
       `<meta property="og:image" content="${photo}">`,
-      `<meta property="og:image:alt" content="${title}">`,
+      `<meta property="og:image:alt" content="${name}">`,
       `<meta name="twitter:image" content="${photo}">`,
-      `<meta name="twitter:image:alt" content="${title}">`,
+      `<meta name="twitter:image:alt" content="${name}">`,
       `<link rel="icon" href="${photo}">`,
     );
     return cleaned.replace(/<\/head>/i, `${tags.join("\n")}\n</head>`);
