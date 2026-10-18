@@ -1,5 +1,12 @@
+import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
 import logo from "@/assets/makiwa-logo-light.png";
+
+const exploreLinks = [
+  { label: "About Us", to: "/about" },
+  { label: "Memorials", to: "/memorials" },
+  { label: "Funeral Services", to: "/funeral-services" },
+];
 
 export const Footer = () => {
   return (
@@ -36,8 +43,8 @@ export const Footer = () => {
         <div>
           <h4 className="font-serif text-lg text-brand-white">Explore</h4>
           <ul className="mt-5 space-y-3 text-sm">
-            {["Memorials", "Services", "Community", "Pricing", "About"].map((l) => (
-              <li key={l}><a href="#" className="hover:text-brand-orange transition-colors">{l}</a></li>
+            {exploreLinks.map((l) => (
+              <li key={l.label}><Link to={l.to} className="hover:text-brand-orange transition-colors">{l.label}</Link></li>
             ))}
           </ul>
         </div>
