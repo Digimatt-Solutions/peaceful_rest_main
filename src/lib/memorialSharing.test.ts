@@ -1,16 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { memorialInvitation, memorialPreviewImage, memorialShareData } from "./memorialSharing";
+import { MAKIWA_DESCRIPTION, memorialInvitation, memorialPreviewImage, memorialShareData, siteShareData } from "./memorialSharing";
 
 describe("memorial sharing", () => {
   it("uses the exact personalized invitation", () => {
-    expect(memorialInvitation("Adil Oloo")).toBe("Join us in honoring the life and times of Adil Oloo.");
+    expect(memorialInvitation("Adil Oloo")).toBe("Join us in honoring the life and times of Adil Oloo, on Makiwa, a digital memorial platform helping families preserve legacies.");
   });
   it("keeps the memorial identity and URL without payment or follow parameters", () => {
     expect(memorialShareData("memorial-123", "Adil Oloo", "https://makiwa.ke")).toEqual({
-      title: "Adil Oloo",
-      text: "Join us in honoring the life and times of Adil Oloo.",
+      title: "Adil Oloo | Makiwa",
+      text: "Join us in honoring the life and times of Adil Oloo, on Makiwa, a digital memorial platform helping families preserve legacies.",
       url: "https://makiwa.ke/memorial/memorial-123",
     });
+  });
+  it("introduces the platform on site-wide shares", () => {
+    const site = siteShareData("https://makiwa.ke");
+    expect(site.url).toBe("https://makiwa.ke");
+    expect(site.text).toBe(MAKIWA_DESCRIPTION);
+    expect(site.title).toContain("Makiwa");
   });
   it("uses each deceased's profile photo rather than branding", () => {
     expect(memorialPreviewImage("https://photos.example/portrait.jpg", "https://makiwa.ke")).toBe("https://photos.example/portrait.jpg");

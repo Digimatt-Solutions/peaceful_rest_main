@@ -12,10 +12,10 @@ afterEach(() => vi.unstubAllGlobals());
 describe("server-delivered memorial previews", () => {
   it("replaces the brand preview and page icon with the deceased's identity", () => {
     const doc = new DOMParser().parseFromString(memorialPreviewHtml(original, memorial, pageUrl), "text/html");
-    expect(doc.title).toBe("Dennis Juma Machyo");
+    expect(doc.title).toBe("Dennis Juma Machyo | Makiwa");
     expect(doc.querySelector('meta[property="og:image"]')?.getAttribute("content")).toBe(portrait);
     expect(doc.querySelector('link[rel="icon"]')?.getAttribute("href")).toBe(portrait);
-    expect(doc.querySelector('meta[property="og:description"]')?.getAttribute("content")).toBe("Join us in honoring the life and times of Dennis Juma Machyo.");
+    expect(doc.querySelector('meta[property="og:description"]')?.getAttribute("content")).toBe("Join us in honoring the life and times of Dennis Juma Machyo, on Makiwa, a digital memorial platform helping families preserve legacies.");
     expect(doc.querySelector('meta[property="og:url"]')?.getAttribute("content")).toBe(pageUrl);
     expect(doc.querySelectorAll('meta[property="og:title"]')).toHaveLength(1);
   });
@@ -29,7 +29,7 @@ describe("server-delivered memorial previews", () => {
   it("does not allow memorial names to inject HTML", () => {
     const doc = new DOMParser().parseFromString(memorialPreviewHtml(original, { ...memorial, full_name: '<script>alert("name")</script>' }, pageUrl), "text/html");
     expect(doc.querySelector("script")).toBeNull();
-    expect(doc.title).toBe('<script>alert("name")</script>');
+    expect(doc.title).toBe('<script>alert("name")</script> | Makiwa');
   });
 
   it("delivers public memorial photos without requiring crawler JavaScript", async () => {
