@@ -153,20 +153,36 @@ const About = () => (
     </section>
 
     {/* Mission & vision */}
-    <section className="py-24 lg:py-32 bg-brand-black text-brand-white relative overflow-hidden">
-      <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-white/10" />
-      <div className="container-luxe grid md:grid-cols-2 gap-8">
-        <div className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our mission</span>
-          <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
-            To help every family honour their loved ones with dignity and preserve their legacies for the generations that follow.
-          </p>
+    <section className="py-24 lg:py-32 relative overflow-hidden">
+      <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-orange/15" />
+      <div className="container-luxe">
+        <div className="max-w-2xl mx-auto text-center">
+          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
+            <span className="h-2 w-2 rounded-full bg-brand-orange" /> Mission & vision
+          </span>
+          <h2 className="mt-5 font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
+            What guides every page we help a family create.
+          </h2>
         </div>
-        <div className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our vision</span>
-          <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
-            A world where meaningful digital remembrance is accessible to every family, and no life story is ever lost.
-          </p>
+        <div className="mt-14 grid md:grid-cols-2 gap-8">
+          <div className="group rounded-2xl border border-brand-black/10 bg-card p-8 lg:p-10 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
+              <Target className="h-6 w-6 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
+            </div>
+            <span className="mt-6 block text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our mission</span>
+            <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
+              To help every family honour their loved ones with dignity and preserve their legacies for the generations that follow.
+            </p>
+          </div>
+          <div className="group rounded-2xl border border-brand-black/10 bg-card p-8 lg:p-10 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
+              <Eye className="h-6 w-6 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
+            </div>
+            <span className="mt-6 block text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our vision</span>
+            <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
+              A world where meaningful digital remembrance is accessible to every family, and no life story is ever lost.
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -258,7 +274,7 @@ const About = () => (
     </section>
 
     {/* Values */}
-    <section className="py-24 lg:py-32 bg-brand-black text-brand-white relative overflow-hidden">
+    <section className="py-24 lg:py-32 relative overflow-hidden">
       <div aria-hidden className="absolute -left-28 -bottom-28 h-80 w-80 rounded-full border border-brand-orange/15" />
       <div className="container-luxe">
         <div className="max-w-2xl">
@@ -273,10 +289,12 @@ const About = () => (
           {values.map((v) => {
             const Icon = v.icon;
             return (
-              <div key={v.title} className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-6 backdrop-blur transition-colors duration-500 hover:border-brand-orange/50">
-                <Icon className="h-6 w-6 text-brand-orange" />
+              <div key={v.title} className="group rounded-2xl border border-brand-black/10 bg-card p-6 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
+                  <Icon className="h-5 w-5 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
+                </div>
                 <h3 className="mt-4 font-semibold">{v.title}</h3>
-                <p className="mt-2 text-sm text-brand-white/70 leading-relaxed">{v.desc}</p>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{v.desc}</p>
               </div>
             );
           })}
