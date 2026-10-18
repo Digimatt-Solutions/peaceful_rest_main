@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import {
   BookOpen, MessageCircleHeart, Images, HandHeart, Printer, CalendarCheck,
   GitBranch, BellRing, HeartHandshake, ShieldCheck, Globe2, Users, Sparkles,
-  Flame, ArrowRight, ChevronDown,
+  Flame, ArrowRight, ChevronDown, Target, Eye,
 } from "lucide-react";
 import { useState } from "react";
 import { Navbar } from "@/components/site/Navbar";
@@ -86,8 +86,8 @@ const About = () => (
     <Navbar />
 
     {/* Hero */}
-    <section className="relative overflow-hidden bg-brand-black pt-36 pb-24 lg:pt-44 lg:pb-32 text-brand-white">
-      <div aria-hidden className="absolute -left-32 top-10 h-96 w-96 rounded-full border border-brand-white/10" />
+    <section className="paper-section relative overflow-hidden pt-36 pb-24 lg:pt-44 lg:pb-32 border-b border-brand-black/10">
+      <div aria-hidden className="absolute -left-32 top-10 h-96 w-96 rounded-full border border-brand-black/10" />
       <div aria-hidden className="absolute -right-24 bottom-0 h-72 w-72 rounded-full border border-brand-orange/20" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-brand-orange/10 to-transparent" />
       <div className="container-luxe relative grid lg:grid-cols-12 gap-12 items-center">
@@ -98,25 +98,23 @@ const About = () => (
           <h1 className="mt-6 font-serif text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
             Honouring Lives. Preserving Memories. <em className="not-italic text-brand-orange">Keeping Legacies Alive.</em>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-brand-white/75">
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             {MAKIWA_DESCRIPTION}
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild className="rounded-full bg-brand-orange px-7 text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
               <Link to="/memorials">Explore Memorials <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             </Button>
-            <Button asChild variant="ghost" className="rounded-full px-7 text-brand-white border border-brand-white/40 hover:bg-brand-white/10 hover:text-brand-white">
+            <Button asChild variant="outline" className="rounded-full px-7 border-brand-black/20 hover:border-brand-orange hover:text-brand-orange">
               <Link to="/funeral-services">Discover Our Services</Link>
             </Button>
           </div>
         </div>
         <div className="lg:col-span-5">
-          <div className="relative">
-            <div className="overflow-hidden rounded-2xl border border-brand-white/15 shadow-elegant">
-              <img src={candleImg} alt="A hand holding a lit memorial candle at dusk" className="aspect-[4/5] w-full object-cover" loading="eager" />
-            </div>
-            <div className="no-card absolute -bottom-6 -left-6 hidden rounded-2xl border border-brand-white/15 bg-brand-black/90 p-5 backdrop-blur sm:block">
-              <p className="font-serif text-lg leading-snug max-w-[220px]">“When we speak of them, they are near.”</p>
+          <div className="relative mx-auto max-w-sm">
+            <div aria-hidden className="absolute -inset-4 rounded-full border border-brand-orange/25" />
+            <div className="overflow-hidden rounded-full border-4 border-card shadow-elegant">
+              <img src={candleImg} alt="A hand holding a lit memorial candle at dusk" className="aspect-square w-full object-cover" loading="eager" />
             </div>
           </div>
         </div>
