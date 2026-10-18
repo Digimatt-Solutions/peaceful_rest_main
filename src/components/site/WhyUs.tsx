@@ -126,6 +126,10 @@ export const WhyUs = () => {
               );
             })}
           </div>
+
+          <Button asChild className="mt-10 rounded-full bg-brand-orange px-7 text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
+            <Link to="/about">Learn More About Makiwa <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+          </Button>
         </div>
       </div>
     </section>
