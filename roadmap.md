@@ -19,3 +19,7 @@
 - [x] Default tribute profile picture stored in the app
 - [x] Memorial page hides the family tree until a relationship exists
 - [x] Super admin Memorials: "My memorials" plus "All memorials" from other admins, editable in Obituary Management
+
+- [x] Branded share metadata: memorial previews titled "Name | Makiwa" with platform introduction; site-wide OG/Twitter description
+- [x] Premium About Makiwa page at /about with story, mission, services, values, FAQ, and CTAs
+- [x] About Us links in navbar, footer, and homepage About section
