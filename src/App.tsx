@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import MemorialDetail from "./pages/MemorialDetail";
 import AllMemorials from "./pages/AllMemorials";
 import FuneralServices from "./pages/FuneralServices";
+import About from "./pages/About";
 
 import Overview from "./pages/dashboard/Overview";
 import MyMemorials from "./pages/dashboard/MyMemorials";
@@ -77,6 +78,7 @@ const App = () => (
 
             <Route path="/memorials" element={<AllMemorials />} />
             <Route path="/funeral-services" element={<FuneralServices />} />
+            <Route path="/about" element={<About />} />
             <Route path="/memorial/:id" element={<MemorialDetail />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
