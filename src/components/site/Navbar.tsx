@@ -51,13 +51,22 @@ export const Navbar = () => {
         <ul className="hidden lg:flex items-center gap-8">
           {links.map((l) => (
             <li key={l.label}>
-              <a
-                href={l.href}
-                onClick={(e) => handleNavClick(e, l.href)}
-                className="text-sm font-medium tracking-wide text-brand-white/85 transition-colors hover:text-brand-orange"
-              >
-                {l.label}
-              </a>
+              {"route" in l && l.route ? (
+                <Link
+                  to={l.href}
+                  className="text-sm font-medium tracking-wide text-brand-white/85 transition-colors hover:text-brand-orange"
+                >
+                  {l.label}
+                </Link>
+              ) : (
+                <a
+                  href={l.href}
+                  onClick={(e) => handleNavClick(e, l.href)}
+                  className="text-sm font-medium tracking-wide text-brand-white/85 transition-colors hover:text-brand-orange"
+                >
+                  {l.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>
@@ -93,13 +102,23 @@ export const Navbar = () => {
           <ul className="container-luxe py-4 flex flex-col gap-4">
             {links.map((l) => (
               <li key={l.label}>
-                <a
-                  href={l.href}
-                  onClick={(e) => handleNavClick(e, l.href)}
-                  className="block py-2 text-base font-medium text-brand-white/85 hover:text-brand-orange"
-                >
-                  {l.label}
-                </a>
+                {"route" in l && l.route ? (
+                  <Link
+                    to={l.href}
+                    onClick={() => setOpen(false)}
+                    className="block py-2 text-base font-medium text-brand-white/85 hover:text-brand-orange"
+                  >
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={l.href}
+                    onClick={(e) => handleNavClick(e, l.href)}
+                    className="block py-2 text-base font-medium text-brand-white/85 hover:text-brand-orange"
+                  >
+                    {l.label}
+                  </a>
+                )}
               </li>
             ))}
             <li className="flex gap-3 pt-1">
