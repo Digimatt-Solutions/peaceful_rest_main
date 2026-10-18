@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import {
   BookOpen, MessageCircleHeart, Images, HandHeart, Printer, CalendarCheck,
   GitBranch, BellRing, HeartHandshake, ShieldCheck, Globe2, Users, Sparkles,
-  Flame, ArrowRight, ChevronDown,
+  Flame, ArrowRight, ChevronDown, Target, Eye,
 } from "lucide-react";
 import { useState } from "react";
 import { Navbar } from "@/components/site/Navbar";
@@ -86,8 +86,8 @@ const About = () => (
     <Navbar />
 
     {/* Hero */}
-    <section className="relative overflow-hidden bg-brand-black pt-36 pb-24 lg:pt-44 lg:pb-32 text-brand-white">
-      <div aria-hidden className="absolute -left-32 top-10 h-96 w-96 rounded-full border border-brand-white/10" />
+    <section className="paper-section relative overflow-hidden pt-36 pb-24 lg:pt-44 lg:pb-32 border-b border-brand-black/10">
+      <div aria-hidden className="absolute -left-32 top-10 h-96 w-96 rounded-full border border-brand-black/10" />
       <div aria-hidden className="absolute -right-24 bottom-0 h-72 w-72 rounded-full border border-brand-orange/20" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-brand-orange/10 to-transparent" />
       <div className="container-luxe relative grid lg:grid-cols-12 gap-12 items-center">
@@ -98,25 +98,23 @@ const About = () => (
           <h1 className="mt-6 font-serif text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.05] tracking-tight">
             Honouring Lives. Preserving Memories. <em className="not-italic text-brand-orange">Keeping Legacies Alive.</em>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-brand-white/75">
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             {MAKIWA_DESCRIPTION}
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild className="rounded-full bg-brand-orange px-7 text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
               <Link to="/memorials">Explore Memorials <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             </Button>
-            <Button asChild variant="ghost" className="rounded-full px-7 text-brand-white border border-brand-white/40 hover:bg-brand-white/10 hover:text-brand-white">
+            <Button asChild variant="outline" className="rounded-full px-7 border-brand-black/20 hover:border-brand-orange hover:text-brand-orange">
               <Link to="/funeral-services">Discover Our Services</Link>
             </Button>
           </div>
         </div>
         <div className="lg:col-span-5">
-          <div className="relative">
-            <div className="overflow-hidden rounded-2xl border border-brand-white/15 shadow-elegant">
-              <img src={candleImg} alt="A hand holding a lit memorial candle at dusk" className="aspect-[4/5] w-full object-cover" loading="eager" />
-            </div>
-            <div className="no-card absolute -bottom-6 -left-6 hidden rounded-2xl border border-brand-white/15 bg-brand-black/90 p-5 backdrop-blur sm:block">
-              <p className="font-serif text-lg leading-snug max-w-[220px]">“When we speak of them, they are near.”</p>
+          <div className="relative mx-auto max-w-sm">
+            <div aria-hidden className="absolute -inset-4 rounded-full border border-brand-orange/25" />
+            <div className="overflow-hidden rounded-full border-4 border-card shadow-elegant">
+              <img src={candleImg} alt="A hand holding a lit memorial candle at dusk" className="aspect-square w-full object-cover" loading="eager" />
             </div>
           </div>
         </div>
@@ -155,20 +153,36 @@ const About = () => (
     </section>
 
     {/* Mission & vision */}
-    <section className="py-24 lg:py-32 bg-brand-black text-brand-white relative overflow-hidden">
-      <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-white/10" />
-      <div className="container-luxe grid md:grid-cols-2 gap-8">
-        <div className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our mission</span>
-          <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
-            To help every family honour their loved ones with dignity and preserve their legacies for the generations that follow.
-          </p>
+    <section className="py-24 lg:py-32 relative overflow-hidden">
+      <div aria-hidden className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-brand-orange/15" />
+      <div className="container-luxe">
+        <div className="max-w-2xl mx-auto text-center">
+          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">
+            <span className="h-2 w-2 rounded-full bg-brand-orange" /> Mission & vision
+          </span>
+          <h2 className="mt-5 font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
+            What guides every page we help a family create.
+          </h2>
         </div>
-        <div className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-8 lg:p-10 backdrop-blur">
-          <span className="text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our vision</span>
-          <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
-            A world where meaningful digital remembrance is accessible to every family, and no life story is ever lost.
-          </p>
+        <div className="mt-14 grid md:grid-cols-2 gap-8">
+          <div className="group rounded-2xl border border-brand-black/10 bg-card p-8 lg:p-10 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
+              <Target className="h-6 w-6 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
+            </div>
+            <span className="mt-6 block text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our mission</span>
+            <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
+              To help every family honour their loved ones with dignity and preserve their legacies for the generations that follow.
+            </p>
+          </div>
+          <div className="group rounded-2xl border border-brand-black/10 bg-card p-8 lg:p-10 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
+              <Eye className="h-6 w-6 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
+            </div>
+            <span className="mt-6 block text-xs uppercase tracking-[0.3em] text-brand-orange font-semibold">Our vision</span>
+            <p className="mt-4 font-serif text-2xl lg:text-3xl leading-snug">
+              A world where meaningful digital remembrance is accessible to every family, and no life story is ever lost.
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -260,7 +274,7 @@ const About = () => (
     </section>
 
     {/* Values */}
-    <section className="py-24 lg:py-32 bg-brand-black text-brand-white relative overflow-hidden">
+    <section className="py-24 lg:py-32 relative overflow-hidden">
       <div aria-hidden className="absolute -left-28 -bottom-28 h-80 w-80 rounded-full border border-brand-orange/15" />
       <div className="container-luxe">
         <div className="max-w-2xl">
@@ -275,10 +289,12 @@ const About = () => (
           {values.map((v) => {
             const Icon = v.icon;
             return (
-              <div key={v.title} className="no-card rounded-2xl border border-brand-white/15 bg-brand-white/5 p-6 backdrop-blur transition-colors duration-500 hover:border-brand-orange/50">
-                <Icon className="h-6 w-6 text-brand-orange" />
+              <div key={v.title} className="group rounded-2xl border border-brand-black/10 bg-card p-6 shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-elegant hover:border-brand-orange/40">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-orange/10 transition-colors duration-500 group-hover:bg-brand-orange">
+                  <Icon className="h-5 w-5 text-brand-orange transition-colors duration-500 group-hover:text-brand-white" />
+                </div>
                 <h3 className="mt-4 font-semibold">{v.title}</h3>
-                <p className="mt-2 text-sm text-brand-white/70 leading-relaxed">{v.desc}</p>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{v.desc}</p>
               </div>
             );
           })}
@@ -327,29 +343,6 @@ const About = () => (
         </div>
         <div className="lg:col-span-8 space-y-4">
           {faqs.map((f) => <FaqItem key={f.q} q={f.q} a={f.a} />)}
-        </div>
-      </div>
-    </section>
-
-    {/* Closing CTA */}
-    <section className="relative overflow-hidden bg-brand-black py-24 lg:py-32 text-brand-white">
-      <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-brand-orange/10 to-transparent" />
-      <div aria-hidden className="absolute -right-24 top-10 h-72 w-72 rounded-full border border-brand-white/10" />
-      <div className="container-luxe relative text-center">
-        <Flame className="mx-auto h-8 w-8 text-brand-orange" />
-        <h2 className="mx-auto mt-6 max-w-3xl font-serif text-3xl lg:text-5xl font-medium leading-[1.08] tracking-tight">
-          Begin honouring a life today.
-        </h2>
-        <p className="mx-auto mt-5 max-w-xl text-brand-white/75 leading-relaxed">
-          Explore memorials, create a lasting tribute for someone you love, or reach out and let our team walk with you.
-        </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Button asChild className="rounded-full bg-brand-orange px-7 text-brand-white hover:bg-brand-orange/90 shadow-glow border border-brand-orange/40">
-            <Link to="/auth?tab=create-account">Create a Memorial <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-          </Button>
-          <Button asChild variant="ghost" className="rounded-full px-7 text-brand-white border border-brand-white/40 hover:bg-brand-white/10 hover:text-brand-white">
-            <a href="mailto:info@makiwa.ke">Contact the Team</a>
-          </Button>
         </div>
       </div>
     </section>
