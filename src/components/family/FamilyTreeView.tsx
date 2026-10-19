@@ -377,9 +377,20 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
         {canReorder && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground">Drag a card onto another in the same section to swap positions.</p>
         )}
+        {!expandedMode && (
+          <button
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-expanded={mobileOpen}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border border-border py-2 text-xs font-semibold transition-colors hover:bg-muted/50 sm:hidden"
+          >
+            {mobileOpen ? "Hide family tree" : "View family tree"}
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", mobileOpen && "rotate-180")} />
+          </button>
+        )}
       </header>
 
-      <div className={cn("space-y-1 px-3 py-5 sm:px-6", expandedMode && "max-h-[calc(100vh-12rem)] overflow-y-auto")}>
+      <div className={cn("space-y-1 px-3 py-5 sm:px-6", expandedMode && "max-h-[calc(100vh-12rem)] overflow-y-auto", !mobileOpen && !expandedMode && "hidden sm:block")}>
         {/* Descendants of the children sit at the top, like the reference */}
         {renderSection("greatGrandchildren")}
         {sections.greatGrandchildren.length > 0 && <Connector />}
