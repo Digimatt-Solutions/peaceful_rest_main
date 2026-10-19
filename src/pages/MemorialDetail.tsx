@@ -33,9 +33,9 @@ import paystackLogo from "@/assets/paystack-logo.png";
 const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "-";
 
 const condolenceSchema = z.object({
-  name: z.string().trim().min(2, "Please share your name").max(80),
+  name: z.string().trim().min(2, "Please share your name").max(100),
   relationship: z.string().trim().max(60).optional(),
-  message: z.string().trim().min(10, "Please share at least a sentence").max(1500),
+  message: z.string().trim().min(10, "Please share at least a sentence").max(30000),
 });
 
 const MemorialDetail = () => {
