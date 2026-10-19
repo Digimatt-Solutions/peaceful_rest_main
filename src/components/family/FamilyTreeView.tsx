@@ -141,59 +141,7 @@ const Connector = () => (
   </div>
 );
 
-// ---- PDF export (unchanged layout engine) ----
-
-const createLayout = (deceasedName: string, deceasedPhoto: string | null | undefined, members: FamilyMember[]) => {
-  const groups = new Map<number, FamilyMember[]>();
-  members.forEach((member) => {
-    const generation = relationshipGeneration(member.relationship);
-    groups.set(generation, [...(groups.get(generation) || []), member]);
-  });
-
-  const generations = Array.from(new Set([0, ...groups.keys()])).sort((a, b) => a - b);
-  const minGeneration = Math.min(...generations);
-  const maxGeneration = Math.max(...generations);
-  const rows = generations.map((generation) => {
-    const group = sortMembers(generation, groups.get(generation) || []);
-    const count = group.length + (generation === 0 ? 1 : 0);
-    return { generation, group, width: Math.max(CARD_WIDTH, count * CARD_WIDTH + Math.max(0, count - 1) * COLUMN_GAP) };
-  });
-  const worldWidth = Math.max(720, ...rows.map((row) => row.width)) + 160;
-  const worldHeight = Math.max(560, (maxGeneration - minGeneration) * ROW_GAP + 280);
-  const centerX = worldWidth / 2;
-  const centerGenerationY = 140 + (0 - minGeneration) * ROW_GAP;
-  const nodes: TreeNode[] = [];
-
-  rows.forEach(({ generation, group }) => {
-    const rowMembers: Array<FamilyMember & { deceased?: boolean }> = generation === 0
-      ? [
-          ...group.filter((member) => relationshipLane(0, member.relationship) === 0),
-          { id: "deceased-anchor", name: deceasedName, relationship: "In loving memory", photo_url: deceasedPhoto, deceased: true },
-          ...group.filter((member) => relationshipLane(0, member.relationship) !== 0),
-        ]
-      : group;
-    const rowWidth = rowMembers.length * CARD_WIDTH + Math.max(0, rowMembers.length - 1) * COLUMN_GAP;
-    const startX = centerX - rowWidth / 2 + CARD_WIDTH / 2;
-    rowMembers.forEach((member, index) => nodes.push({
-      ...member,
-      generation,
-      x: startX + index * (CARD_WIDTH + COLUMN_GAP),
-      y: centerGenerationY + generation * ROW_GAP,
-    }));
-  });
-
-  return { nodes, rows, worldWidth, worldHeight, centerX, centerGenerationY };
-};
-
-const generationLabel = (generation: number) => {
-  if (generation <= -3) return "Great-grandchildren";
-  if (generation === -2) return "Grandchildren";
-  if (generation === -1) return "Children, nieces & nephews";
-  if (generation === 0) return "Deceased, partners & siblings";
-  if (generation === 1) return "Parents, aunts & uncles";
-  if (generation === 2) return "Grandparents";
-  return "Great-grandparents";
-};
+// ---- PDF export: mirrors the on-screen sectioned layout ----
 
 export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className, canReorder = false, onSwap, expandedMode = false }: Props) => {
   const draggedMember = useRef<FamilyMember | null>(null);
