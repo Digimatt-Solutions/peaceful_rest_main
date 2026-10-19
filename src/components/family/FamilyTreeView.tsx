@@ -121,11 +121,12 @@ const SECTIONS: Record<SectionKey, { title: string; icon: typeof Users; panel: s
   extended: { title: "Extended Family", icon: Users, panel: "bg-muted/40 border-border", chip: "bg-foreground text-background" },
 };
 
-const SectionPanel = ({ sectionKey, count, children, className }: {
+const SectionPanel = ({ sectionKey, count, children, className, compact = false }: {
   sectionKey: SectionKey;
   count: number;
   children: React.ReactNode;
   className?: string;
+  compact?: boolean;
 }) => {
   const section = SECTIONS[sectionKey];
   const Icon = section.icon;
@@ -138,7 +139,7 @@ const SectionPanel = ({ sectionKey, count, children, className }: {
         <h3 className="text-xs font-bold uppercase tracking-widest">{section.title}</h3>
         <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-semibold text-muted-foreground border border-border">{count}</span>
       </div>
-      <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+      <div className={cn("grid grid-cols-1 gap-2 min-[420px]:grid-cols-2", !compact && "sm:grid-cols-3 lg:grid-cols-4")}>
         {children}
       </div>
     </div>
