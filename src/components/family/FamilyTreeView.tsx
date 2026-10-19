@@ -150,7 +150,7 @@ const Connector = () => (
   <div className="flex justify-center py-1" aria-hidden="true">
     <span className="h-6 w-px bg-border" />
   </div>
-};
+);
 
 // ---- PDF export (unchanged layout engine) ----
 
