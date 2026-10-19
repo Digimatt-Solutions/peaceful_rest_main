@@ -432,7 +432,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
         )}
       </div>
 
-      <footer className="border-t border-border px-4 py-3 text-center">
+      <footer className={cn("border-t border-border px-4 py-3 text-center", !mobileOpen && !expandedMode && "hidden sm:block")}>
         <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Family · Legacy · Love</p>
       </footer>
 
