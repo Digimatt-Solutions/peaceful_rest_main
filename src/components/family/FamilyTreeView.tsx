@@ -359,11 +359,11 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
     }
   }, [deceasedName, layout]);
 
-  const renderSection = (key: SectionKey) => {
+  const renderSection = (key: SectionKey, compact = false) => {
     const list = sections[key];
     if (list.length === 0) return null;
     return (
-      <SectionPanel sectionKey={key} count={list.length}>
+      <SectionPanel sectionKey={key} count={list.length} compact={compact}>
         {list.map((member) => (
           <MemberCard
             key={member.id}
@@ -425,7 +425,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
         {/* Parents — deceased — Partner row */}
         <div className="grid items-stretch gap-3 lg:grid-cols-[1fr_auto_1fr]">
           <div className="flex flex-col justify-center">
-            {renderSection("parents")}
+            {renderSection("parents", true)}
           </div>
 
           <div className="flex items-center justify-center">
@@ -441,7 +441,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
           </div>
 
           <div className="flex flex-col justify-center">
-            {renderSection("partner")}
+            {renderSection("partner", true)}
           </div>
         </div>
 
