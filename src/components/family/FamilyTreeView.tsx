@@ -147,6 +147,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
   const draggedMember = useRef<FamilyMember | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const sections = useMemo(() => {
     const grouped: Record<SectionKey, FamilyMember[]> = {
