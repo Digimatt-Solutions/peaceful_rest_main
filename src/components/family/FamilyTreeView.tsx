@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Baby, Download, Expand, Heart, Users } from "lucide-react";
+import { Baby, ChevronDown, Download, Expand, Heart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -23,18 +23,6 @@ type Props = {
   onSwap?: (first: FamilyMember, second: FamilyMember, orderedLane: FamilyMember[]) => Promise<void> | void;
   expandedMode?: boolean;
 };
-
-type TreeNode = FamilyMember & {
-  generation: number;
-  x: number;
-  y: number;
-  deceased?: boolean;
-};
-
-const CARD_WIDTH = 152;
-const CARD_HEIGHT = 112;
-const COLUMN_GAP = 34;
-const ROW_GAP = 184;
 
 const relationshipGeneration = (relationship: string) => {
   const value = relationship.toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
