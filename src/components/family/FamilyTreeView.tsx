@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Baby, Download, Expand, Heart, Users } from "lucide-react";
+import { Baby, ChevronDown, Download, Expand, Heart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -23,18 +23,6 @@ type Props = {
   onSwap?: (first: FamilyMember, second: FamilyMember, orderedLane: FamilyMember[]) => Promise<void> | void;
   expandedMode?: boolean;
 };
-
-type TreeNode = FamilyMember & {
-  generation: number;
-  x: number;
-  y: number;
-  deceased?: boolean;
-};
-
-const CARD_WIDTH = 152;
-const CARD_HEIGHT = 112;
-const COLUMN_GAP = 34;
-const ROW_GAP = 184;
 
 const relationshipGeneration = (relationship: string) => {
   const value = relationship.toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
@@ -153,64 +141,13 @@ const Connector = () => (
   </div>
 );
 
-// ---- PDF export (unchanged layout engine) ----
-
-const createLayout = (deceasedName: string, deceasedPhoto: string | null | undefined, members: FamilyMember[]) => {
-  const groups = new Map<number, FamilyMember[]>();
-  members.forEach((member) => {
-    const generation = relationshipGeneration(member.relationship);
-    groups.set(generation, [...(groups.get(generation) || []), member]);
-  });
-
-  const generations = Array.from(new Set([0, ...groups.keys()])).sort((a, b) => a - b);
-  const minGeneration = Math.min(...generations);
-  const maxGeneration = Math.max(...generations);
-  const rows = generations.map((generation) => {
-    const group = sortMembers(generation, groups.get(generation) || []);
-    const count = group.length + (generation === 0 ? 1 : 0);
-    return { generation, group, width: Math.max(CARD_WIDTH, count * CARD_WIDTH + Math.max(0, count - 1) * COLUMN_GAP) };
-  });
-  const worldWidth = Math.max(720, ...rows.map((row) => row.width)) + 160;
-  const worldHeight = Math.max(560, (maxGeneration - minGeneration) * ROW_GAP + 280);
-  const centerX = worldWidth / 2;
-  const centerGenerationY = 140 + (0 - minGeneration) * ROW_GAP;
-  const nodes: TreeNode[] = [];
-
-  rows.forEach(({ generation, group }) => {
-    const rowMembers: Array<FamilyMember & { deceased?: boolean }> = generation === 0
-      ? [
-          ...group.filter((member) => relationshipLane(0, member.relationship) === 0),
-          { id: "deceased-anchor", name: deceasedName, relationship: "In loving memory", photo_url: deceasedPhoto, deceased: true },
-          ...group.filter((member) => relationshipLane(0, member.relationship) !== 0),
-        ]
-      : group;
-    const rowWidth = rowMembers.length * CARD_WIDTH + Math.max(0, rowMembers.length - 1) * COLUMN_GAP;
-    const startX = centerX - rowWidth / 2 + CARD_WIDTH / 2;
-    rowMembers.forEach((member, index) => nodes.push({
-      ...member,
-      generation,
-      x: startX + index * (CARD_WIDTH + COLUMN_GAP),
-      y: centerGenerationY + generation * ROW_GAP,
-    }));
-  });
-
-  return { nodes, rows, worldWidth, worldHeight, centerX, centerGenerationY };
-};
-
-const generationLabel = (generation: number) => {
-  if (generation <= -3) return "Great-grandchildren";
-  if (generation === -2) return "Grandchildren";
-  if (generation === -1) return "Children, nieces & nephews";
-  if (generation === 0) return "Deceased, partners & siblings";
-  if (generation === 1) return "Parents, aunts & uncles";
-  if (generation === 2) return "Grandparents";
-  return "Great-grandparents";
-};
+// ---- PDF export: mirrors the on-screen sectioned layout ----
 
 export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className, canReorder = false, onSwap, expandedMode = false }: Props) => {
   const draggedMember = useRef<FamilyMember | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const sections = useMemo(() => {
     const grouped: Record<SectionKey, FamilyMember[]> = {
@@ -258,98 +195,125 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
     await onSwap?.(source, target, orderedLane);
   };
 
-  const layout = useMemo(() => createLayout(deceasedName, deceasedPhoto, members), [deceasedName, deceasedPhoto, members]);
-
   const downloadPdf = useCallback(async () => {
     setExporting(true);
     try {
       const { jsPDF } = await import("jspdf");
-      const landscape = layout.worldWidth >= layout.worldHeight;
-      const pdf = new jsPDF({ orientation: landscape ? "landscape" : "portrait", unit: "pt", format: "a3" });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const titleHeight = 72;
-      const legendHeight = 58;
-      const scale = Math.min((pageWidth - 56) / layout.worldWidth, (pageHeight - titleHeight - legendHeight - 36) / layout.worldHeight);
-      const offsetX = (pageWidth - layout.worldWidth * scale) / 2;
-      const offsetY = titleHeight;
-      const sx = (value: number) => offsetX + value * scale;
-      const sy = (value: number) => offsetY + value * scale;
-      const anchor = layout.nodes.find((node) => node.deceased);
+      const margin = 36;
+      let y = margin;
 
+      // Header — mirrors the on-screen header
+      pdf.setFont("times", "bold");
+      pdf.setFontSize(22);
       pdf.setTextColor(31, 31, 31);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(20);
-      pdf.text(`${deceasedName} — Family Tree`, 28, 34);
+      pdf.text("Makiwa", margin, y);
       pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(9);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text("Automatically arranged by relationship to the deceased", 28, 50);
+      pdf.setFontSize(7);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text("REMEMBER · HONOUR · TOGETHER", margin, y + 11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(8);
+      pdf.text("FAMILY TREE", pageWidth - margin, y, { align: "right" });
+      y += 36;
+      pdf.setFont("times", "bold");
+      pdf.setFontSize(26);
+      pdf.setTextColor(31, 31, 31);
+      pdf.text(deceasedName, pageWidth / 2, y, { align: "center" });
+      y += 16;
+      pdf.setFont("times", "italic");
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text("“Forever in our hearts, always in our family.”", pageWidth / 2, y, { align: "center" });
+      y += 22;
+      pdf.setDrawColor(220, 220, 220);
+      pdf.setLineWidth(0.8);
+      pdf.line(margin, y, pageWidth - margin, y);
+      y += 22;
 
-      if (anchor) {
-        pdf.setDrawColor(185, 185, 185);
-        pdf.setLineWidth(Math.max(0.6, 1.4 * scale));
-        const grouped = new Map<number, TreeNode[]>();
-        layout.nodes.forEach((node) => grouped.set(node.generation, [...(grouped.get(node.generation) || []), node]));
-        grouped.forEach((nodes, generation) => {
-          if (generation === 0) {
-            nodes.filter((node) => !node.deceased).forEach((node) => pdf.line(sx(Math.min(node.x, anchor.x) + CARD_WIDTH / 2), sy(anchor.y), sx(Math.max(node.x, anchor.x) - CARD_WIDTH / 2), sy(anchor.y)));
-            return;
-          }
-          const rowY = nodes[0]?.y;
-          if (rowY === undefined) return;
-          const toward = generation < 0 ? rowY + CARD_HEIGHT / 2 : rowY - CARD_HEIGHT / 2;
-          const bus = generation < 0 ? toward + 34 : toward - 34;
-          const xs = nodes.map((node) => node.x);
-          pdf.line(sx(Math.min(...xs, layout.centerX)), sy(bus), sx(Math.max(...xs, layout.centerX)), sy(bus));
-          pdf.line(sx(layout.centerX), sy(bus), sx(layout.centerX), sy(anchor.y + (generation < 0 ? -CARD_HEIGHT / 2 : CARD_HEIGHT / 2)));
-          nodes.forEach((node) => pdf.line(sx(node.x), sy(toward), sx(node.x), sy(bus)));
-        });
-      }
+      const cardHeight = 46;
+      const gap = 8;
+      const cols = 3;
+      const cardWidth = (pageWidth - margin * 2 - gap * (cols - 1)) / cols;
 
-      layout.rows.forEach(({ generation }) => {
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(Math.max(6, 8 * scale));
-        pdf.setTextColor(110, 110, 110);
-        pdf.text(generationLabel(generation).toUpperCase(), sx(20), sy(layout.centerGenerationY + generation * ROW_GAP - CARD_HEIGHT / 2 - 13));
-      });
+      const ensureSpace = (needed: number) => {
+        if (y + needed > pageHeight - margin - 16) {
+          pdf.addPage();
+          y = margin;
+        }
+      };
 
-      layout.nodes.forEach((node) => {
-        const left = sx(node.x - CARD_WIDTH / 2);
-        const top = sy(node.y - CARD_HEIGHT / 2);
-        const width = CARD_WIDTH * scale;
-        const height = CARD_HEIGHT * scale;
-        if (node.deceased) {
+      const drawCard = (name: string, relationship: string, left: number, top: number, width: number, deceased = false) => {
+        if (deceased) {
           pdf.setFillColor(255, 247, 242);
-          pdf.setDrawColor(239, 91, 28);
-          pdf.setLineWidth(2);
+          pdf.setDrawColor(243, 112, 33);
+          pdf.setLineWidth(1.6);
         } else {
           pdf.setFillColor(255, 255, 255);
           pdf.setDrawColor(205, 205, 205);
           pdf.setLineWidth(0.8);
         }
-        pdf.roundedRect(left, top, width, height, 5, 5, "FD");
+        pdf.roundedRect(left, top, width, cardHeight, 5, 5, "FD");
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(Math.max(6, 10 * scale));
+        pdf.setFontSize(9);
         pdf.setTextColor(31, 31, 31);
-        const nameLines = pdf.splitTextToSize(node.name, Math.max(34, width - 18));
-        pdf.text(nameLines.slice(0, 2), left + 9, top + height / 2 - 3);
+        const nameLines = pdf.splitTextToSize(name, width - 14);
+        pdf.text(nameLines.slice(0, 2), left + 7, top + 16);
         pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(Math.max(5, 7 * scale));
-        pdf.setTextColor(node.deceased ? 239 : 100, node.deceased ? 91 : 100, node.deceased ? 28 : 100);
-        pdf.text(node.relationship.toUpperCase(), left + 9, top + height - 10);
-      });
+        pdf.setFontSize(6.5);
+        if (deceased) pdf.setTextColor(243, 112, 33);
+        else pdf.setTextColor(110, 110, 110);
+        pdf.text(relationship.toUpperCase(), left + 7, top + cardHeight - 7);
+      };
 
-      const legendY = pageHeight - 42;
-      pdf.setFillColor(255, 247, 242);
-      pdf.setDrawColor(239, 91, 28);
-      pdf.roundedRect(28, legendY - 11, 18, 14, 3, 3, "FD");
-      pdf.setTextColor(55, 55, 55);
-      pdf.setFontSize(8);
-      pdf.text("Highlighted card: deceased anchor", 53, legendY);
-      pdf.setDrawColor(185, 185, 185);
-      pdf.line(225, legendY - 4, 255, legendY - 4);
-      pdf.text("Lines: family relationship connection", 263, legendY);
+      const drawConnector = () => {
+        pdf.setDrawColor(210, 210, 210);
+        pdf.setLineWidth(0.8);
+        pdf.line(pageWidth / 2, y, pageWidth / 2, y + 12);
+        y += 20;
+      };
+
+      const drawSection = (key: SectionKey) => {
+        const list = sections[key];
+        if (list.length === 0) return;
+        const rows = Math.ceil(list.length / cols);
+        ensureSpace(24 + rows * (cardHeight + gap));
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(8);
+        pdf.setTextColor(243, 112, 33);
+        pdf.text(`${SECTIONS[key].title.toUpperCase()} (${list.length})`, margin, y);
+        y += 10;
+        list.forEach((member, index) => {
+          const row = Math.floor(index / cols);
+          const col = index % cols;
+          drawCard(member.name, member.relationship, margin + col * (cardWidth + gap), y + row * (cardHeight + gap), cardWidth);
+        });
+        y += rows * (cardHeight + gap) + 4;
+        drawConnector();
+      };
+
+      // Same order as on screen: descendants top, parents → deceased → partner, then children, siblings, extended
+      drawSection("greatGrandchildren");
+      drawSection("grandchildren");
+      drawSection("parents");
+
+      const anchorWidth = cardWidth * 1.4;
+      ensureSpace(cardHeight + 10);
+      drawCard(deceasedName, "† Deceased", (pageWidth - anchorWidth) / 2, y, anchorWidth, true);
+      y += cardHeight + 4;
+      drawConnector();
+
+      drawSection("partner");
+      drawSection("children");
+      drawSection("siblings");
+      drawSection("extended");
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(140, 140, 140);
+      pdf.text("FAMILY · LEGACY · LOVE — MAKIWA", pageWidth / 2, pageHeight - 20, { align: "center" });
 
       pdf.save(`${deceasedName.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase()}-family-tree.pdf`);
     } catch {
@@ -357,7 +321,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
     } finally {
       setExporting(false);
     }
-  }, [deceasedName, layout]);
+  }, [deceasedName, sections]);
 
   const renderSection = (key: SectionKey, compact = false) => {
     const list = sections[key];
@@ -413,9 +377,20 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
         {canReorder && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground">Drag a card onto another in the same section to swap positions.</p>
         )}
+        {!expandedMode && (
+          <button
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-expanded={mobileOpen}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border border-border py-2 text-xs font-semibold transition-colors hover:bg-muted/50 sm:hidden"
+          >
+            {mobileOpen ? "Hide family tree" : "View family tree"}
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", mobileOpen && "rotate-180")} />
+          </button>
+        )}
       </header>
 
-      <div className={cn("space-y-1 px-3 py-5 sm:px-6", expandedMode && "max-h-[calc(100vh-12rem)] overflow-y-auto")}>
+      <div className={cn("space-y-1 px-3 py-5 sm:px-6", expandedMode && "max-h-[calc(100vh-12rem)] overflow-y-auto", !mobileOpen && !expandedMode && "hidden sm:block")}>
         {/* Descendants of the children sit at the top, like the reference */}
         {renderSection("greatGrandchildren")}
         {sections.greatGrandchildren.length > 0 && <Connector />}
@@ -457,7 +432,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
         )}
       </div>
 
-      <footer className="border-t border-border px-4 py-3 text-center">
+      <footer className={cn("border-t border-border px-4 py-3 text-center", !mobileOpen && !expandedMode && "hidden sm:block")}>
         <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Family · Legacy · Love</p>
       </footer>
 
