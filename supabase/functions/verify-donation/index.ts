@@ -59,6 +59,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       status: session.payment_status,
       amount: existing.amount,
+      donation_id: existing.id,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

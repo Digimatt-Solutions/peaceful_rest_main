@@ -54,11 +54,11 @@ export const DonateDialog = ({ fundraiser, onOpenChange, onCompleted }: Props) =
   const finish = async (donationId?: string, amount?: number) => {
     let don: any = null;
     if (donationId) {
-      const { data } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+      const { data } = await supabase.from("masked_donations").select("*").eq("id", donationId).maybeSingle();
       don = data;
     } else if (user) {
       const { data } = await supabase
-        .from("donations").select("*")
+        .from("masked_donations").select("*")
         .eq("fundraiser_id", fundraiser.id).eq("user_id", user.id)
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       don = data;

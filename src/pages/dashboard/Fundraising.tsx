@@ -373,7 +373,7 @@ const Fundraising = () => {
       donor_name: contribForm.is_anonymous ? null : contribForm.donor_name,
       donor_phone: contribForm.is_anonymous ? null : (contribForm.donor_phone || null),
       is_anonymous: contribForm.is_anonymous, status: "paid", payment_method: "manual",
-    }).select().maybeSingle();
+    }).select("id,fundraiser_id,user_id,donor_name,amount,is_anonymous,message,created_at,status,payment_method").maybeSingle();
     if (error || !ins) { setSavingContrib(false); return toast.error(error?.message || "Failed"); }
     const fund = funds.find(f => f.id === contribForm.fundraiser_id);
     if (fund) {
