@@ -1,5 +1,10 @@
 # Makiwa roadmap
 
+- [ ] Privacy policy, connected consent notice and public submission disclosures
+- [ ] Consent-gated family publication, abbreviated names, protected minor profiles and signed-in downloads
+- [ ] Public privacy requests and masked donor identifiers across records, receipts and exports
+- [ ] Verify privacy safeguards and request publication after security review
+
 - [x] Add obituary poster uploads and portrait placement on desktop/mobile
 - [x] Soften Life Moments edges and apply compact mobile memorial margins
 
