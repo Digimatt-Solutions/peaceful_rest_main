@@ -1,5 +1,7 @@
 # Makiwa roadmap
 
+- [ ] Remove the privacy-page footer's external links and add an owner/admin family-tree public visibility switch, preserving consent and restricted-profile safeguards
+
 - [x] Privacy policy, connected consent notice and public submission disclosures
 - [x] Consent-gated family publication, abbreviated names, protected minor profiles and signed-in downloads
 - [x] Public privacy requests and masked donor identifiers across records, receipts and exports
