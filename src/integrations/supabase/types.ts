@@ -916,6 +916,7 @@ export type Database = {
           date_of_birth: string | null
           date_of_death: string | null
           family_consent_confirmed: boolean
+          family_tree_public: boolean
           full_name: string
           gender: string | null
           id: string
@@ -942,6 +943,7 @@ export type Database = {
           date_of_birth?: string | null
           date_of_death?: string | null
           family_consent_confirmed?: boolean
+          family_tree_public?: boolean
           full_name: string
           gender?: string | null
           id?: string
@@ -968,6 +970,7 @@ export type Database = {
           date_of_birth?: string | null
           date_of_death?: string | null
           family_consent_confirmed?: boolean
+          family_tree_public?: boolean
           full_name?: string
           gender?: string | null
           id?: string

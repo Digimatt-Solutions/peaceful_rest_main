@@ -1,4 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { familyDisplayName } from "@/lib/privacy";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -79,17 +80,25 @@ const FamilyTree = () => {
   const [consent, setConsent] = useState(false);
   const [isMinor, setIsMinor] = useState(false);
   const [privacyMode, setPrivacyMode] = useState("abbreviated");
+  const [savingVisibility, setSavingVisibility] = useState(false);
   const deceased = memorials.find(m => m.id === memorialId);
 
   useEffect(() => {
     document.title = "Family Tree · Makiwa";
     if (!user) return;
-    const q = supabase.from("memorials").select("id,full_name,profile_photo_url,family_consent_confirmed");
-    const promise = isSuperAdmin ? q : q.eq("created_by", user.id);
-    promise.then(({ data }) => {
+    let cancelled = false;
+    const loadMemorials = async () => {
+      const q = supabase.from("memorials").select("id,full_name,profile_photo_url,family_consent_confirmed,family_tree_public");
+      const { data: assignments } = isSuperAdmin ? { data: [] } : await supabase.from("memorial_admins").select("memorial_id").eq("user_id", user.id);
+      const assignedIds = (assignments || []).map(a => a.memorial_id);
+      const { data, error } = await (isSuperAdmin ? q : assignedIds.length ? q.or(`created_by.eq.${user.id},id.in.(${assignedIds.join(",")})`) : q.eq("created_by", user.id));
+      if (cancelled) return;
+      if (error) { toast.error("Could not load your memorials"); return; }
       setMemorials(data || []);
       if (data?.[0]) setMemorialId(data[0].id);
-    });
+    };
+    void loadMemorials();
+    return () => { cancelled = true; };
   }, [user, isSuperAdmin]);
 
   useEffect(() => {
@@ -97,6 +106,22 @@ const FamilyTree = () => {
     supabase.from("family_members").select("*").eq("memorial_id", memorialId).order("created_at")
       .then(({ data }) => setMembers((data as Member[]) || []));
   }, [memorialId]);
+
+  const saveVisibility = async (visible: boolean) => {
+    if (!memorialId || savingVisibility) return;
+    const targetId = memorialId;
+    setSavingVisibility(true);
+    try {
+      const { data, error } = await supabase.from("memorials").update({ family_tree_public: visible }).eq("id", targetId).select("id,family_tree_public").maybeSingle();
+      if (error || !data) { toast.error("Family tree visibility could not be saved. Please try again."); return; }
+      setMemorials(current => current.map(m => m.id === targetId ? { ...m, family_tree_public: data.family_tree_public } : m));
+      toast.success(visible ? "Family tree public visibility enabled" : "Family tree hidden from public view");
+    } catch {
+      toast.error("Family tree visibility could not be saved. Please try again.");
+    } finally {
+      setSavingVisibility(false);
+    }
+  };
 
   const add = async () => {
     if (!name.trim() || !memorialId) return;
@@ -197,6 +222,10 @@ const FamilyTree = () => {
             </Button>
           </div>
 
+          <div className="mb-5 flex items-center justify-between gap-4 border-y border-border py-4">
+            <Label htmlFor="family-tree-public" className="text-sm font-medium">Show family tree publicly</Label>
+            <Switch id="family-tree-public" checked={deceased?.family_tree_public === true} disabled={savingVisibility || !deceased} onCheckedChange={saveVisibility} />
+          </div>
           {!deceased?.family_consent_confirmed && <p className="mb-4 text-sm text-muted-foreground">Family information stays hidden publicly until consent is confirmed in <Link to={`/dashboard/obituary?id=${memorialId}`} className="underline text-brand-orange">Obituary Management</Link>.</p>}
           <FamilyTreeView
             deceasedName={deceased?.full_name || "Loved One"}

@@ -1,7 +1,7 @@
 # Architecture rules
 
 - Use the shared consent module and Google Consent Mode defaults for analytics; optional custom visit tracking must check permission before collection to respect privacy choices.
-- Public family trees read only the redacted public_family_members RPC; raw family records remain administrator-only so names and restricted profiles cannot leak through public queries.
+- Public family trees read only the redacted public_family_members RPC, which enforces the per-memorial visibility switch and consent for every caller; raw family records remain administrator-only so names and restricted profiles cannot leak through public queries.
 - Read donations through masked_donations in user-facing screens; raw contact identifiers are restricted to payment processing so masking is enforced beyond presentation.
 - Privacy requests are collected without sign-in and reviewed in Oversight under server-side platform-admin rules; retention cleanup runs daily with legal-hold exceptions.
 

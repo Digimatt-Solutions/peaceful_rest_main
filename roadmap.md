@@ -1,6 +1,7 @@
 # Makiwa roadmap
 
-- [ ] Remove the privacy-page footer's external links and add an owner/admin family-tree public visibility switch, preserving consent and restricted-profile safeguards
+- [x] Remove the privacy-page footer's external links and add an owner/admin family-tree public visibility switch, preserving consent and restricted-profile safeguards; 19 tests and public mobile checks passed
+- [ ] Verify the family-tree switch saves and reads back while signed in (blocked: requesting user has no matching app account/session; sign in through the preview)
 
 - [x] Privacy policy, connected consent notice and public submission disclosures
 - [x] Consent-gated family publication, abbreviated names, protected minor profiles and signed-in downloads

@@ -22,4 +22,7 @@ export function maskReceiptPhones(html: string): string {
 }
 
 export function mayPublishFamily(consent: boolean): boolean { return consent === true; }
+export function mayShowPublicFamilyTree(memorial: { is_public?: boolean; family_tree_public?: boolean; family_consent_confirmed?: boolean }): boolean {
+  return memorial.is_public === true && memorial.family_tree_public === true && memorial.family_consent_confirmed === true;
+}
 export function mayDownload(userId?: string | null): boolean { return Boolean(userId); }

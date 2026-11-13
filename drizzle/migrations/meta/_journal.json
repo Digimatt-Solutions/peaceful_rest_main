@@ -99,6 +99,13 @@
       "when": 1794554135420,
       "tag": "0013_privacy_public_scope_and_request_controls",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794554978617,
+      "tag": "0014_family_tree_public_visibility",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { PrivacyRequest } from "@/components/privacy/PrivacyRequest";
+import { mayShowPublicFamilyTree } from "@/lib/privacy";
 import { PublicSubmissionNotice } from "@/components/privacy/PublicSubmissionNotice";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CondolenceTribute } from "@/components/memorial/CondolenceTribute";
@@ -478,7 +479,7 @@ const MemorialDetail = () => {
             <MemorialPoster src={memorial.poster_photo_url} name={memorial.full_name} />
           </div>}
 
-          {family.length > 0 && (
+          {mayShowPublicFamilyTree(memorial) && family.length > 0 && (
           <section>
             <SectionTitle icon={Users} eyebrow="Family" title="The family tree" />
             <div className="mt-8">
