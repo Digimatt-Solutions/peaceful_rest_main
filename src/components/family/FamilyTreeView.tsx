@@ -1,3 +1,5 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { familyDisplayName, mayDownload } from "@/lib/privacy";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Baby, ChevronDown, Download, Expand, Heart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,8 @@ export type FamilyMember = {
   relationship: string;
   photo_url?: string | null;
   display_order?: number | null;
+  is_minor?: boolean;
+  privacy_mode?: string;
 };
 
 type Props = {
@@ -87,10 +91,10 @@ const MemberCard = ({ member, canReorder, onDragStart, onDrop }: {
     }}
   >
     <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-[11px] font-semibold text-background">
-      {member.photo_url ? <img src={member.photo_url} alt="" className="h-full w-full object-cover" /> : initialsOf(member.name)}
+      {member.photo_url && !member.is_minor && member.privacy_mode !== "initials" ? <img src={member.photo_url} alt="" className="h-full w-full object-cover" /> : initialsOf(member.name)}
     </div>
     <div className="min-w-0 text-left">
-      <p className="truncate text-sm font-semibold leading-snug">{member.name}</p>
+      <p className="truncate text-sm font-semibold leading-snug">{familyDisplayName(member.name, member.is_minor || member.privacy_mode === "initials")}</p>
       <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">{member.relationship}</p>
     </div>
   </article>
@@ -144,6 +148,7 @@ const Connector = () => (
 // ---- PDF export: mirrors the on-screen sectioned layout ----
 
 export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className, canReorder = false, onSwap, expandedMode = false }: Props) => {
+  const { user } = useAuth();
   const draggedMember = useRef<FamilyMember | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -196,6 +201,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
   };
 
   const downloadPdf = useCallback(async () => {
+    if (!mayDownload(user?.id)) return;
     setExporting(true);
     try {
       const { jsPDF } = await import("jspdf");
@@ -288,7 +294,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
         list.forEach((member, index) => {
           const row = Math.floor(index / cols);
           const col = index % cols;
-          drawCard(member.name, member.relationship, margin + col * (cardWidth + gap), y + row * (cardHeight + gap), cardWidth);
+          drawCard(familyDisplayName(member.name, member.is_minor || member.privacy_mode === "initials"), member.relationship, margin + col * (cardWidth + gap), y + row * (cardHeight + gap), cardWidth);
         });
         y += rows * (cardHeight + gap) + 4;
         drawConnector();
@@ -321,7 +327,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
     } finally {
       setExporting(false);
     }
-  }, [deceasedName, sections]);
+  }, [deceasedName, sections, user]);
 
   const renderSection = (key: SectionKey, compact = false) => {
     const list = sections[key];
@@ -365,7 +371,7 @@ export const FamilyTreeView = ({ deceasedName, deceasedPhoto, members, className
           </p>
         </div>
         <div className="mt-4 flex items-center justify-center gap-2">
-          <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={downloadPdf} disabled={exporting}>
+          <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={downloadPdf} disabled={exporting || !mayDownload(user?.id)} title={!user ? "Sign in to download" : undefined}>
             <Download className="mr-1.5 h-3.5 w-3.5" /> {exporting ? "Preparing…" : "Download PDF"}
           </Button>
           {!expandedMode && (

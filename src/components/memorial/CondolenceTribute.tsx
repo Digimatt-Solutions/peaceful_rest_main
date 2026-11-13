@@ -1,3 +1,4 @@
+import { PublicSubmissionNotice } from "@/components/privacy/PublicSubmissionNotice";
 import { useRef, useState } from "react";
 import { Heart, MessageCircle, Loader2, Send, Trash2 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
@@ -127,6 +128,7 @@ export const CondolenceTribute = ({ c, avatar, likes, comments, profiles, userId
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
+            <PublicSubmissionNotice replies />
           </div>
         </div>
       )}

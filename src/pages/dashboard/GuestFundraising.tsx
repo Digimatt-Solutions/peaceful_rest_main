@@ -1,3 +1,4 @@
+import { maskReceiptPhones } from "@/lib/privacy";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,9 +49,9 @@ const GuestFundraising = () => {
     if (user) {
       const [{ data: rs }, { data: ds }] = await Promise.all([
         supabase.from("donation_receipts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("donations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("masked_donations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
-      setReceipts(rs || []);
+      setReceipts((rs || []).map(r => ({ ...r, html: maskReceiptPhones(r.html) })));
       setMyDonations(ds || []);
     }
     setLoading(false);
@@ -71,7 +72,7 @@ const GuestFundraising = () => {
         toast.success(outcome.message!);
         // Store the receipt against the guest's account so it appears below.
         if (outcome.donation_id && user) {
-          const { data: don } = await supabase.from("donations").select("*").eq("id", outcome.donation_id).maybeSingle();
+          const { data: don } = await supabase.from("masked_donations").select("*").eq("id", outcome.donation_id).maybeSingle();
           if (don?.status === "paid") {
             const { data: fr } = await supabase.from("fundraisers").select("title, memorial_id").eq("id", don.fundraiser_id).maybeSingle();
             let memorial_name: string | undefined;

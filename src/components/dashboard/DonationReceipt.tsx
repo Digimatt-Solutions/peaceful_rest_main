@@ -1,3 +1,4 @@
+import { maskPhone } from "@/lib/privacy";
 import { format } from "date-fns";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ const methodMeta = (m?: string | null) => {
 };
 
 export const buildReceiptHTML = (d: ReceiptData) => {
-  const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
+  const name = d.is_anonymous ? "Anonymous" : (d.donor_name || maskPhone(d.donor_phone) || "Anonymous");
   const refNo = `MKW-${d.id.slice(0, 8).toUpperCase()}`;
   const dateStr = format(new Date(d.created_at), "dd/MM/yyyy");
   const timeStr = format(new Date(d.created_at), "HH:mm:ss");
@@ -96,7 +97,7 @@ export const buildReceiptHTML = (d: ReceiptData) => {
   <div class="sep"></div>
 
   <div class="row"><span class="k">Donor</span><span class="v">${name}</span></div>
-  ${d.donor_phone && !d.is_anonymous ? `<div class="row"><span class="k">Phone</span><span class="v">${d.donor_phone}</span></div>` : ""}
+  ${d.donor_phone && !d.is_anonymous ? `<div class="row"><span class="k">Phone</span><span class="v">${maskPhone(d.donor_phone)}</span></div>` : ""}
   ${d.memorial_name ? `<div class="row"><span class="k">In memory of</span><span class="v">${d.memorial_name}</span></div>` : ""}
 
   <div class="sep"></div>

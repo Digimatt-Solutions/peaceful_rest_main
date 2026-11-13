@@ -1,3 +1,6 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import { familyDisplayName } from "@/lib/privacy";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -57,7 +60,7 @@ const tidyLabel = (v: string) =>
     .map((w) => (["in", "of", "the", "and"].includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
     .join(" ");
 
-type Member = { id: string; name: string; relationship: string; memorial_id: string; photo_url?: string | null; display_order?: number | null };
+type Member = { id: string; name: string; relationship: string; memorial_id: string; photo_url?: string | null; display_order?: number | null; is_minor?: boolean; privacy_mode?: string; consent_confirmed?: boolean };
 
 const FamilyTree = () => {
   const { user } = useAuth();
@@ -73,12 +76,15 @@ const FamilyTree = () => {
   const [editRel, setEditRel] = useState("Father");
   const [editCustomRel, setEditCustomRel] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [isMinor, setIsMinor] = useState(false);
+  const [privacyMode, setPrivacyMode] = useState("abbreviated");
   const deceased = memorials.find(m => m.id === memorialId);
 
   useEffect(() => {
     document.title = "Family Tree · Makiwa";
     if (!user) return;
-    const q = supabase.from("memorials").select("id,full_name,profile_photo_url");
+    const q = supabase.from("memorials").select("id,full_name,profile_photo_url,family_consent_confirmed");
     const promise = isSuperAdmin ? q : q.eq("created_by", user.id);
     promise.then(({ data }) => {
       setMemorials(data || []);
@@ -94,11 +100,12 @@ const FamilyTree = () => {
 
   const add = async () => {
     if (!name.trim() || !memorialId) return;
+    if (!consent) return toast.error("Confirm permission before adding this family member");
     const rel = relationship === "Other" ? tidyLabel(customRel) : relationship;
     if (!rel) return toast.error("Please describe the relationship");
     const { data, error } = await supabase
       .from("family_members")
-      .insert({ memorial_id: memorialId, name: tidyLabel(name), relationship: rel })
+      .insert({ memorial_id: memorialId, name: tidyLabel(name), relationship: rel, consent_confirmed: consent, is_minor: isMinor, privacy_mode: isMinor && privacyMode === "abbreviated" ? "initials" : privacyMode })
       .select()
       .maybeSingle();
     if (error) return toast.error(error.message);
@@ -119,6 +126,9 @@ const FamilyTree = () => {
   };
 
   const startEdit = (m: Member) => {
+    setConsent(false);
+    setIsMinor(Boolean(m.is_minor));
+    setPrivacyMode(m.privacy_mode || "abbreviated");
     setEditing(m);
     setEditName(m.name);
     const known = RELATIONSHIPS.includes(m.relationship);
@@ -128,16 +138,17 @@ const FamilyTree = () => {
 
   const saveEdit = async () => {
     if (!editing) return;
+    if (!consent) return toast.error("Confirm permission before saving");
     if (!editName.trim()) return toast.error("Name required");
     const rel = editRel === "Other" ? tidyLabel(editCustomRel) : editRel;
     if (!rel) return toast.error("Please describe the relationship");
     const nextName = tidyLabel(editName);
     const { error } = await supabase
       .from("family_members")
-      .update({ name: nextName, relationship: rel })
+      .update({ name: nextName, relationship: rel, consent_confirmed: consent, is_minor: isMinor, privacy_mode: isMinor && privacyMode === "abbreviated" ? "initials" : privacyMode })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
-    setMembers(members.map(m => m.id === editing.id ? { ...m, name: nextName, relationship: rel } : m));
+    setMembers(members.map(m => m.id === editing.id ? { ...m, name: nextName, relationship: rel, consent_confirmed: consent, is_minor: isMinor, privacy_mode: isMinor && privacyMode === "abbreviated" ? "initials" : privacyMode } : m));
     setEditing(null);
     toast.success("Updated");
   };
@@ -157,6 +168,8 @@ const FamilyTree = () => {
     setMembers((current) => current.map((member) => orders.has(member.id) ? { ...member, display_order: orders.get(member.id) } : member));
     toast.success("Family positions updated");
   };
+
+  const privacyFields = <div className="space-y-3 border-t border-border pt-4"><label className="flex items-center gap-2 text-sm"><Checkbox checked={isMinor} onCheckedChange={value => { setIsMinor(value === true); if (value) setPrivacyMode("initials"); }} />Under 18 years old</label><Select value={privacyMode} onValueChange={setPrivacyMode}><SelectTrigger aria-label="Family profile visibility"><SelectValue /></SelectTrigger><SelectContent>{!isMinor && <SelectItem value="abbreviated">Public: first name and initials</SelectItem>}<SelectItem value="initials">Public: initials only, no photo</SelectItem><SelectItem value="family">Family access only (authorised administrators)</SelectItem></SelectContent></Select><label className="flex items-start gap-2 text-sm"><Checkbox checked={consent} onCheckedChange={value => setConsent(value === true)} /><span>I confirm I have permission from this living relative, or appropriate parental/guardian consent for a minor, for the selected use of their information and photos.</span></label><Link to="/privacy" className="text-xs underline text-brand-orange">Privacy Policy</Link></div>;
 
   return (
     <>
@@ -179,15 +192,16 @@ const FamilyTree = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={() => setAddOpen(true)} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+            <Button onClick={() => { setConsent(false); setIsMinor(false); setPrivacyMode("abbreviated"); setAddOpen(true); }} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
               <Plus className="h-4 w-4 mr-1.5" /> Add family member
             </Button>
           </div>
 
+          {!deceased?.family_consent_confirmed && <p className="mb-4 text-sm text-muted-foreground">Family information stays hidden publicly until consent is confirmed in <Link to={`/dashboard/obituary?id=${memorialId}`} className="underline text-brand-orange">Obituary Management</Link>.</p>}
           <FamilyTreeView
             deceasedName={deceased?.full_name || "Loved One"}
             deceasedPhoto={deceased?.profile_photo_url}
-            members={members}
+            members={members.filter(m => m.privacy_mode !== "family" && m.consent_confirmed)}
             canReorder
             onSwap={swapMembers}
             className="mb-10 mx-auto"
@@ -202,7 +216,8 @@ const FamilyTree = () => {
                     {m.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{m.name}</p>
+                    <p className="text-sm font-medium truncate">{familyDisplayName(m.name, m.is_minor || m.privacy_mode === "initials")}</p>
+                    <p className="text-xs text-muted-foreground">{m.privacy_mode === "family" ? "Family access only" : !m.consent_confirmed ? "Awaiting consent" : "Consent confirmed"}</p>
                     <p className="text-xs text-muted-foreground">{m.relationship}</p>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
@@ -254,6 +269,7 @@ const FamilyTree = () => {
               )}
             </div>
           </div>
+          {privacyFields}
           <DialogFooter>
             <Button variant="outline" className="rounded-xl" onClick={() => setEditing(null)}>Cancel</Button>
             <Button onClick={saveEdit} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-brand-white">Save</Button>
@@ -294,6 +310,7 @@ const FamilyTree = () => {
               )}
             </div>
           </div>
+          {privacyFields}
           <DialogFooter>
             <Button variant="outline" className="rounded-xl" onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button onClick={add} className="rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-brand-white">

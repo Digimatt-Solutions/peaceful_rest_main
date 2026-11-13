@@ -1,3 +1,4 @@
+import { PublicSubmissionNotice } from "@/components/privacy/PublicSubmissionNotice";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -203,6 +204,7 @@ const Condolences = () => {
           <div className="space-y-2"><Label>Message</Label>
             <Textarea rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Share a memory or message of comfort…" />
           </div>
+          <PublicSubmissionNotice />
           <Button onClick={addCondolence} disabled={submitting} className="w-full rounded-xl bg-brand-orange text-brand-white hover:bg-brand-orange/90">
             {submitting ? "Sharing…" : "Share condolence"}
           </Button>

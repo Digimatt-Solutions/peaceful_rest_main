@@ -1,3 +1,5 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { mayDownload } from "@/lib/privacy";
 import { useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
@@ -13,10 +15,12 @@ type Props = {
 };
 
 export const MemorialQR = ({ memorialId, memorialName, size = 180, compact = false }: Props) => {
+  const { user } = useAuth();
   const wrapRef = useRef<HTMLDivElement>(null);
   const { url } = memorialShareData(memorialId, memorialName);
 
   const download = () => {
+    if (!mayDownload(user?.id)) return;
     const canvas = wrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
     if (!canvas) return;
     const padded = document.createElement("canvas");
@@ -68,7 +72,7 @@ export const MemorialQR = ({ memorialId, memorialName, size = 180, compact = fal
         />
       </div>
       <div className="mt-4 flex flex-col gap-2">
-        <Button onClick={download} className="w-full rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90">
+        <Button disabled={!mayDownload(user?.id)} title={!user ? "Sign in to download" : undefined} onClick={download} className="w-full rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90">
           <Download className="h-4 w-4 mr-2" /> Download QR
         </Button>
         <Button onClick={share} variant="outline" className="w-full rounded-xl">

@@ -1,3 +1,5 @@
+import { PrivacyRequest } from "@/components/privacy/PrivacyRequest";
+import { PublicSubmissionNotice } from "@/components/privacy/PublicSubmissionNotice";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CondolenceTribute } from "@/components/memorial/CondolenceTribute";
 import { EmojiPicker, insertAtCursor } from "@/components/memorial/EmojiPicker";
@@ -92,7 +94,7 @@ const MemorialDetail = () => {
     setLoading(true);
     Promise.all([
       supabase.from("memorials").select("*").eq("id", id).maybeSingle(),
-      supabase.from("family_members").select("*").eq("memorial_id", id),
+      supabase.rpc("public_family_members", { _memorial_id: id }),
       supabase.from("memories").select("*").eq("memorial_id", id).eq("status", "approved").order("memory_date", { ascending: false }),
       supabase.from("condolences").select("*").eq("memorial_id", id).in("status", ["approved", "pinned"]).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("announcements").select("*").eq("memorial_id", id).order("created_at", { ascending: false }),
@@ -195,7 +197,7 @@ const MemorialDetail = () => {
         const { data, error } = await supabase.functions.invoke("verify-donation", { body: { session_id: sessionId } });
         if (!error && data?.status === "paid") {
           // Fetch the donation record for the receipt
-          const { data: don } = await supabase.from("donations").select("*").eq("stripe_session_id", sessionId).maybeSingle();
+          const { data: don } = await supabase.from("masked_donations").select("*").eq("id", data.donation_id || "00000000-0000-0000-0000-000000000000").maybeSingle();
           if (don) {
             const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
             setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
@@ -318,7 +320,7 @@ const MemorialDetail = () => {
   /** Opens the printable receipt once a contribution is confirmed as paid. */
   const showReceiptFor = async (donationId?: string | null) => {
     if (!donationId) return;
-    const { data: don } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+    const { data: don } = await supabase.from("masked_donations").select("*").eq("id", donationId).maybeSingle();
     if (!don || don.status !== "paid") return;
     const { data: fund } = await supabase.from("fundraisers").select("title").eq("id", don.fundraiser_id).maybeSingle();
     setReceiptDonation({ ...don, fundraiser_title: fund?.title, memorial_name: memorial?.full_name });
@@ -661,7 +663,7 @@ const MemorialDetail = () => {
               <Button type="submit" disabled={submitting} className="rounded-full bg-brand-orange text-brand-black hover:bg-brand-orange/90 h-12 px-7">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send condolences"}
               </Button>
-              <p className="text-xs text-muted-foreground">Official condolences are reviewed before they appear publicly.</p>
+              <PublicSubmissionNotice />
             </form>
 
             <div className="mt-8 space-y-4">
@@ -673,7 +675,7 @@ const MemorialDetail = () => {
                   likes={cLikes.filter(l => l.condolence_id === c.id)}
                   comments={cComments.filter(r => r.condolence_id === c.id)}
                   profiles={profileMap} userId={userId} memorialUrl={`${window.location.origin}/memorial/${id}`}
-                  memorialId={id!} memorialName={memorial.full_name}
+                  memorialId={id || ""} memorialName={memorial.full_name}
                   onChange={loadInteractions}
                 />
               ))}
@@ -705,6 +707,7 @@ const MemorialDetail = () => {
           )}
 
           <MemorialQR memorialId={memorial.id} memorialName={memorial.full_name} />
+          {memorial.is_public && <PrivacyRequest memorialId={memorial.id} />}
 
           <div className="rounded-2xl border border-brand-orange/30 bg-gradient-to-b from-brand-orange/5 to-transparent p-6 text-center">
             <Flame className="h-6 w-6 mx-auto text-brand-orange candle-flicker" />

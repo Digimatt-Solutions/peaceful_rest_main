@@ -1,3 +1,5 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import { mayPublishFamily } from "@/lib/privacy";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,7 +22,7 @@ const empty = {
   full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
   cover_photo_url: "", profile_photo_url: "", poster_photo_url: "", biography: "",
   burial_details: "", service_schedule: "", venue: "", location: "",
-  map_url: "", program_pdf_url: "", short_tribute: "", is_public: false, verification_status: "pending",
+  family_consent_confirmed: false, map_url: "", program_pdf_url: "", short_tribute: "", is_public: false, verification_status: "pending",
 };
 
 const ObituaryManagement = () => {
@@ -110,6 +112,7 @@ const ObituaryManagement = () => {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!mayPublishFamily(form.family_consent_confirmed)) { toast.error("Confirm family and guardian consent before saving this memorial"); return; }
     if (!form.full_name) { toast.error("Full name is required"); return; }
     if (!id && !draftReady) {
       toast.error("Two validators must verify their phone number and confirm before this memorial can be created");
@@ -150,6 +153,7 @@ const ObituaryManagement = () => {
       else toast.error(error.message);
       return;
     }
+    if (!data) { toast.error("No changes were saved. Please check your editing permissions."); return; }
     // Store the validator audit trail alongside the new memorial.
     if (!id && data) {
       await supabase.from("memorial_validators").insert(
@@ -326,6 +330,8 @@ const ObituaryManagement = () => {
             onCheckedChange={(v) => setForm((f: any) => ({ ...f, is_public: v }))}
           />
         </section>
+
+        <section className="border-t border-border pt-5"><label className="flex gap-3 items-start text-sm"><Checkbox checked={form.family_consent_confirmed === true} onCheckedChange={value => setForm((f: any) => ({ ...f, family_consent_confirmed: value === true }))} /><span>I confirm that I have obtained consent from living relatives and appropriate parental/guardian consent for minors before publishing their information or photos. I can provide evidence of this permission when needed. <Link to="/privacy" className="underline text-brand-orange">Privacy Policy</Link></span></label></section>
 
         {id ? (
           <MemorialValidators

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PrivacyRequestsAdmin } from "@/components/privacy/PrivacyRequestsAdmin";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/dashboard/PageHeader";
@@ -62,6 +63,7 @@ const Oversight = () => {
   return (
     <>
       <PageHeader title="Memorial Oversight" subtitle="A super-admin view of every memorial across the platform." />
+      <PrivacyRequestsAdmin />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
         <Stat label="Memorials" value={total} />

@@ -1,3 +1,4 @@
+import { canTrack, onConsentChange } from "./consent";
 import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "mw_last_visit";
@@ -27,35 +28,11 @@ const detectDevice = (ua: string) => {
   return "Desktop";
 };
 
-let geoCache: { country: string | null; country_code: string | null; city: string | null } | null = null;
-
-const getGeo = async () => {
-  if (geoCache) return geoCache;
-  try {
-    const cached = sessionStorage.getItem("mw_geo");
-    if (cached) {
-      geoCache = JSON.parse(cached);
-      return geoCache;
-    }
-  } catch {}
-  try {
-    const r = await fetch("https://ipapi.co/json/", { cache: "no-store" });
-    if (!r.ok) throw new Error("geo fail");
-    const j = await r.json();
-    geoCache = {
-      country: j.country_name || null,
-      country_code: j.country_code || null,
-      city: j.city || null,
-    };
-    try { sessionStorage.setItem("mw_geo", JSON.stringify(geoCache)); } catch {}
-    return geoCache;
-  } catch {
-    geoCache = { country: null, country_code: null, city: null };
-    return geoCache;
-  }
-};
-
 export const trackVisit = async (path: string) => {
+  if (!(await canTrack("analytics"))) {
+    const off = onConsentChange(() => { off(); void trackVisit(path); });
+    return;
+  }
   try {
     const key = `${STORAGE_KEY}:${path}`;
     const last = Number(sessionStorage.getItem(key) || 0);
@@ -63,18 +40,20 @@ export const trackVisit = async (path: string) => {
     sessionStorage.setItem(key, String(Date.now()));
 
     const ua = navigator.userAgent;
-    const geo = await getGeo();
+    if (!(await canTrack("analytics"))) return;
+    let referrer: string | null = null;
+    try { referrer = document.referrer ? new URL(document.referrer).origin : null; } catch {}
 
     await supabase.from("site_visits").insert({
       path,
-      referrer: document.referrer || null,
-      country: geo?.country ?? null,
-      country_code: geo?.country_code ?? null,
-      city: geo?.city ?? null,
+      referrer,
+      country: null,
+      country_code: null,
+      city: null,
       device: detectDevice(ua),
       browser: detectBrowser(ua),
       os: detectOS(ua),
-      user_agent: ua,
+      user_agent: null,
     });
   } catch {
     // silent

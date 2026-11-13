@@ -19,6 +19,8 @@ import MemorialDetail from "./pages/MemorialDetail";
 import AllMemorials from "./pages/AllMemorials";
 import FuneralServices from "./pages/FuneralServices";
 import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import { PrivacyNotice } from "@/components/privacy/PrivacyNotice";
 
 import Overview from "./pages/dashboard/Overview";
 import MyMemorials from "./pages/dashboard/MyMemorials";
@@ -70,6 +72,7 @@ const App = () => (
           <AuthProvider>
             <FontModeManager />
             <ScrollReset />
+            <PrivacyNotice />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -79,6 +82,7 @@ const App = () => (
             <Route path="/memorials" element={<AllMemorials />} />
             <Route path="/funeral-services" element={<FuneralServices />} />
             <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/memorial/:id" element={<MemorialDetail />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

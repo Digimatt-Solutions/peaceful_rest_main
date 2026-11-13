@@ -430,6 +430,7 @@ export type Database = {
           fundraiser_title: string | null
           html: string
           id: string
+          legal_hold: boolean
           memorial_name: string | null
           receipt_no: string
           user_id: string | null
@@ -441,6 +442,7 @@ export type Database = {
           fundraiser_title?: string | null
           html: string
           id?: string
+          legal_hold?: boolean
           memorial_name?: string | null
           receipt_no: string
           user_id?: string | null
@@ -452,6 +454,7 @@ export type Database = {
           fundraiser_title?: string | null
           html?: string
           id?: string
+          legal_hold?: boolean
           memorial_name?: string | null
           receipt_no?: string
           user_id?: string | null
@@ -462,6 +465,13 @@ export type Database = {
             columns: ["donation_id"]
             isOneToOne: true
             referencedRelation: "donations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_receipts_donation_id_fkey"
+            columns: ["donation_id"]
+            isOneToOne: true
+            referencedRelation: "masked_donations"
             referencedColumns: ["id"]
           },
         ]
@@ -476,6 +486,7 @@ export type Database = {
           fundraiser_id: string
           id: string
           is_anonymous: boolean
+          legal_hold: boolean
           message: string | null
           payment_method: string | null
           status: string
@@ -491,6 +502,7 @@ export type Database = {
           fundraiser_id: string
           id?: string
           is_anonymous?: boolean
+          legal_hold?: boolean
           message?: string | null
           payment_method?: string | null
           status?: string
@@ -506,6 +518,7 @@ export type Database = {
           fundraiser_id?: string
           id?: string
           is_anonymous?: boolean
+          legal_hold?: boolean
           message?: string | null
           payment_method?: string | null
           status?: string
@@ -524,33 +537,42 @@ export type Database = {
       }
       family_members: {
         Row: {
+          consent_confirmed: boolean
           created_at: string
           display_order: number
           id: string
+          is_minor: boolean
           memorial_id: string
           name: string
           notes: string | null
           photo_url: string | null
+          privacy_mode: string
           relationship: string
         }
         Insert: {
+          consent_confirmed?: boolean
           created_at?: string
           display_order?: number
           id?: string
+          is_minor?: boolean
           memorial_id: string
           name: string
           notes?: string | null
           photo_url?: string | null
+          privacy_mode?: string
           relationship: string
         }
         Update: {
+          consent_confirmed?: boolean
           created_at?: string
           display_order?: number
           id?: string
+          is_minor?: boolean
           memorial_id?: string
           name?: string
           notes?: string | null
           photo_url?: string | null
+          privacy_mode?: string
           relationship?: string
         }
         Relationships: [
@@ -893,6 +915,7 @@ export type Database = {
           created_by: string
           date_of_birth: string | null
           date_of_death: string | null
+          family_consent_confirmed: boolean
           full_name: string
           gender: string | null
           id: string
@@ -918,6 +941,7 @@ export type Database = {
           created_by: string
           date_of_birth?: string | null
           date_of_death?: string | null
+          family_consent_confirmed?: boolean
           full_name: string
           gender?: string | null
           id?: string
@@ -943,6 +967,7 @@ export type Database = {
           created_by?: string
           date_of_birth?: string | null
           date_of_death?: string | null
+          family_consent_confirmed?: boolean
           full_name?: string
           gender?: string | null
           id?: string
@@ -1201,6 +1226,53 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_requests: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          details: string
+          email: string
+          id: string
+          legal_hold: boolean
+          memorial_id: string | null
+          request_type: string
+          requester_name: string
+          status: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          details: string
+          email: string
+          id?: string
+          legal_hold?: boolean
+          memorial_id?: string | null
+          request_type?: string
+          requester_name: string
+          status?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          details?: string
+          email?: string
+          id?: string
+          legal_hold?: boolean
+          memorial_id?: string | null
+          request_type?: string
+          requester_name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_requests_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           anniversary_muted: boolean
@@ -1443,7 +1515,62 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      masked_donations: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          donor_email: string | null
+          donor_name: string | null
+          donor_phone: string | null
+          fundraiser_id: string | null
+          id: string | null
+          is_anonymous: boolean | null
+          message: string | null
+          payment_method: string | null
+          status: string | null
+          stripe_session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          donor_email?: never
+          donor_name?: never
+          donor_phone?: never
+          fundraiser_id?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          message?: string | null
+          payment_method?: string | null
+          status?: string | null
+          stripe_session_id?: never
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          donor_email?: never
+          donor_name?: never
+          donor_phone?: never
+          fundraiser_id?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          message?: string | null
+          payment_method?: string | null
+          status?: string | null
+          stripe_session_id?: never
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       account_deleted_at: { Args: { _user_id: string }; Returns: string }
@@ -1468,11 +1595,25 @@ export type Database = {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
       }
+      mask_donor_phone: { Args: { phone: string }; Returns: string }
       memorial_follower_count: {
         Args: { _memorial_id: string }
         Returns: number
       }
+      public_family_members: {
+        Args: { _memorial_id: string }
+        Returns: {
+          display_order: number
+          id: string
+          is_minor: boolean
+          name: string
+          photo_url: string
+          privacy_mode: string
+          relationship: string
+        }[]
+      }
       purge_expired_deleted_accounts: { Args: never; Returns: number }
+      purge_privacy_retention: { Args: never; Returns: undefined }
       super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {

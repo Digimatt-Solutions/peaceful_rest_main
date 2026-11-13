@@ -4,7 +4,7 @@ export const RETENTION = { visitsDays: 90, closedRequestsMonths: 12, financialYe
 export function familyDisplayName(name: string, initialsOnly = false): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "Family member";
-  const initials = (words: string[]) => words.map(word => `${Array.from(word)[0].toUpperCase()}.`).join("");
+  const initials = (words: string[]) => words.map(word => word.includes(".") ? word.toUpperCase() : `${Array.from(word)[0].toUpperCase()}.`).join("");
   return initialsOnly ? initials(parts) : `${parts[0]}${parts.length > 1 ? ` ${initials(parts.slice(1))}` : ""}`;
 }
 

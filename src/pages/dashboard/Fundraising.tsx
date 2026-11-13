@@ -1,3 +1,4 @@
+import { maskPhone } from "@/lib/privacy";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -106,10 +107,10 @@ const Fundraising = () => {
       ["Reference", "Donor", "Phone", "Fundraiser", "Amount (KSh)", "Status", "Date"],
       ...donations.map(d => {
         const fund = funds.find(f => f.id === d.fundraiser_id);
-        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
+        const name = d.is_anonymous ? "Anonymous" : (d.donor_name || maskPhone(d.donor_phone) || "Anonymous");
         return [
           `MKW-${d.id.slice(0,8).toUpperCase()}`, name,
-          d.is_anonymous ? "" : (d.donor_phone || ""),
+          d.is_anonymous ? "" : maskPhone(d.donor_phone),
           fund?.title || "", Number(d.amount).toString(), d.status || "",
           format(new Date(d.created_at), "yyyy-MM-dd HH:mm"),
         ];
@@ -157,7 +158,7 @@ const Fundraising = () => {
         setFunds(fs || []);
         const ids = (fs || []).map(f => f.id);
         if (ids.length) {
-          const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+          const { data: ds } = await supabase.from("masked_donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
           setDonations((ds || []).filter((d: any) => d.status === "paid"));
         }
       }
@@ -168,7 +169,7 @@ const Fundraising = () => {
   // Show the printable receipt only once a payment is confirmed as successful.
   const showReceiptFor = async (donationId?: string | null) => {
     if (!donationId) return;
-    const { data: don } = await supabase.from("donations").select("*").eq("id", donationId).maybeSingle();
+    const { data: don } = await supabase.from("masked_donations").select("*").eq("id", donationId).maybeSingle();
     if (!don || don.status !== "paid") return;
     const { data: fund } = await supabase.from("fundraisers").select("title,memorial_id").eq("id", don.fundraiser_id).maybeSingle();
     const mem = memorials.find(m => m.id === fund?.memorial_id);
@@ -182,7 +183,7 @@ const Fundraising = () => {
     setFunds(fs || []);
     const ids = (fs || []).map(f => f.id);
     if (ids.length) {
-      const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+      const { data: ds } = await supabase.from("masked_donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
       setDonations((ds || []).filter((d: any) => d.status === "paid"));
     }
   };
@@ -265,7 +266,7 @@ const Fundraising = () => {
       setFunds(fs || []);
       const ids = (fs || []).map(f => f.id);
       if (ids.length) {
-        const { data: ds } = await supabase.from("donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
+        const { data: ds } = await supabase.from("masked_donations").select("*").in("fundraiser_id", ids).order("created_at", { ascending: false });
         setDonations((ds || []).filter((d: any) => d.status === "paid"));
       } else setDonations([]);
       const { data: ps } = ids.length
@@ -419,7 +420,7 @@ const Fundraising = () => {
     const map: Record<string, { name: string; total: number; count: number }> = {};
     donations.forEach(d => {
       const key = d.is_anonymous ? `__anon_${d.id}` : (d.donor_phone || d.donor_name || "Anonymous");
-      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
+      const display = d.is_anonymous ? "Anonymous" : (d.donor_name || maskPhone(d.donor_phone) || "Anonymous");
       if (!map[key]) map[key] = { name: display, total: 0, count: 0 };
       map[key].total += Number(d.amount || 0); map[key].count += 1;
     });
@@ -713,7 +714,7 @@ const Fundraising = () => {
                       <tbody>
                         {donations.map(d => {
                           const fund = funds.find(f => f.id === d.fundraiser_id);
-                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || d.donor_phone || "Anonymous");
+                          const name = d.is_anonymous ? "Anonymous" : (d.donor_name || maskPhone(d.donor_phone) || "Anonymous");
                           const isPending = d.status === "pending";
                           return (
                             <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
@@ -724,7 +725,7 @@ const Fundraising = () => {
                                   </div>
                                   <div>
                                     <p className="font-medium">{name}</p>
-                                    {d.donor_phone && !d.is_anonymous && <p className="text-xs text-muted-foreground">{d.donor_phone}</p>}
+                                    {d.donor_phone && !d.is_anonymous && <p className="text-xs text-muted-foreground">{maskPhone(d.donor_phone)}</p>}
                                   </div>
                                 </div>
                               </td>
