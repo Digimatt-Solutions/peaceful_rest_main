@@ -856,6 +856,53 @@ export type Database = {
           },
         ]
       }
+      memorial_proof_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          draft_memorial_id: string
+          file_name: string
+          file_size: number
+          id: string
+          memorial_id: string | null
+          mime_type: string
+          object_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          draft_memorial_id: string
+          file_name: string
+          file_size: number
+          id?: string
+          memorial_id?: string | null
+          mime_type: string
+          object_path: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          draft_memorial_id?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          memorial_id?: string | null
+          mime_type?: string
+          object_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_proof_documents_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_validators: {
         Row: {
           confirmed_at: string | null

@@ -17,6 +17,8 @@ import { MemorialQR } from "@/components/MemorialQR";
 import { MemorialValidators } from "@/components/dashboard/MemorialValidators";
 import { MemorialFollowers } from "@/components/dashboard/MemorialFollowers";
 import { MemorialPoster } from "@/components/memorial/MemorialPoster";
+import { ProofOfDeath, MemorialProofDocuments } from "@/components/dashboard/ProofOfDeath";
+import { prepareProofDocuments, requiresProof, type DraftProof } from "@/lib/proofOfDeath";
 
 const empty = {
   full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
@@ -35,6 +37,8 @@ const ObituaryManagement = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const [readFile, setReadFile] = useState<string | null>(null);
+  const [proofDocuments, setProofDocuments] = useState<DraftProof[]>([]);
+  const [draftMemorialId, setDraftMemorialId] = useState(() => crypto.randomUUID());
   // Validators collected before the memorial exists; saved together with it.
   const [draftValidators, setDraftValidators] = useState<any[]>([]);
   const draftReady = draftValidators.filter(
@@ -89,6 +93,8 @@ const ObituaryManagement = () => {
       });
     } else {
       setForm(empty);
+      setProofDocuments([]);
+      setDraftMemorialId(crypto.randomUUID());
     }
   }, [id]);
 
@@ -111,9 +117,13 @@ const ObituaryManagement = () => {
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || loading) return;
     if (!mayPublishFamily(form.family_consent_confirmed)) { toast.error("Confirm family and guardian consent before saving this memorial"); return; }
     if (!form.full_name) { toast.error("Full name is required"); return; }
+    if (requiresProof(!id, proofDocuments.length)) {
+      toast.error("Upload at least one proof-of-death document before creating this memorial.");
+      return;
+    }
     if (!id && !draftReady) {
       toast.error("Two validators must verify their phone number and confirm before this memorial can be created");
       return;
@@ -130,6 +140,8 @@ const ObituaryManagement = () => {
       }
     }
     setLoading(true);
+    try {
+    if (!id) await prepareProofDocuments(user.id, draftMemorialId, proofDocuments);
     // A new memorial is created with two confirmed validators, so it starts verified.
     const status = id ? (form.verification_status || "pending") : "verified";
     const verified = status === "verified";
@@ -146,8 +158,7 @@ const ObituaryManagement = () => {
     };
     const { data, error } = id
       ? await supabase.from("memorials").update(payload).eq("id", id).select().maybeSingle()
-      : await supabase.from("memorials").insert(payload).select().maybeSingle();
-    setLoading(false);
+      : await supabase.from("memorials").insert({ ...payload, id: draftMemorialId }).select().maybeSingle();
     if (error) {
       if ((error as any).code === "23505") toast.error("This National ID is already registered for another memorial.");
       else toast.error(error.message);
@@ -176,6 +187,11 @@ const ObituaryManagement = () => {
     });
     toast.success(id ? "Memorial updated" : "Memorial created");
     if (!id && data) navigate(`/dashboard/obituary?id=${data.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "This memorial could not be saved. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const remove = async () => {
@@ -268,6 +284,8 @@ const ObituaryManagement = () => {
           </div>
         </section>
 
+        {id ? <MemorialProofDocuments memorialId={id} /> : <ProofOfDeath documents={proofDocuments} onChange={setProofDocuments} busy={loading} />}
+
         <section className="rounded-2xl border border-border bg-card p-7 space-y-5">
           <h3 className="font-serif text-xl">Photos</h3>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -351,9 +369,10 @@ const ObituaryManagement = () => {
 
         {id && <MemorialFollowers memorialId={id} />}
 
-        <Button type="submit" disabled={loading || uploading !== null || (!id && !draftReady)} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+        <Button type="submit" disabled={loading || uploading !== null || requiresProof(!id, proofDocuments.length) || (!id && !draftReady)} className="rounded-full h-12 px-8 bg-brand-orange text-brand-white hover:bg-brand-orange/90">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-4 w-4 mr-2" /> {id ? "Save changes" : "Create memorial"}</>}
         </Button>
+        {requiresProof(!id, proofDocuments.length) && <p className="text-xs text-muted-foreground">At least one proof-of-death document is required before submission.</p>}
         {!id && !draftReady && (
           <p className="text-xs text-muted-foreground">
             Two validators must verify their phone number and confirm this record before the memorial can be created.

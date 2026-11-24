@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/lib/activity";
+import { ProofOfDeath } from "@/components/dashboard/ProofOfDeath";
+import { prepareProofDocuments, requiresProof, type DraftProof } from "@/lib/proofOfDeath";
 
 type Props = {
   trigger?: React.ReactNode;
@@ -20,6 +22,8 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [proofDocuments, setProofDocuments] = useState<DraftProof[]>([]);
+  const [draftMemorialId, setDraftMemorialId] = useState(() => crypto.randomUUID());
   const [form, setForm] = useState({
     full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "",
     location: "", short_tribute: "",
@@ -41,16 +45,20 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || saving || uploading) return;
     if (!form.full_name.trim()) { toast.error("Full ID name is required"); return; }
+    if (requiresProof(true, proofDocuments.length)) { toast.error("Upload at least one proof-of-death document before creating this memorial."); return; }
     const nid = form.national_id.trim();
     if (nid) {
       const { data: dup } = await supabase.from("memorials").select("id,full_name").ilike("national_id", nid).maybeSingle();
       if (dup) { toast.error(`An obituary with this ID already exists for ${dup.full_name}`); return; }
     }
     setSaving(true);
+    try {
+    await prepareProofDocuments(user.id, draftMemorialId, proofDocuments);
     const payload = {
       ...form,
+      id: draftMemorialId,
       national_id: nid || null,
       created_by: user.id,
       date_of_birth: form.date_of_birth || null,
@@ -58,25 +66,32 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
       is_public: false,
     };
     const { data, error } = await supabase.from("memorials").insert(payload).select().maybeSingle();
-    setSaving(false);
     if (error) {
       if ((error as any).code === "23505") toast.error("This ID number is already registered for another memorial.");
       else toast.error(error.message);
       return;
     }
+    if (!data) { toast.error("This memorial could not be saved. Please try again."); return; }
     logActivity("memorial_create", {
       entity_type: "memorial", entity_id: data?.id,
       description: `Created memorial for ${form.full_name}`,
     });
     toast.success("Memorial created", { description: "Add two validators to verify it before it goes public." });
     setOpen(false);
+    setProofDocuments([]);
+    setDraftMemorialId(crypto.randomUUID());
     setForm({ full_name: "", national_id: "", gender: "", date_of_birth: "", date_of_death: "", location: "", short_tribute: "", profile_photo_url: "", cover_photo_url: "", is_public: false });
     onCreated?.(data);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "This memorial could not be saved. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={value => { if (!saving) setOpen(value); }}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
@@ -141,6 +156,7 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
               </div>
             </div>
           </div>
+          <ProofOfDeath documents={proofDocuments} onChange={setProofDocuments} busy={saving} />
           <div className="rounded-xl border border-border p-4">
             <p className="font-medium text-sm">Verification required before publishing</p>
             <p className="text-xs text-muted-foreground mt-1">
@@ -150,8 +166,8 @@ export const NewMemorialDialog = ({ trigger, onCreated }: Props) => {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" className="rounded-full" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={saving} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
+            <Button type="button" variant="outline" className="rounded-full" disabled={saving} onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" disabled={saving || uploading !== null || requiresProof(true, proofDocuments.length)} className="rounded-full bg-brand-orange text-brand-white hover:bg-brand-orange/90">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create memorial"}
             </Button>
           </div>
