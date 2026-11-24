@@ -1,8 +1,8 @@
 # Makiwa roadmap
 
-- [ ] Replace Privacy Policy and Terms of Use with Coming Soon and keep all references working
-- [ ] Require PDF/JPG/PNG proof of death for new memorials with private administrator-only storage
-- [ ] Verify mandatory submission and document access controls end to end
+- [x] Replace Privacy Policy and Terms of Use with Coming Soon and keep all references working
+- [x] Require PDF/JPG/PNG proof of death for new memorials with private administrator-only storage
+- [x] Verify required documents, real PDF/JPG/PNG submission and readback, owner/assigned-admin downloads, public/unrelated-user denial and mobile layouts; 30 tests passed
 
 - [x] Remove the privacy-page footer's external links and add an owner/admin family-tree public visibility switch, preserving consent and restricted-profile safeguards; 19 tests and public mobile checks passed
 - [ ] Verify the family-tree switch saves and reads back while signed in (blocked: requesting user has no matching app account/session; sign in through the preview)
