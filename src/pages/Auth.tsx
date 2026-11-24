@@ -182,7 +182,7 @@ const Auth = () => {
       role: selectedRole,
     });
     if (!parsed.success) { toast.error(parsed.error.errors[0].message); return; }
-    if (!acceptedTerms) { toast.error("Please accept the Terms of Use and Privacy Policy"); return; }
+    if (!acceptedTerms) { toast.error("Please confirm your contact preference"); return; }
     if (scorePassword(parsed.data.password) < 2) { toast.error("Please choose a stronger password"); return; }
     if (!phoneVerified) { toast.error("Please verify your phone number first"); return; }
 
@@ -515,12 +515,13 @@ const Auth = () => {
                 <div className="flex items-start gap-2.5 rounded-xl border border-brand-orange/25 bg-brand-orange/5 p-3">
                   <Checkbox id="su-terms" checked={acceptedTerms} onCheckedChange={(v) => setAcceptedTerms(v === true)} className="mt-0.5" />
                   <Label htmlFor="su-terms" className="text-[12px] font-normal leading-relaxed text-muted-foreground">
-                    I agree to the{" "}
-                    <span className="text-brand-orange font-medium">Terms of Use</span>{" "}
-                    and the{" "}
-                    <span className="text-brand-orange font-medium">Privacy Policy</span>, and I consent to being contacted about memorials I follow.
+                    I consent to being contacted about memorials I follow.
                   </Label>
                 </div>
+                <p className="text-[12px] leading-relaxed text-muted-foreground">
+                  <Link to="/terms" className="text-brand-orange underline">Terms of Use — Coming Soon</Link>{" · "}
+                  <Link to="/privacy" className="text-brand-orange underline">Privacy Policy — Coming Soon</Link>
+                </p>
 
                 <Button type="submit" disabled={loading || !acceptedTerms} className="w-full h-12 rounded-lg bg-brand-orange text-brand-white hover:bg-brand-orange/90 shadow-glow text-base font-medium border border-brand-orange/40 disabled:opacity-60">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><UserPlus className="h-4 w-4 mr-2" />Create Account</>)}

@@ -331,7 +331,7 @@ const ObituaryManagement = () => {
           />
         </section>
 
-        <section className="border-t border-border pt-5"><label className="flex gap-3 items-start text-sm"><Checkbox checked={form.family_consent_confirmed === true} onCheckedChange={value => setForm((f: any) => ({ ...f, family_consent_confirmed: value === true }))} /><span>I confirm that I have obtained consent from living relatives and appropriate parental/guardian consent for minors before publishing their information or photos. I can provide evidence of this permission when needed. <Link to="/privacy" className="underline text-brand-orange">Privacy Policy</Link></span></label></section>
+        <section className="border-t border-border pt-5"><label className="flex gap-3 items-start text-sm"><Checkbox checked={form.family_consent_confirmed === true} onCheckedChange={value => setForm((f: any) => ({ ...f, family_consent_confirmed: value === true }))} /><span>I confirm that I have obtained consent from living relatives and appropriate parental/guardian consent for minors before publishing their information or photos. I can provide evidence of this permission when needed. <Link to="/privacy" className="underline text-brand-orange">Privacy Policy — Coming Soon</Link></span></label></section>
 
         {id ? (
           <MemorialValidators

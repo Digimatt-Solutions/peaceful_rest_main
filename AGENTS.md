@@ -8,3 +8,6 @@
 - All memorial invitation and QR sharing uses `src/lib/memorialSharing.ts` so names, messages, and clean memorial URLs remain consistent.
 - Memorial posters use the existing memorial-media upload flow and a shared MemorialPoster renderer so saved posters display consistently across screen sizes.
 - Per-memorial head metadata uses Helmet under the root provider and a Netlify Edge Function injecting matching tags into original memorial URLs; social crawlers cannot read client-side Helmet updates. Both use the shared invitation helper, and the edge lookup uses only public credentials and public memorials.- Inside `main` of `paper-ink-theme` pages, rounded cards are forced to the light card color; dark-section cards must opt out with the `no-card` class (see src/pages/About.tsx).
+
+- Proof-of-death files use a dedicated private verification bucket and separate administrator-only records; creation triggers require uploaded evidence and attach staged records atomically so public memorial queries never expose verification documents.
+- Both memorial creation entry points reuse the same proof-of-death controls and validation; existing memorial edits remain unaffected by the new-creation requirement.

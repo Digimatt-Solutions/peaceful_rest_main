@@ -20,6 +20,7 @@ import AllMemorials from "./pages/AllMemorials";
 import FuneralServices from "./pages/FuneralServices";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
+import { LegalComingSoon } from "./pages/LegalComingSoon";
 import { PrivacyNotice } from "@/components/privacy/PrivacyNotice";
 
 import Overview from "./pages/dashboard/Overview";
@@ -83,6 +84,9 @@ const App = () => (
             <Route path="/funeral-services" element={<FuneralServices />} />
             <Route path="/about" element={<About />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<LegalComingSoon title="Terms of Use" path="/terms" />} />
+            <Route path="/terms-of-use" element={<LegalComingSoon title="Terms of Use" path="/terms" />} />
+            <Route path="/terms-of-service" element={<LegalComingSoon title="Terms of Use" path="/terms" />} />
             <Route path="/memorial/:id" element={<MemorialDetail />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

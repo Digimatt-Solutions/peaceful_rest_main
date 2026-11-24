@@ -54,8 +54,8 @@ export const Footer = () => {
         <div>
           <h4 className="font-serif text-lg text-brand-white">Support</h4>
           <ul className="mt-5 space-y-3 text-sm">
-            {["Help Center", "Privacy Policy", "Terms of Service", "Bereavement Resources", "Contact Us"].map((l) => (
-              <li key={l}>{l === "Privacy Policy" ? <Link to="/privacy" className="hover:text-brand-orange transition-colors">{l}</Link> : <a href="#" className="hover:text-brand-orange transition-colors">{l}</a>}</li>
+            {["Help Center", "Privacy Policy", "Terms of Use", "Bereavement Resources", "Contact Us"].map((l) => (
+              <li key={l}>{l === "Privacy Policy" || l === "Terms of Use" ? <Link to={l === "Privacy Policy" ? "/privacy" : "/terms"} className="hover:text-brand-orange transition-colors">{l} — Coming Soon</Link> : <a href="#" className="hover:text-brand-orange transition-colors">{l}</a>}</li>
             ))}
           </ul>
           <Button variant="link" onClick={openPrivacySettings} className="px-0 text-brand-white/75">Cookie settings</Button>
